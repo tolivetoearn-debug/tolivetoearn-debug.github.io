@@ -1,3 +1,6 @@
-# 临时刷题站
+﻿# Temporary quiz site
 
-这是部署用公开仓库，源码主仓库保持私有。
+Public deploy repo only.
+
+- Site: https://tolivetoearn-debug.github.io/
+- Main source repo stays private
