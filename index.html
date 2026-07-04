@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>程序刷题</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1>程序刷题</h1>
+        <p class="subtitle">填空题、单选题、判断题、程序题，直接开刷</p>
+      </div>
+      <button id="homeShortcut" class="ghost-button hidden" type="button">返回首页</button>
+    </header>
+
+    <main>
+      <section id="homeView" class="view active">
+        <div class="hero-card">
+          <h2>选择刷题模式</h2>
+          <p>填空题、单选题、判断题、程序题，直接开刷。</p>
+          <div class="home-grid">
+            <button class="mode-card" type="button" data-mode="fill">
+              <span class="mode-title">填空题</span>
+              <span class="mode-desc">先填空，再看对错和答案</span>
+            </button>
+            <button class="mode-card" type="button" data-mode="single">
+              <span class="mode-title">单选题</span>
+              <span class="mode-desc">自动判对错，支持打乱选项</span>
+            </button>
+            <button class="mode-card" type="button" data-mode="judge">
+              <span class="mode-title">判断题</span>
+              <span class="mode-desc">判断对错，自动判分</span>
+            </button>
+            <button class="mode-card" type="button" data-mode="program">
+              <span class="mode-title">程序题</span>
+              <span class="mode-desc">自己写程序，再看参考答案</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section id="practiceView" class="view">
+        <div class="toolbar">
+          <div>
+            <div id="modeTitle" class="toolbar-title"></div>
+            <div id="progressText" class="toolbar-meta"></div>
+          </div>
+          <div class="toolbar-actions">
+            <label id="questionShuffleWrap" class="toggle-chip">
+              <input id="shuffleQuestionOrderToggle" type="checkbox">
+              <span>随机题序</span>
+            </label>
+            <label id="shuffleToggleWrap" class="toggle-chip hidden">
+              <input id="shuffleOptionsToggle" type="checkbox">
+              <span>打乱选项</span>
+            </label>
+            <button id="wrongOnlyButton" class="ghost-button" type="button">错题再练</button>
+            <button id="unfinishedOnlyButton" class="ghost-button" type="button">只看未做题</button>
+            <button id="allQuestionsButton" class="ghost-button" type="button">全部题目</button>
+          </div>
+        </div>
+
+        <div class="practice-layout">
+          <article class="question-card question-main-card">
+            <div class="question-header">
+              <h2 id="questionTitle">题目</h2>
+              <span id="questionMeta" class="chip"></span>
+            </div>
+
+            <div id="questionBody" class="question-body"></div>
+
+            <div id="feedbackPanel" class="feedback-panel hidden"></div>
+
+            <div id="programComposer" class="program-composer hidden">
+              <label class="composer-label" for="programAnswer">你的答案</label>
+              <textarea id="programAnswer" placeholder="在这里写你的 Python 程序"></textarea>
+              <div id="programMarkRow" class="program-mark-row">
+                <button id="programMarkWrong" class="ghost-button" type="button">记为错题</button>
+                <span class="helper-text">程序题不自动判分，自己看完答案后决定是否记错题。</span>
+              </div>
+            </div>
+
+            <div id="programAnswerPanel" class="answer-panel hidden"></div>
+
+            <div class="action-row">
+              <button id="prevAction" class="ghost-button" type="button">上一题</button>
+              <button id="primaryAction" class="primary-button" type="button">下一题</button>
+            </div>
+          </article>
+
+          <aside class="navigator-card">
+            <div class="navigator-header">
+              <div>
+                <h3>题目导航</h3>
+                <p id="navigatorSummary" class="navigator-summary">未做 0 · 错题 0</p>
+              </div>
+            </div>
+            <div id="questionNavigator" class="navigator-list"></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js" type="module"></script>
+</body>
+</html>
