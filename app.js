@@ -2295,6 +2295,16 @@ async function submitHomeChat(forcedMessage) {
 }
 
 async function requestHomeChatReply(userMessage) {
+  const payload = buildHomeChatRequestPayload(userMessage);
+  try {
+    return await requestHomeChatReplyViaResponses(payload);
+  } catch (error) {
+    console.warn("主页聊天高级模式失败，切换稳定模式：", error);
+    return requestHomeChatReplyViaChatCompletions(payload, error);
+  }
+}
+
+function buildHomeChatRequestPayload(userMessage) {
   const context = buildStudyContextForChat(getActiveProfile());
   const history = (progressStore.homeChatHistory || []).slice(-10).map((item) => ({
     role: item.role,
@@ -2313,26 +2323,46 @@ async function requestHomeChatReply(userMessage) {
     "如果用户消息里带了网页链接并且允许网页阅读，先打开页面再回答。",
     "回答风格：中文，直接、清楚、少空话，必要时用短列表。",
   ].join("\n");
+  const enhancedPrompt = buildEnhancedHomeChatPrompt(userMessage, {
+    urls,
+    knowledgeMatches,
+    allowWebSearch,
+    allowUrlRead,
+  });
 
+  return {
+    userMessage,
+    context,
+    history,
+    urls,
+    knowledgeMatches,
+    allowUrlRead,
+    allowWebSearch,
+    systemPrompt,
+    enhancedPrompt,
+  };
+}
+
+async function requestHomeChatReplyViaResponses(payload) {
   const input = [
     {
       role: "system",
-      content: [{ type: "input_text", text: systemPrompt }],
+      content: [{ type: "input_text", text: payload.systemPrompt }],
     },
     {
       role: "system",
-      content: [{ type: "input_text", text: `当前存档与学习进度：\n${context}` }],
+      content: [{ type: "input_text", text: `当前存档与学习进度：\n${payload.context}` }],
     },
   ];
 
-  if (knowledgeMatches.length) {
+  if (payload.knowledgeMatches.length) {
     input.push({
       role: "system",
-      content: [{ type: "input_text", text: buildKnowledgeContext(knowledgeMatches) }],
+      content: [{ type: "input_text", text: buildKnowledgeContext(payload.knowledgeMatches) }],
     });
   }
 
-  history.forEach((item) => {
+  payload.history.forEach((item) => {
     input.push({
       role: item.role,
       content: [{ type: "input_text", text: item.content }],
@@ -2343,12 +2373,7 @@ async function requestHomeChatReply(userMessage) {
     role: "user",
     content: [{
       type: "input_text",
-      text: buildEnhancedHomeChatPrompt(userMessage, {
-        urls,
-        knowledgeMatches,
-        allowWebSearch,
-        allowUrlRead,
-      }),
+      text: payload.enhancedPrompt,
     }],
   });
 
@@ -2359,7 +2384,7 @@ async function requestHomeChatReply(userMessage) {
     input,
   };
 
-  if (allowWebSearch) {
+  if (payload.allowWebSearch) {
     body.tools = [{ type: "web_search" }];
   }
 
@@ -2371,12 +2396,82 @@ async function requestHomeChatReply(userMessage) {
   const webInfo = extractResponseWebActions(data);
   const content = extractResponseText(data).trim() || "我已经看完你的进度了，建议先从错题最多的板块开始回刷。";
   const capabilities = dedupeStringList([
-    ...(knowledgeMatches.length ? ["资料库检索"] : []),
+    ...(payload.knowledgeMatches.length ? ["资料库检索"] : []),
     ...webInfo.capabilities,
   ]);
   const sources = dedupeHomeChatSources([
-    ...knowledgeMatches.map((item) => buildKnowledgeSourceEntry(item)),
+    ...payload.knowledgeMatches.map((item) => buildKnowledgeSourceEntry(item)),
     ...webInfo.sources,
+  ]);
+  return { content, capabilities, sources };
+}
+
+async function requestHomeChatReplyViaChatCompletions(payload, fallbackError = null) {
+  const messages = [
+    { role: "system", content: payload.systemPrompt },
+    { role: "system", content: `当前存档与学习进度：\n${payload.context}` },
+  ];
+
+  if (payload.knowledgeMatches.length) {
+    messages.push({
+      role: "system",
+      content: buildKnowledgeContext(payload.knowledgeMatches),
+    });
+  }
+
+  if (payload.urls.length) {
+    messages.push({
+      role: "system",
+      content: payload.allowUrlRead
+        ? `用户消息里提到了这些网址：${payload.urls.join("，")}。当前通道这次未启用自动网页读取，请不要假装已经打开网页；如果必须依赖网页原文，请明确提醒用户把关键内容贴出来。`
+        : `用户消息里提到了这些网址：${payload.urls.join("，")}。当前没有网页阅读能力，请不要假装已经打开网页。`,
+    });
+  }
+
+  if (payload.allowWebSearch) {
+    messages.push({
+      role: "system",
+      content: "当前稳定模式不调用联网搜索工具。除非用户自己提供资料或文字，否则不要编造最新网页信息；涉及最新动态时，直接说明本次先按现有资料和学习进度给建议。",
+    });
+  }
+
+  payload.history.forEach((item) => {
+    messages.push({
+      role: item.role,
+      content: item.content,
+    });
+  });
+
+  messages.push({
+    role: "user",
+    content: payload.enhancedPrompt,
+  });
+
+  const body = {
+    model: AI_CONFIG.model,
+    temperature: 0.45,
+    messages,
+  };
+
+  const response = await postAiRequest(body);
+  if (!response.ok) {
+    const errorText = await response.text();
+    const reasons = [
+      extractAiError(errorText),
+      fallbackError?.message,
+      "聊天请求失败",
+    ].filter(Boolean);
+    throw new Error(reasons[0]);
+  }
+
+  const data = await response.json();
+  const content = getAiMessageContent(data).trim() || "我已经看完你的进度了，建议先从错题最多的板块开始回刷。";
+  const capabilities = dedupeStringList([
+    ...(payload.knowledgeMatches.length ? ["资料库检索"] : []),
+    "稳定对话",
+  ]);
+  const sources = dedupeHomeChatSources([
+    ...payload.knowledgeMatches.map((item) => buildKnowledgeSourceEntry(item)),
   ]);
   return { content, capabilities, sources };
 }
