@@ -2405,6 +2405,109 @@ body::after {
   align-items: flex-start;
 }
 
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.resource-card,
+.resource-empty-card {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.resource-card {
+  display: grid;
+  gap: 14px;
+}
+
+.resource-card-top,
+.resource-card-badges,
+.resource-card-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.resource-card-top {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.resource-course-tag,
+.resource-file-tag,
+.resource-file-size {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.resource-course-tag,
+.resource-file-tag {
+  padding: 6px 10px;
+}
+
+.resource-course-tag.finance {
+  background: #ebe5ff;
+  color: #5f3dc4;
+}
+
+.resource-course-tag.python {
+  background: #dff2ff;
+  color: #005f97;
+}
+
+.resource-course-tag.neutral {
+  background: #eef2ff;
+  color: #334155;
+}
+
+.resource-file-tag {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.resource-file-size {
+  padding: 6px 0;
+  color: var(--muted);
+}
+
+.resource-card h4,
+.resource-empty-card h4 {
+  margin: 0;
+  color: var(--brand);
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.resource-card p,
+.resource-empty-card p,
+.resource-card-meta {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.resource-card-meta {
+  font-size: 13px;
+}
+
+.resource-card-actions {
+  margin-top: 4px;
+}
+
+.resource-download-link,
+.resource-delete-button {
+  text-decoration: none;
+}
+
 .wrong-review-copy-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
