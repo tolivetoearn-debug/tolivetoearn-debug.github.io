@@ -2344,48 +2344,19 @@ function buildHomeChatRequestPayload(userMessage) {
 }
 
 async function requestHomeChatReplyViaResponses(payload) {
-  const input = [
-    {
-      role: "system",
-      content: [{ type: "input_text", text: payload.systemPrompt }],
-    },
-    {
-      role: "system",
-      content: [{ type: "input_text", text: `当前存档与学习进度：\n${payload.context}` }],
-    },
-  ];
-
-  if (payload.knowledgeMatches.length) {
-    input.push({
-      role: "system",
-      content: [{ type: "input_text", text: buildKnowledgeContext(payload.knowledgeMatches) }],
-    });
-  }
-
-  payload.history.forEach((item) => {
-    input.push({
-      role: item.role,
-      content: [{ type: "input_text", text: item.content }],
-    });
-  });
-
-  input.push({
-    role: "user",
-    content: [{
-      type: "input_text",
-      text: payload.enhancedPrompt,
-    }],
-  });
-
+  const forceWebSearch = shouldForceHomeChatWebSearch(payload);
   const body = {
     model: AI_CONFIG.model,
     temperature: 0.45,
     text: { verbosity: "low" },
-    input,
+    input: buildHomeChatResponsesInput(payload),
   };
 
   if (payload.allowWebSearch) {
-    body.tools = [{ type: "web_search" }];
+    body.tools = [{ type: "web_search", search_context_size: "low" }];
+    if (forceWebSearch) {
+      body.tool_choice = "required";
+    }
   }
 
   const response = await postAiResponsesRequest(body);
@@ -2395,13 +2366,17 @@ async function requestHomeChatReplyViaResponses(payload) {
   const data = await response.json();
   const webInfo = extractResponseWebActions(data);
   const content = extractResponseText(data).trim() || "我已经看完你的进度了，建议先从错题最多的板块开始回刷。";
+  const textSources = extractHomeChatTextSources(content);
+  const usedWebSearch = payload.allowWebSearch && (forceWebSearch || webInfo.capabilities.includes("联网搜索") || textSources.length > 0);
   const capabilities = dedupeStringList([
     ...(payload.knowledgeMatches.length ? ["资料库检索"] : []),
+    ...(usedWebSearch ? ["联网搜索"] : []),
     ...webInfo.capabilities,
   ]);
   const sources = dedupeHomeChatSources([
     ...payload.knowledgeMatches.map((item) => buildKnowledgeSourceEntry(item)),
     ...webInfo.sources,
+    ...textSources,
   ]);
   return { content, capabilities, sources };
 }
@@ -2508,11 +2483,81 @@ function buildEnhancedHomeChatPrompt(userMessage, options = {}) {
     }
   }
   if (options.allowWebSearch) {
-    notes.push("本次允许联网搜索，但只在确实需要最新信息、官网说明、网页内容或用户明确要求搜索时再使用。");
+    notes.push("本次允许联网搜索，但只在确实需要最新信息、官网说明、网页内容或用户明确要求搜索时再使用。若实际用了联网搜索，请把最终参考的网页链接一起给出。");
   } else {
     notes.push("本次不要联网，只能基于存档进度和本地资料库回答。");
   }
   return `${notes.join("\n\n")}\n\n用户问题：\n${userMessage}`;
+}
+
+function buildHomeChatResponsesInput(payload) {
+  const blocks = [
+    `系统要求：\n${payload.systemPrompt}`,
+    `当前存档与学习进度：\n${payload.context}`,
+  ];
+
+  if (payload.knowledgeMatches.length) {
+    blocks.push(buildCompactHomeChatKnowledgeContext(payload.knowledgeMatches));
+  }
+
+  if (payload.history.length) {
+    const historyLines = ["最近聊天记录（按时间顺序，仅供参考）："];
+    payload.history.slice(-8).forEach((item, index) => {
+      const roleLabel = item.role === "user" ? "用户" : AI_MODEL_DISPLAY;
+      historyLines.push(`[${index + 1}] ${roleLabel}\n${truncateHomeChatPromptText(item.content, 360)}`);
+    });
+    blocks.push(historyLines.join("\n\n"));
+  }
+
+  const requestNotes = [
+    "下面是当前这轮新的用户消息，请优先回答这条。",
+    payload.allowWebSearch
+      ? "如需联网，请直接搜索并在答案里附上可点击的来源链接。"
+      : "本次不要联网，只能基于已有上下文回答。",
+  ];
+
+  if (payload.urls.length) {
+    requestNotes.push(payload.allowUrlRead
+      ? `用户消息里包含这些网址：${payload.urls.join("，")}。请优先结合这些网页相关信息回答，并把最终参考的链接附上。`
+      : `用户消息里包含这些网址：${payload.urls.join("，")}。当前没有开启网页阅读，不要假装已经打开网页。`);
+  }
+
+  blocks.push(requestNotes.join("\n"));
+  blocks.push(`新的用户消息：\n${payload.enhancedPrompt}`);
+  return blocks.filter(Boolean).join("\n\n");
+}
+
+function shouldForceHomeChatWebSearch(payload) {
+  if (!payload.allowWebSearch) return false;
+  if (payload.allowUrlRead && payload.urls.length) return true;
+  return /(最新|联网|搜索|查(一下|一查|最新|官网|网页|资料|新闻)|官网|官方链接|网页|新闻|链接|最近发布|recent|latest|news|official|website|web)/iu.test(String(payload.userMessage || ""));
+}
+
+function truncateHomeChatPromptText(value, maxLength = 360) {
+  const text = String(value || "").trim();
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, Math.max(60, maxLength - 1)).trim()}…`;
+}
+
+function buildCompactHomeChatKnowledgeContext(matches, maxLength = 2600) {
+  const lines = ["本地资料库命中（已压缩）："];
+
+  matches.slice(0, 4).forEach((item, index) => {
+    lines.push(`[${index + 1}] ${buildKnowledgeSourceLabel(item)}`);
+    lines.push(truncateHomeChatPromptText(item.text, 420));
+  });
+
+  const merged = lines.join("\n\n");
+  if (merged.length <= maxLength) return merged;
+  return `${merged.slice(0, Math.max(800, maxLength - 1)).trim()}…`;
+}
+
+function extractHomeChatTextSources(content) {
+  return extractUrlsFromText(content).slice(0, 8).map((url) => ({
+    type: "url_reference",
+    label: `网页引用：${url}`,
+    url,
+  }));
 }
 
 function prepareKnowledgeBase(raw) {
