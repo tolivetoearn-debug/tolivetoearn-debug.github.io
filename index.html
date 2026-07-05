@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>1302学习中心</title>
-  <link rel="stylesheet" href="./styles.css?v=20260705-2152">
+  <link rel="stylesheet" href="./styles.css?v=20260705-2235">
 </head>
 <body>
   <header class="app-header">
@@ -450,6 +450,27 @@
 
             <div id="feedbackPanel" class="feedback-panel hidden"></div>
 
+            <section id="questionAiChatPanel" class="question-ai-chat-panel hidden">
+              <div class="question-ai-chat-head">
+                <div>
+                  <h3>继续问这道题</h3>
+                  <p id="questionAiChatStatus" class="question-ai-chat-status">围绕当前题目继续和 AI 对话</p>
+                </div>
+                <button id="questionAiChatClearButton" class="ghost-button" type="button">清空本题对话</button>
+              </div>
+
+              <div id="questionAiChatMessages" class="question-ai-chat-messages"></div>
+
+              <div class="question-ai-chat-composer">
+                <label class="sr-only" for="questionAiChatInput">继续追问这道题</label>
+                <textarea id="questionAiChatInput" placeholder="比如：这一步为什么要减？这里为什么不是记到别的科目？能不能用更简单的话再讲一遍？"></textarea>
+                <div class="question-ai-chat-actions">
+                  <span class="question-ai-chat-tip">当前只围绕这一道题继续讲</span>
+                  <button id="questionAiChatSendButton" class="primary-button" type="button">发送追问</button>
+                </div>
+              </div>
+            </section>
+
             <div id="programAnswerPanel" class="answer-panel hidden"></div>
 
             <div id="manualReviewRow" class="program-mark-row hidden">
@@ -480,6 +501,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=20260705-2152" type="module"></script>
+  <script src="./app.js?v=20260705-2235" type="module"></script>
 </body>
 </html>
