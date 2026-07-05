@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>1302学习中心</title>
-  <link rel="stylesheet" href="./styles.css?v=20260705-1938">
+  <link rel="stylesheet" href="./styles.css?v=20260705-2118">
 </head>
 <body>
   <header class="app-header">
@@ -272,6 +272,26 @@
               <button id="chatClearButton" class="ghost-button" type="button">清空聊天</button>
             </div>
 
+            <div class="chat-capability-grid">
+              <label class="chat-capability-chip">
+                <input id="chatKnowledgeToggle" type="checkbox" checked>
+                <span>资料库检索</span>
+                <small>PDF / DOCX 题库与提纲</small>
+              </label>
+              <label class="chat-capability-chip">
+                <input id="chatWebSearchToggle" type="checkbox" checked>
+                <span>联网搜索</span>
+                <small>查最新资料 / 官网 / 解释</small>
+              </label>
+              <label class="chat-capability-chip">
+                <input id="chatUrlReadToggle" type="checkbox" checked>
+                <span>网页阅读</span>
+                <small>直接贴链接让我先读再答</small>
+              </label>
+            </div>
+
+            <p class="chat-mode-helper">支持三种增强：本地资料库检索、网页搜索、网页内容阅读。你可以直接贴网址，或者问“帮我查最新资料”。后续补进来的 PDF / DOCX / TXT / MD 也会自动进知识库。</p>
+
             <div class="chat-context-row">
               <span>当前基于存档：</span>
               <strong id="chatProfileName">默认练习</strong>
@@ -281,7 +301,7 @@
 
             <div class="chat-input-card">
               <label class="sr-only" for="homeChatInput">和 ChatGPT 5.4 对话</label>
-              <textarea id="homeChatInput" placeholder="例如：我今天应该先刷哪一类？我现在最薄弱的是哪里？"></textarea>
+              <textarea id="homeChatInput" placeholder="例如：我今天先刷什么？收入五步法怎么记？帮我看这个链接：https://..."></textarea>
               <div class="chat-input-actions">
                 <span id="homeChatStatus" class="home-chat-status">已连接 ChatGPT 5.4</span>
                 <button id="homeChatSendButton" class="primary-button" type="button">发送</button>
@@ -438,6 +458,7 @@
             <div class="action-row">
               <button id="prevAction" class="ghost-button" type="button">上一题</button>
               <button id="primaryAction" class="primary-button" type="button">下一题</button>
+              <button id="nextAction" class="ghost-button" type="button">下一题</button>
             </div>
           </article>
 
@@ -456,6 +477,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=20260705-1938" type="module"></script>
+  <script src="./app.js?v=20260705-2118" type="module"></script>
 </body>
 </html>

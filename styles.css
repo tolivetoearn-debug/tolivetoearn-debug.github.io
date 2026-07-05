@@ -1945,6 +1945,59 @@ body::after {
   margin-bottom: 14px;
 }
 
+.chat-capability-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.chat-capability-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(89, 113, 255, 0.14);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 249, 255, 0.96));
+  box-shadow: 0 12px 28px rgba(88, 111, 174, 0.08);
+  cursor: pointer;
+}
+
+.chat-capability-chip input {
+  accent-color: var(--brand);
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.chat-capability-chip span {
+  color: var(--text);
+  font-weight: 800;
+}
+
+.chat-capability-chip small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.chat-capability-chip:has(input:disabled) {
+  opacity: 0.56;
+  cursor: not-allowed;
+}
+
+.chat-capability-chip:has(input:checked) {
+  border-color: rgba(89, 113, 255, 0.28);
+  box-shadow: 0 16px 34px rgba(89, 113, 255, 0.14);
+}
+
+.chat-mode-helper {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
 .chat-context-row {
   margin-bottom: 12px;
   color: var(--muted);
@@ -1993,6 +2046,70 @@ body::after {
 .home-chat-message-body {
   color: var(--text);
   word-break: break-word;
+}
+
+.home-chat-message-body a {
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.home-chat-message-body a:hover {
+  text-decoration: underline;
+}
+
+.home-chat-message-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.home-chat-message-time {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.home-chat-capability {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #3353b5;
+  background: rgba(88, 112, 255, 0.08);
+}
+
+.home-chat-source-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed rgba(122, 145, 190, 0.28);
+}
+
+.home-chat-source-title {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.home-chat-source-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(239, 244, 255, 0.88);
+  border: 1px solid rgba(112, 136, 206, 0.14);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+  text-decoration: none;
+}
+
+.home-chat-source-item:hover {
+  border-color: rgba(89, 113, 255, 0.22);
 }
 
 .chat-input-card {
@@ -2349,6 +2466,10 @@ body::after {
 
   .home-chat-message {
     max-width: 100%;
+  }
+
+  .chat-capability-grid {
+    grid-template-columns: 1fr;
   }
 
   .chat-input-actions {

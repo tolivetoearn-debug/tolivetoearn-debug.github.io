@@ -175,6 +175,7 @@ JSON 结构必须是：
 
 const state = {
   data: null,
+  knowledgeBase: { meta: {}, items: [] },
   currentMode: null,
   currentList: [],
   currentIndex: 0,
@@ -209,6 +210,7 @@ const manualReviewHelper = document.getElementById("manualReviewHelper");
 const aiAssistButton = document.getElementById("aiAssistButton");
 const primaryAction = document.getElementById("primaryAction");
 const prevAction = document.getElementById("prevAction");
+const nextAction = document.getElementById("nextAction");
 const markQuestionButton = document.getElementById("markQuestionButton");
 const wrongOnlyButton = document.getElementById("wrongOnlyButton");
 const unfinishedOnlyButton = document.getElementById("unfinishedOnlyButton");
@@ -251,6 +253,9 @@ const homeChatMessages = document.getElementById("homeChatMessages");
 const homeChatInput = document.getElementById("homeChatInput");
 const homeChatSendButton = document.getElementById("homeChatSendButton");
 const homeChatStatus = document.getElementById("homeChatStatus");
+const chatKnowledgeToggle = document.getElementById("chatKnowledgeToggle");
+const chatWebSearchToggle = document.getElementById("chatWebSearchToggle");
+const chatUrlReadToggle = document.getElementById("chatUrlReadToggle");
 const wrongReviewPlanButton = document.getElementById("wrongReviewPlanButton");
 const wrongReviewPlanHint = document.getElementById("wrongReviewPlanHint");
 const wrongReviewPlanPanel = document.getElementById("wrongReviewPlanPanel");
@@ -280,9 +285,27 @@ init().catch((error) => {
   questionBody.innerHTML = "<p>加载题库失败，请刷新重试。</p>";
 });
 
+async function loadKnowledgeBase() {
+  try {
+    const response = await fetch("./data/knowledge_base.json");
+    if (!response.ok) {
+      throw new Error(`knowledge-base-${response.status}`);
+    }
+    const raw = await response.json();
+    return prepareKnowledgeBase(raw);
+  } catch (error) {
+    console.warn("knowledge base unavailable", error);
+    return { meta: { unavailable: true }, items: [] };
+  }
+}
+
 async function init() {
-  const response = await fetch("./data/questions.json");
-  state.data = await response.json();
+  const [questionResponse, knowledgeBase] = await Promise.all([
+    fetch("./data/questions.json"),
+    loadKnowledgeBase(),
+  ]);
+  state.data = await questionResponse.json();
+  state.knowledgeBase = knowledgeBase;
   if (aiModelDisplay) {
     aiModelDisplay.textContent = AI_MODEL_DISPLAY;
   }
@@ -298,6 +321,7 @@ async function init() {
 
   primaryAction.addEventListener("click", handlePrimaryAction);
   prevAction.addEventListener("click", () => navigateRelative(-1));
+  nextAction?.addEventListener("click", () => navigateRelative(1));
   markQuestionButton.addEventListener("click", toggleQuestionMarked);
   wrongOnlyButton.addEventListener("click", () => switchQuestionSet("wrong"));
   unfinishedOnlyButton.addEventListener("click", () => switchQuestionSet("unfinished"));
@@ -318,6 +342,9 @@ async function init() {
   homeChatSendButton?.addEventListener("click", () => submitHomeChat());
   chatSuggestButton?.addEventListener("click", () => submitProgressSuggestionRequest());
   chatClearButton?.addEventListener("click", clearHomeChatHistory);
+  chatKnowledgeToggle?.addEventListener("change", (event) => handleHomeChatSettingToggle("chatKnowledgeEnabled", event.target.checked));
+  chatWebSearchToggle?.addEventListener("change", (event) => handleHomeChatSettingToggle("chatWebSearchEnabled", event.target.checked));
+  chatUrlReadToggle?.addEventListener("change", (event) => handleHomeChatSettingToggle("chatUrlReadEnabled", event.target.checked));
   homeChatInput?.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -652,6 +679,7 @@ function renderCurrentQuestion() {
     programAnswerPanel.innerHTML = "";
     primaryAction.disabled = true;
     prevAction.disabled = true;
+    nextAction.disabled = true;
     markQuestionButton.disabled = true;
     renderNavigator();
     updateToolbarButtons();
@@ -660,6 +688,7 @@ function renderCurrentQuestion() {
 
   primaryAction.disabled = false;
   prevAction.disabled = state.currentList.length <= 1;
+  nextAction.disabled = state.currentList.length <= 1;
   markQuestionButton.disabled = false;
   feedbackPanel.classList.add("hidden");
   feedbackPanel.innerHTML = "";
@@ -688,7 +717,7 @@ function renderCurrentQuestion() {
 
   if (isFillMode(currentKind)) {
     renderFillQuestion(question);
-    primaryAction.textContent = "下一题";
+    primaryAction.textContent = isMemorizeMode() ? "下一题" : "提交本题";
   } else if (currentKind === "single") {
     renderSingleChoiceQuestion(question);
     primaryAction.textContent = "提交本题";
@@ -1050,13 +1079,14 @@ function buildChatWelcomeMessage(progressData = progressStore) {
   const overview = getProgressOverview(progressData);
   const suggestedMode = pickRecommendedMode(progressData);
   const suggestedLabel = MODE_LABELS[suggestedMode] || "简答题";
+  const abilityLine = "你可以直接问我进度建议、贴网页链接让我读，也可以让我先查资料库再回答。";
   if (overview.done === 0) {
-    return `你好，我是 ${AI_MODEL_DISPLAY}。你现在还没开始刷题，可以先从 ${suggestedLabel} 开始，我也可以按你的进度随时给复习建议。`;
+    return `你好，我是 ${AI_MODEL_DISPLAY}。你现在还没开始刷题，可以先从 ${suggestedLabel} 开始。${abilityLine}`;
   }
   if (overview.wrong > 0) {
-    return `你好，我是 ${AI_MODEL_DISPLAY}。你当前已完成 ${overview.done} 题，累计错题 ${overview.wrong} 题。现在最适合优先回刷 ${suggestedLabel}。`;
+    return `你好，我是 ${AI_MODEL_DISPLAY}。你当前已完成 ${overview.done} 题，累计错题 ${overview.wrong} 题，现在最适合优先回刷 ${suggestedLabel}。${abilityLine}`;
   }
-  return `你好，我是 ${AI_MODEL_DISPLAY}。你当前已完成 ${overview.done} 题，整体状态不错。要不要我直接按你的进度给你安排下一轮复习顺序？`;
+  return `你好，我是 ${AI_MODEL_DISPLAY}。你当前已完成 ${overview.done} 题，整体状态不错。${abilityLine}`;
 }
 
 function renderHomeChatMessages() {
@@ -1064,20 +1094,95 @@ function renderHomeChatMessages() {
   const history = Array.isArray(progressStore.homeChatHistory) ? progressStore.homeChatHistory : [];
   const displayMessages = history.length
     ? history
-    : [{ role: "assistant", content: buildChatWelcomeMessage(progressStore) }];
+    : [{
+      role: "assistant",
+      content: buildChatWelcomeMessage(progressStore),
+      capabilities: buildEnabledChatFeatureLabels(),
+      sources: [],
+    }];
 
-  homeChatMessages.innerHTML = displayMessages.map((message) => `
-    <div class="home-chat-message ${message.role === "user" ? "user" : "assistant"}">
-      <div class="home-chat-message-role">${message.role === "user" ? "你" : AI_MODEL_DISPLAY}</div>
-      <div class="home-chat-message-body">${escapeHtml(message.content).replace(/\n/gu, "<br>")}</div>
-    </div>
-  `).join("");
+  homeChatMessages.innerHTML = displayMessages.map((message) => {
+    const roleLabel = message.role === "user" ? "你" : AI_MODEL_DISPLAY;
+    const metaHtml = renderHomeChatMessageMetaHtml(message);
+    const sourceHtml = renderHomeChatSourceListHtml(message.sources);
+    return `
+      <div class="home-chat-message ${message.role === "user" ? "user" : "assistant"}">
+        <div class="home-chat-message-role">${roleLabel}</div>
+        <div class="home-chat-message-body">${formatChatMessageHtml(message.content)}</div>
+        ${metaHtml}
+        ${sourceHtml}
+      </div>
+    `;
+  }).join("");
   homeChatMessages.scrollTop = homeChatMessages.scrollHeight;
+}
+
+function renderHomeChatMessageMetaHtml(message) {
+  const capabilityLabels = normalizeStringList(message?.capabilities);
+  const timeText = message?.createdAt ? formatProfileTime(message.createdAt) : "";
+  if (!timeText && !capabilityLabels.length) return "";
+  return `
+    <div class="home-chat-message-meta">
+      ${timeText ? `<span class="home-chat-message-time">${escapeHtml(timeText)}</span>` : ""}
+      ${capabilityLabels.map((label) => `<span class="home-chat-capability">${escapeHtml(label)}</span>`).join("")}
+    </div>
+  `;
+}
+
+function renderHomeChatSourceListHtml(sources) {
+  const normalizedSources = normalizeHomeChatSources(sources);
+  if (!normalizedSources.length) return "";
+  return `
+    <div class="home-chat-source-list">
+      <div class="home-chat-source-title">本次参考</div>
+      ${normalizedSources.map((source) => source.url
+        ? `<a class="home-chat-source-item" href="${escapeHtml(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.label)}</a>`
+        : `<div class="home-chat-source-item">${escapeHtml(source.label)}</div>`).join("")}
+    </div>
+  `;
+}
+
+function formatChatMessageHtml(value) {
+  const raw = String(value || "").trim();
+  const escaped = escapeHtml(raw);
+  return escaped
+    .replace(/(https?:\/\/[^\s<]+)/gu, (url) => `<a href="${url}" target="_blank" rel="noreferrer">${url}</a>`)
+    .replace(/\n/gu, "<br>");
 }
 
 function updateHomeChatStatus(text) {
   if (!homeChatStatus) return;
-  homeChatStatus.textContent = text || (state.homeChatLoading ? `${AI_MODEL_DISPLAY} 正在思考...` : `已连接 ${AI_MODEL_DISPLAY}`);
+  homeChatStatus.textContent = text || buildHomeChatStatusText();
+}
+
+function buildHomeChatStatusText() {
+  if (state.homeChatLoading) {
+    return `${AI_MODEL_DISPLAY} 正在思考...`;
+  }
+  const labels = buildEnabledChatFeatureLabels();
+  return labels.length ? `已连接 ${AI_MODEL_DISPLAY} · ${labels.join(" / ")}` : `已连接 ${AI_MODEL_DISPLAY} · 仅进度建议`;
+}
+
+function buildEnabledChatFeatureLabels(progressData = progressStore) {
+  const labels = [];
+  if (isKnowledgeChatEnabled(progressData)) {
+    labels.push("资料库检索");
+  }
+  if (progressData?.chatWebSearchEnabled !== false) {
+    labels.push("联网搜索");
+  }
+  if (progressData?.chatUrlReadEnabled !== false) {
+    labels.push("网页阅读");
+  }
+  return labels;
+}
+
+function isKnowledgeBaseAvailable() {
+  return Array.isArray(state.knowledgeBase?.items) && state.knowledgeBase.items.length > 0;
+}
+
+function isKnowledgeChatEnabled(progressData = progressStore) {
+  return progressData?.chatKnowledgeEnabled !== false && isKnowledgeBaseAvailable();
 }
 
 function syncProgressToggles() {
@@ -1090,6 +1195,23 @@ function syncProgressToggles() {
   if (shuffleOptionsToggle) {
     shuffleOptionsToggle.checked = !!progressStore.shuffleChoiceOptions;
   }
+  if (chatKnowledgeToggle) {
+    chatKnowledgeToggle.disabled = !isKnowledgeBaseAvailable();
+    chatKnowledgeToggle.checked = isKnowledgeChatEnabled();
+  }
+  if (chatWebSearchToggle) {
+    chatWebSearchToggle.checked = progressStore.chatWebSearchEnabled !== false;
+  }
+  if (chatUrlReadToggle) {
+    chatUrlReadToggle.checked = progressStore.chatUrlReadEnabled !== false;
+  }
+}
+
+function handleHomeChatSettingToggle(key, checked) {
+  progressStore[key] = !!checked;
+  saveProgress();
+  renderHomeChatMessages();
+  updateHomeChatStatus("聊天能力已更新");
 }
 
 function handleProfileAction(action, profileId) {
@@ -1229,7 +1351,7 @@ async function submitHomeChat(forcedMessage) {
 
   try {
     const reply = await requestHomeChatReply(message);
-    appendHomeChatMessage("assistant", reply);
+    appendHomeChatMessage("assistant", reply.content, reply);
     updateHomeChatStatus("建议已生成");
   } catch (error) {
     appendHomeChatMessage("assistant", `这次没连上，我先本地给你一句建议：${buildChatWelcomeMessage(progressStore)}\n\n错误信息：${error.message || "请求失败"}`);
@@ -1250,35 +1372,84 @@ async function requestHomeChatReply(userMessage) {
     content: item.content,
   }));
 
+  const urls = extractUrlsFromText(userMessage);
+  const knowledgeMatches = isKnowledgeChatEnabled() ? findKnowledgeBaseMatches(userMessage, 5) : [];
+  const allowUrlRead = progressStore.chatUrlReadEnabled !== false && urls.length > 0;
+  const allowWebSearch = progressStore.chatWebSearchEnabled !== false || allowUrlRead;
+  const systemPrompt = [
+    `你是 ${AI_MODEL_DISPLAY}，也是一个中文学习搭子。`,
+    "先结合用户当前存档进度回答。",
+    "如果我提供了本地资料库片段，优先结合这些片段回答。",
+    "只有在用户明确要求最新资料、联网搜索、官网、新闻、网页链接，或问题本身需要联网核实时，才调用 web_search。",
+    "如果用户消息里带了网页链接并且允许网页阅读，先打开页面再回答。",
+    "回答风格：中文，直接、清楚、少空话，必要时用短列表。",
+  ].join("\n");
+
+  const input = [
+    {
+      role: "system",
+      content: [{ type: "input_text", text: systemPrompt }],
+    },
+    {
+      role: "system",
+      content: [{ type: "input_text", text: `当前存档与学习进度：\n${context}` }],
+    },
+  ];
+
+  if (knowledgeMatches.length) {
+    input.push({
+      role: "system",
+      content: [{ type: "input_text", text: buildKnowledgeContext(knowledgeMatches) }],
+    });
+  }
+
+  history.forEach((item) => {
+    input.push({
+      role: item.role,
+      content: [{ type: "input_text", text: item.content }],
+    });
+  });
+
+  input.push({
+    role: "user",
+    content: [{
+      type: "input_text",
+      text: buildEnhancedHomeChatPrompt(userMessage, {
+        urls,
+        knowledgeMatches,
+        allowWebSearch,
+        allowUrlRead,
+      }),
+    }],
+  });
+
   const body = {
     model: AI_CONFIG.model,
-    temperature: 0.6,
-    messages: [
-      {
-        role: "system",
-        content: [
-          `你是 ${AI_MODEL_DISPLAY}，也是一个中文学习搭子。`,
-          "你的任务：结合用户当前练习进度，给出具体、可执行、简洁直接的建议。",
-          "你可以自由聊天，但回答要尽量结合当前进度，不要空泛。",
-          "如果用户问复习安排，就给出优先级、原因、建议时长或顺序。",
-          "如果用户问薄弱点，就直接指出错题多、未做多或主观题/客观题的卡点。",
-          "回答风格：中文，友好，直接，不啰嗦，必要时用短列表。",
-        ].join("\n"),
-      },
-      {
-        role: "system",
-        content: `当前存档与学习进度：\n${context}`,
-      },
-      ...history,
-    ],
+    temperature: 0.45,
+    text: { verbosity: "low" },
+    input,
   };
 
-  const response = await postAiRequest(body);
+  if (allowWebSearch) {
+    body.tools = [{ type: "web_search" }];
+  }
+
+  const response = await postAiResponsesRequest(body);
   if (!response.ok) {
     throw new Error(extractAiError(await response.text()) || "聊天请求失败");
   }
   const data = await response.json();
-  return getAiMessageContent(data).trim() || "我已经看完你的进度了，建议先从错题最多的板块开始回刷。";
+  const webInfo = extractResponseWebActions(data);
+  const content = extractResponseText(data).trim() || "我已经看完你的进度了，建议先从错题最多的板块开始回刷。";
+  const capabilities = dedupeStringList([
+    ...(knowledgeMatches.length ? ["资料库检索"] : []),
+    ...webInfo.capabilities,
+  ]);
+  const sources = dedupeHomeChatSources([
+    ...knowledgeMatches.map((item) => buildKnowledgeSourceEntry(item)),
+    ...webInfo.sources,
+  ]);
+  return { content, capabilities, sources };
 }
 
 function buildStudyContextForChat(profile) {
@@ -1296,6 +1467,176 @@ function buildStudyContextForChat(profile) {
     `推荐优先板块：${MODE_LABELS[pickRecommendedMode(progressData)] || "简答题"}`,
     ...modeLines,
   ].join("\n");
+}
+
+function buildEnhancedHomeChatPrompt(userMessage, options = {}) {
+  const notes = ["请先结合当前学习进度回答。"];
+  if (options.knowledgeMatches?.length) {
+    notes.push("已附上本地资料库相关片段，优先参考这些内容。资料库片段已经够用时，不要为了凑来源去联网。");
+  } else {
+    notes.push("当前没有命中明显相关的本地资料片段，可以直接结合进度回答；如果用户明确要最新资料，再考虑联网。");
+  }
+  if (options.urls?.length) {
+    if (options.allowUrlRead) {
+      notes.push(`用户消息中包含网址：${options.urls.join(" ，")}。请先打开相关网页阅读，再回答。`);
+    } else {
+      notes.push(`用户消息中包含网址，但当前没有开启网页阅读：${options.urls.join(" ，")}。`);
+    }
+  }
+  if (options.allowWebSearch) {
+    notes.push("本次允许联网搜索，但只在确实需要最新信息、官网说明、网页内容或用户明确要求搜索时再使用。");
+  } else {
+    notes.push("本次不要联网，只能基于存档进度和本地资料库回答。");
+  }
+  return `${notes.join("\n\n")}\n\n用户问题：\n${userMessage}`;
+}
+
+function prepareKnowledgeBase(raw) {
+  const items = Array.isArray(raw?.items)
+    ? raw.items.map((item, index) => ({
+      id: String(item?.id || `kb-${index + 1}`),
+      course: String(item?.course || "未分类"),
+      source_type: String(item?.source_type || "doc"),
+      source_title: String(item?.source_title || "资料库"),
+      section_title: String(item?.section_title || "资料片段"),
+      page: Number.isFinite(Number(item?.page)) ? Number(item.page) : null,
+      text: String(item?.text || "").trim(),
+      search_text: String(item?.search_text || "").trim(),
+      _searchBlob: normalizeSearchText(item?.search_text || [item?.course, item?.source_title, item?.section_title, item?.text].filter(Boolean).join(" ")),
+    })).filter((item) => item.text)
+    : [];
+  return {
+    meta: raw?.meta && typeof raw.meta === "object" ? raw.meta : {},
+    items,
+  };
+}
+
+function normalizeSearchText(value) {
+  return String(value || "").toLowerCase().replace(/\s+/gu, "");
+}
+
+function extractUrlsFromText(text) {
+  return Array.from(new Set((String(text || "").match(/https?:\/\/[^\s)\]}>]+/gu) || []).map((item) => item.trim())));
+}
+
+function buildSearchTerms(query) {
+  const source = String(query || "").toLowerCase().replace(/https?:\/\/[^\s]+/gu, " ");
+  const terms = new Set();
+  const stopTerms = new Set(["什么", "怎么", "一下", "这个", "那个", "现在", "就是", "一个", "一些", "有没有", "以及", "然后", "还是"]);
+
+  (source.match(/[a-z0-9_+.\-/#:]{2,}/gu) || []).forEach((token) => {
+    const clean = token.trim();
+    if (clean.length >= 2) {
+      terms.add(clean);
+    }
+  });
+
+  (source.match(/[\u4e00-\u9fff]{2,}/gu) || []).forEach((segment) => {
+    if (segment.length <= 8 && !stopTerms.has(segment)) {
+      terms.add(segment);
+    }
+    const maxGram = Math.min(5, segment.length);
+    for (let size = maxGram; size >= 2; size -= 1) {
+      for (let index = 0; index <= segment.length - size; index += 1) {
+        const gram = segment.slice(index, index + size);
+        if (!stopTerms.has(gram)) {
+          terms.add(gram);
+        }
+      }
+    }
+  });
+
+  return Array.from(terms).filter((term) => term.length >= 2).slice(0, 80);
+}
+
+function findKnowledgeBaseMatches(query, limit = 5) {
+  if (!isKnowledgeBaseAvailable()) return [];
+  const normalizedQuery = normalizeSearchText(String(query || "").replace(/https?:\/\/[^\s]+/gu, " "));
+  const terms = buildSearchTerms(query);
+  const hints = normalizeSearchText(query);
+  const scored = [];
+
+  state.knowledgeBase.items.forEach((item) => {
+    const blob = item._searchBlob || "";
+    if (!blob) return;
+    let score = 0;
+
+    if (normalizedQuery && normalizedQuery.length >= 4 && blob.includes(normalizedQuery)) {
+      score += 120;
+    }
+
+    terms.forEach((term) => {
+      if (!blob.includes(term)) return;
+      const isChinese = /[\u4e00-\u9fff]/u.test(term);
+      score += isChinese ? Math.min(28, 6 + term.length * 3) : Math.min(24, 4 + term.length * 2);
+    });
+
+    if ((hints.includes("python") || hints.includes("程序") || hints.includes("字符串") || hints.includes("循环") || hints.includes("字典") || hints.includes("函数")) && item.course === "Python") {
+      score += 12;
+    }
+    if ((hints.includes("中财") || hints.includes("财务") || hints.includes("收入") || hints.includes("折扣") || hints.includes("合同") || hints.includes("无形资产")) && item.course === "中级财务") {
+      score += 12;
+    }
+
+    if (score > 0) {
+      scored.push({ ...item, _score: score });
+    }
+  });
+
+  scored.sort((a, b) => b._score - a._score || a.text.length - b.text.length);
+  return scored.slice(0, limit);
+}
+
+function buildKnowledgeContext(matches) {
+  const lines = ["本地资料库命中（按相关度排序）："];
+  matches.forEach((item, index) => {
+    lines.push(`[${index + 1}] ${buildKnowledgeSourceLabel(item)}`);
+    lines.push(item.text);
+  });
+  return lines.join("\n\n");
+}
+
+function buildKnowledgeSourceLabel(item) {
+  const bits = [item.course, item.source_title];
+  if (item.page) {
+    bits.push(`第${item.page}页`);
+  }
+  if (item.section_title) {
+    bits.push(item.section_title);
+  }
+  return bits.filter(Boolean).join(" · ");
+}
+
+function buildKnowledgeSourceEntry(item) {
+  return {
+    type: "knowledge",
+    label: `资料库：${buildKnowledgeSourceLabel(item)}`,
+    url: "",
+  };
+}
+
+function normalizeHomeChatSources(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((source) => ({
+    type: String(source?.type || "note"),
+    label: String(source?.label || "").trim(),
+    url: String(source?.url || "").trim(),
+  })).filter((source) => source.label);
+}
+
+function dedupeHomeChatSources(value) {
+  const sourceMap = new Map();
+  normalizeHomeChatSources(value).forEach((source) => {
+    const key = `${source.type}::${source.label}::${source.url}`;
+    if (!sourceMap.has(key)) {
+      sourceMap.set(key, source);
+    }
+  });
+  return Array.from(sourceMap.values()).slice(0, 8);
+}
+
+function dedupeStringList(value) {
+  return Array.from(new Set(normalizeStringList(value))).slice(0, 8);
 }
 
 function resetWrongReviewState() {
@@ -1941,14 +2282,16 @@ function buildWrongReviewPlanHtml(plan) {
   `;
 }
 
-function appendHomeChatMessage(role, content) {
+function appendHomeChatMessage(role, content, extras = {}) {
   progressStore.homeChatHistory ||= [];
   progressStore.homeChatHistory.push({
     role,
     content: String(content || "").trim(),
     createdAt: new Date().toISOString(),
+    sources: dedupeHomeChatSources(extras.sources),
+    capabilities: dedupeStringList(extras.capabilities),
   });
-  progressStore.homeChatHistory = progressStore.homeChatHistory.slice(-20);
+  progressStore.homeChatHistory = progressStore.homeChatHistory.slice(-24);
   saveProgress();
   renderHomeChatMessages();
 }
@@ -2483,15 +2826,15 @@ async function requestAiReview(mode, question, userAnswer) {
   return normalizeAiReview(parsed, mode);
 }
 
-async function postAiRequest(body) {
+async function postAiApiRequest(endpointPath, body, timeoutMs = 45000, timeoutText = "AI伴答超时了，等会再点一次。") {
   const errors = [];
   const keys = AI_CONFIG.apiKeys.filter(Boolean);
 
   for (let index = 0; index < keys.length; index += 1) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(`${AI_CONFIG.baseUrl.replace(/\/+$/u, "")}/chat/completions`, {
+      const response = await fetch(`${AI_CONFIG.baseUrl.replace(/\/+$/u, "")}${endpointPath}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2523,16 +2866,24 @@ async function postAiRequest(body) {
       }
       if (index === keys.length - 1) {
         if (error.name === "AbortError") {
-          throw new Error("AI伴答超时了，等会再点一次。");
+          throw new Error(timeoutText);
         }
-        throw new Error(errors.filter(Boolean).join("；") || "AI伴答请求失败");
+        throw new Error(errors.filter(Boolean).join("；") || "AI 请求失败");
       }
     } finally {
       clearTimeout(timeoutId);
     }
   }
 
-  throw new Error(errors.filter(Boolean).join("；") || "AI伴答请求失败");
+  throw new Error(errors.filter(Boolean).join("；") || "AI 请求失败");
+}
+
+async function postAiRequest(body) {
+  return postAiApiRequest("/chat/completions", body, 45000, "AI伴答超时了，等会再点一次。");
+}
+
+async function postAiResponsesRequest(body) {
+  return postAiApiRequest("/responses", body, 65000, "学习搭子超时了，等会再试一次。");
 }
 
 function shouldSwitchAiKey(status, errorText) {
@@ -2549,6 +2900,68 @@ function getAiMessageContent(data) {
     return content.map((item) => item?.text || item?.content || "").join("\n");
   }
   throw new Error("AI 返回内容为空");
+}
+
+function extractResponseText(data) {
+  const texts = [];
+  (data?.output || []).forEach((item) => {
+    if (item?.type !== "message") return;
+    (item.content || []).forEach((contentItem) => {
+      if (typeof contentItem?.text === "string") {
+        texts.push(contentItem.text);
+      }
+    });
+  });
+  return texts.join("\n");
+}
+
+function extractResponseWebActions(data) {
+  const capabilities = [];
+  const sources = [];
+
+  (data?.output || []).forEach((item) => {
+    if (item?.type === "web_search_call") {
+      const action = item.action || {};
+      if (action.type === "search") {
+        capabilities.push("联网搜索");
+        const queries = Array.isArray(action.queries) ? action.queries : [action.query].filter(Boolean);
+        queries.forEach((query) => {
+          sources.push({
+            type: "web_search",
+            label: `联网搜索：${String(query).trim()}`,
+            url: "",
+          });
+        });
+      }
+      if (action.type === "open_page" && action.url) {
+        capabilities.push("网页阅读");
+        sources.push({
+          type: "url_open",
+          label: `已阅读网页：${action.url}`,
+          url: action.url,
+        });
+      }
+    }
+
+    if (item?.type === "message") {
+      (item.content || []).forEach((contentItem) => {
+        (contentItem?.annotations || []).forEach((annotation) => {
+          const url = String(annotation?.url || annotation?.target_url || "").trim();
+          if (!url) return;
+          sources.push({
+            type: "url_reference",
+            label: `网页引用：${url}`,
+            url,
+          });
+        });
+      });
+    }
+  });
+
+  return {
+    capabilities: dedupeStringList(capabilities),
+    sources: dedupeHomeChatSources(sources),
+  };
 }
 
 function parseAiJson(rawContent) {
@@ -2868,6 +3281,7 @@ function buildNavigatorSummary(list) {
   }
 
   const allQuestions = getQuestionsByMode(state.currentMode);
+  const doneLabel = getDoneDisplayLabel(state.currentMode);
   let pending = 0;
   let wrong = 0;
   let correct = 0;
@@ -2884,10 +3298,22 @@ function buildNavigatorSummary(list) {
   });
 
   if (isManualReviewMode(state.currentMode)) {
-    return `未做 ${pending} · 已做 ${done} · 错题 ${wrong} · 标记 ${marked}`;
+    return `未做 ${pending} · ${doneLabel} ${done} · 错题 ${wrong} · 标记 ${marked}`;
+  }
+
+  if (done > 0) {
+    return `未做 ${pending} · ${doneLabel} ${done} · 正确 ${correct} · 错题 ${wrong} · 标记 ${marked}`;
   }
 
   return `未做 ${pending} · 正确 ${correct} · 错题 ${wrong} · 标记 ${marked}`;
+}
+
+function getDoneDisplayLabel(mode, progressData = progressStore) {
+  return shouldUseMemorizeDoneLabel(mode, progressData) ? "已背" : "已做";
+}
+
+function shouldUseMemorizeDoneLabel(mode, progressData = progressStore) {
+  return mode !== "financeExam" && !!progressData?.memorizeMode;
 }
 
 function getQuestionStatus(mode, question, progressData = progressStore) {
@@ -2913,6 +3339,9 @@ function getQuestionStatus(mode, question, progressData = progressStore) {
     if (result === "wrong" || progressData.fillWrongIds.includes(question.id)) {
       return { key: "wrong", label: "错题" };
     }
+    if (progressData.fillDoneIds.includes(question.id)) {
+      return { key: "done", label: getDoneDisplayLabel(mode, progressData) };
+    }
     return { key: "pending", label: "未做" };
   }
 
@@ -2922,6 +3351,9 @@ function getQuestionStatus(mode, question, progressData = progressStore) {
     if (result === "wrong" || progressData.singleWrongIds.includes(question.id)) {
       return { key: "wrong", label: "错题" };
     }
+    if (progressData.singleDoneIds.includes(question.id)) {
+      return { key: "done", label: getDoneDisplayLabel(mode, progressData) };
+    }
     return { key: "pending", label: "未做" };
   }
 
@@ -2930,6 +3362,9 @@ function getQuestionStatus(mode, question, progressData = progressStore) {
     if (result === "correct") return { key: "correct", label: "正确" };
     if (result === "wrong" || progressData.judgeWrongIds.includes(question.id)) {
       return { key: "wrong", label: "错题" };
+    }
+    if (progressData.judgeDoneIds.includes(question.id)) {
+      return { key: "done", label: getDoneDisplayLabel(mode, progressData) };
     }
     return { key: "pending", label: "未做" };
   }
@@ -2943,7 +3378,7 @@ function getQuestionStatus(mode, question, progressData = progressStore) {
     const doneSet = getDoneSet(mode, progressData);
     const done = doneSet.has(question.id) || hasDraft;
     if (done) {
-      return { key: "done", label: "已做" };
+      return { key: "done", label: getDoneDisplayLabel(mode, progressData) };
     }
   }
 
@@ -3033,6 +3468,7 @@ function toggleOptionShuffle() {
 
 function updateToolbarButtons() {
   const inFinanceExam = state.currentMode === "financeExam";
+  const hasQuestion = !!state.currentList[state.currentIndex];
   wrongOnlyButton.textContent = state.wrongOnly ? "当前：错题模式" : "错题再练";
   unfinishedOnlyButton.textContent = state.unfinishedOnly ? "当前：未做题模式" : "只看未做题";
   wrongOnlyButton.classList.toggle("hidden", inFinanceExam || !state.currentMode);
@@ -3041,10 +3477,12 @@ function updateToolbarButtons() {
   questionShuffleWrap.classList.toggle("hidden", !state.currentMode || inFinanceExam);
   memorizeModeWrap.classList.toggle("hidden", !state.currentMode || inFinanceExam);
   shuffleToggleWrap.classList.toggle("hidden", state.currentMode !== "single" || inFinanceExam);
+  nextAction.classList.toggle("hidden", !state.currentMode || isMemorizeMode());
   newExamSessionButton?.classList.toggle("hidden", !inFinanceExam);
-  primaryAction.disabled = state.aiLoading || !state.currentList[state.currentIndex];
+  primaryAction.disabled = state.aiLoading || !hasQuestion;
   prevAction.disabled = state.aiLoading || state.currentList.length <= 1 || (inFinanceExam && state.currentIndex === 0);
-  markQuestionButton.disabled = state.aiLoading || !state.currentList[state.currentIndex];
+  nextAction.disabled = state.aiLoading || !hasQuestion || (!inFinanceExam && state.currentList.length <= 1);
+  markQuestionButton.disabled = state.aiLoading || !hasQuestion;
   const question = state.currentList[state.currentIndex];
   const isMarked = question && state.currentMode ? isQuestionMarked(state.currentMode, question.id) : false;
   markQuestionButton.textContent = isMarked ? "取消标记" : "标记本题";
@@ -3078,14 +3516,18 @@ function updateProgressText() {
     .filter((question) => getQuestionStatus(state.currentMode, question).key === "pending").length;
   const wrongCount = modeQuestions
     .filter((question) => getQuestionStatus(state.currentMode, question).key === "wrong").length;
+  const doneCount = modeQuestions
+    .filter((question) => getQuestionStatus(state.currentMode, question).key === "done").length;
   const markedCount = getMarkedSet(state.currentMode).size;
   const current = state.currentList.length === 0 ? 0 : state.currentIndex + 1;
   const memorizeLabel = isMemorizeMode() ? " · 背题模式" : "";
+  const doneLabel = getDoneDisplayLabel(state.currentMode);
   if (state.unfinishedOnly) {
     progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 未做 ${pendingCount} 题 · 标记 ${markedCount} 题${memorizeLabel}`;
     return;
   }
-  progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 错题 ${wrongCount} 题 · 标记 ${markedCount} 题${memorizeLabel}`;
+  const doneSegment = doneCount > 0 ? ` · ${doneLabel} ${doneCount} 题` : "";
+  progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题${doneSegment} · 错题 ${wrongCount} 题 · 标记 ${markedCount} 题${memorizeLabel}`;
 }
 
 function getOrderedSingleChoiceOptions(question) {
@@ -3169,27 +3611,28 @@ function markAutoGradedProgress(mode, id, allCorrect) {
 }
 
 function markProgramDone(id) {
-  if (!progressStore.programDoneIds.includes(id)) {
-    progressStore.programDoneIds.push(id);
-    saveProgress();
-  }
+  markQuestionDone("program", id);
 }
 
 function markManualReviewDone(mode, id) {
-  if (mode === "financeExam") {
-    if (!progressStore.financeExamDoneIds.includes(id)) {
-      progressStore.financeExamDoneIds.push(id);
-      saveProgress();
-    }
-    return;
-  }
+  markQuestionDone(mode, id);
+}
 
-  if (mode === "program") {
-    markProgramDone(id);
-    return;
-  }
+function getDoneStorageKey(mode) {
+  if (mode === "financeExam") return "financeExamDoneIds";
+  if (isFillMode(mode)) return "fillDoneIds";
+  if (mode === "single") return "singleDoneIds";
+  if (mode === "judge") return "judgeDoneIds";
+  if (mode === "program") return "programDoneIds";
+  if (mode === "short") return "shortDoneIds";
+  if (mode === "calc") return "calcDoneIds";
+  return "";
+}
 
-  const key = mode === "short" ? "shortDoneIds" : "calcDoneIds";
+function markQuestionDone(mode, id) {
+  const key = getDoneStorageKey(mode);
+  if (!key || !id) return;
+  progressStore[key] ||= [];
   if (!progressStore[key].includes(id)) {
     progressStore[key].push(id);
     saveProgress();
@@ -3200,6 +3643,10 @@ function saveCurrentQuestionState() {
   const question = state.currentList[state.currentIndex];
   if (!question) return;
   const kind = getQuestionKind(state.currentMode, question);
+
+  if (isMemorizeMode()) {
+    markQuestionDone(state.currentMode, question.id);
+  }
 
   if (kind === "program" && !isMemorizeMode()) {
     const draft = programAnswer.value || "";
@@ -3252,8 +3699,11 @@ function ensureProgressDefaults(raw) {
     programMarkedIds: Array.isArray(raw?.programMarkedIds) ? raw.programMarkedIds : [],
     financeExamWrongIds: Array.isArray(raw?.financeExamWrongIds) ? raw.financeExamWrongIds : [],
     financeExamMarkedIds: Array.isArray(raw?.financeExamMarkedIds) ? raw.financeExamMarkedIds : [],
+    fillDoneIds: Array.isArray(raw?.fillDoneIds) ? raw.fillDoneIds : [],
     fillResults: raw?.fillResults && typeof raw.fillResults === "object" ? raw.fillResults : {},
+    singleDoneIds: Array.isArray(raw?.singleDoneIds) ? raw.singleDoneIds : [],
     singleResults: raw?.singleResults && typeof raw.singleResults === "object" ? raw.singleResults : {},
+    judgeDoneIds: Array.isArray(raw?.judgeDoneIds) ? raw.judgeDoneIds : [],
     judgeResults: raw?.judgeResults && typeof raw.judgeResults === "object" ? raw.judgeResults : {},
     financeExamResults: raw?.financeExamResults && typeof raw.financeExamResults === "object" ? raw.financeExamResults : {},
     shortDoneIds: Array.isArray(raw?.shortDoneIds) ? raw.shortDoneIds : [],
@@ -3271,6 +3721,9 @@ function ensureProgressDefaults(raw) {
     shuffleQuestionOrder: typeof raw?.shuffleQuestionOrder === "boolean" ? raw.shuffleQuestionOrder : false,
     shuffleChoiceOptions: typeof raw?.shuffleChoiceOptions === "boolean" ? raw.shuffleChoiceOptions : false,
     memorizeMode: typeof raw?.memorizeMode === "boolean" ? raw.memorizeMode : false,
+    chatKnowledgeEnabled: typeof raw?.chatKnowledgeEnabled === "boolean" ? raw.chatKnowledgeEnabled : true,
+    chatWebSearchEnabled: typeof raw?.chatWebSearchEnabled === "boolean" ? raw.chatWebSearchEnabled : true,
+    chatUrlReadEnabled: typeof raw?.chatUrlReadEnabled === "boolean" ? raw.chatUrlReadEnabled : true,
     lastAiPraise: raw?.lastAiPraise && typeof raw.lastAiPraise === "object" ? raw.lastAiPraise : {},
     homeChatHistory: Array.isArray(raw?.homeChatHistory)
       ? raw.homeChatHistory
@@ -3278,6 +3731,8 @@ function ensureProgressDefaults(raw) {
           role: item?.role === "user" ? "user" : "assistant",
           content: String(item?.content || "").trim(),
           createdAt: item?.createdAt || "",
+          sources: normalizeHomeChatSources(item?.sources),
+          capabilities: normalizeStringList(item?.capabilities),
         }))
         .filter((item) => item.content)
       : [],
@@ -3384,10 +3839,8 @@ function getMarkedSet(mode, progressData = progressStore) {
 }
 
 function getDoneSet(mode, progressData = progressStore) {
-  if (mode === "financeExam") return new Set(progressData.financeExamDoneIds);
-  if (mode === "short") return new Set(progressData.shortDoneIds);
-  if (mode === "calc") return new Set(progressData.calcDoneIds);
-  if (mode === "program") return new Set(progressData.programDoneIds);
+  const key = getDoneStorageKey(mode);
+  if (key) return new Set(progressData[key] || []);
   return new Set();
 }
 
