@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>1302学习中心</title>
-  <link rel="stylesheet" href="./styles.css?v=20260705-2118">
+  <link rel="stylesheet" href="./styles.css?v=20260705-2152">
 </head>
 <body>
   <header class="app-header">
@@ -435,7 +435,10 @@
 
             <div class="question-header">
               <h2 id="questionTitle">题目</h2>
-              <span id="questionMeta" class="chip"></span>
+              <div class="question-header-actions">
+                <button id="aiExplainButton" class="ghost-button question-header-button" type="button">AI讲解</button>
+                <span id="questionMeta" class="chip"></span>
+              </div>
             </div>
 
             <div id="questionBody" class="question-body"></div>
@@ -477,6 +480,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=20260705-2118" type="module"></script>
+  <script src="./app.js?v=20260705-2152" type="module"></script>
 </body>
 </html>

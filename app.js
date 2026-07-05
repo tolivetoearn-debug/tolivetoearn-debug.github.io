@@ -131,6 +131,18 @@ JSON 结构必须是：
 }
 `;
 
+const AI_EXPLAIN_SYSTEM_PROMPT = `
+你是刷题网站里的中文讲题老师，负责把当前这道题讲清楚。
+
+输出要求：
+1. 先说这题考什么。
+2. 再说解题思路，尽量按“先看什么、再算什么、最后得什么结论”来讲。
+3. 再说正确答案或关键步骤。
+4. 最后提醒 1 到 3 个容易错的点。
+5. 中文，分点，直接，不要空话，不要用 Markdown 表格。
+6. 只围绕当前这道题讲，不要扯到别的题。
+`;
+
 const AI_WRONG_REVIEW_SYSTEM_PROMPT = `
 你是一个中文错题复盘教练，任务是把学生已经做错的题讲明白，让学生下次更容易做对。
 
@@ -199,6 +211,7 @@ const modeTitle = document.getElementById("modeTitle");
 const progressText = document.getElementById("progressText");
 const questionTitle = document.getElementById("questionTitle");
 const questionMeta = document.getElementById("questionMeta");
+const aiExplainButton = document.getElementById("aiExplainButton");
 const questionBody = document.getElementById("questionBody");
 const feedbackPanel = document.getElementById("feedbackPanel");
 const programComposer = document.getElementById("programComposer");
@@ -323,6 +336,7 @@ async function init() {
   prevAction.addEventListener("click", () => navigateRelative(-1));
   nextAction?.addEventListener("click", () => navigateRelative(1));
   markQuestionButton.addEventListener("click", toggleQuestionMarked);
+  aiExplainButton?.addEventListener("click", handleAiExplain);
   wrongOnlyButton.addEventListener("click", () => switchQuestionSet("wrong"));
   unfinishedOnlyButton.addEventListener("click", () => switchQuestionSet("unfinished"));
   allQuestionsButton.addEventListener("click", () => switchQuestionSet("all"));
@@ -2475,6 +2489,46 @@ function renderStudyQuestion(question, kind = getQuestionKind(state.currentMode,
   }
 }
 
+function getQuestionPromptText(question, kind) {
+  return buildWrongReviewPromptText(state.currentMode, question);
+}
+
+function buildQuestionReferenceAnswerText(question, kind) {
+  return buildWrongReviewAnswerText(state.currentMode, question).replace(/^参考答案\s*/u, "").trim();
+}
+
+async function handleAiExplain() {
+  const question = state.currentList[state.currentIndex];
+  if (!question || !state.currentMode || !AI_CONFIG.enabled) return;
+
+  const kind = getQuestionKind(state.currentMode, question);
+  state.aiLoading = true;
+  updateToolbarButtons();
+  feedbackPanel.innerHTML = "<h3>AI 正在讲这道题...</h3><p class=\"feedback-note\">马上回来，先别切题。</p>";
+  feedbackPanel.classList.remove("hidden");
+
+  try {
+    const explanation = await requestAiExplanation(question, kind);
+    feedbackPanel.innerHTML = buildAiExplanationHtml(kind, explanation);
+    feedbackPanel.classList.remove("hidden");
+  } catch (error) {
+    console.error(error);
+    feedbackPanel.innerHTML = `
+      <h3>AI讲解暂时没连上</h3>
+      <div class="feedback-list">
+        <div class="feedback-item bad">
+          <div><strong>当前状态</strong><span class="feedback-status bad">稍后再试</span></div>
+          <div>${escapeHtml(error.message || "这次请求没成功，等会再点一次。")}</div>
+        </div>
+      </div>
+    `;
+    feedbackPanel.classList.remove("hidden");
+  } finally {
+    state.aiLoading = false;
+    updateToolbarButtons();
+  }
+}
+
 async function handleAiAssist() {
   const question = state.currentList[state.currentIndex];
   const kind = getQuestionKind(state.currentMode, question);
@@ -2826,6 +2880,32 @@ async function requestAiReview(mode, question, userAnswer) {
   return normalizeAiReview(parsed, mode);
 }
 
+async function requestAiExplanation(question, kind) {
+  const payload = {
+    课程: COURSE_LABELS[state.currentMode] || "未分类",
+    题型: QUESTION_KIND_LABELS[kind] || MODE_LABELS[state.currentMode] || "题目",
+    题目标题: question.title || getQuestionDisplayTitle(question),
+    题目内容: getQuestionPromptText(question, kind),
+    参考答案: buildQuestionReferenceAnswerText(question, kind) || "当前题目未提供参考答案",
+  };
+
+  const body = {
+    model: AI_CONFIG.model,
+    temperature: 0.35,
+    messages: [
+      { role: "system", content: AI_EXPLAIN_SYSTEM_PROMPT },
+      { role: "user", content: JSON.stringify(payload, null, 2) },
+    ],
+  };
+
+  const response = await postAiRequest(body);
+  if (!response.ok) {
+    throw new Error(extractAiError(await response.text()) || "AI讲解请求失败");
+  }
+
+  return getAiMessageContent(await response.json()).trim() || "这题可以先看考点，再按参考答案去对照关键步骤。";
+}
+
 async function postAiApiRequest(endpointPath, body, timeoutMs = 45000, timeoutText = "AI伴答超时了，等会再点一次。") {
   const errors = [];
   const keys = AI_CONFIG.apiKeys.filter(Boolean);
@@ -3030,6 +3110,18 @@ function buildAiFeedbackHtml(mode, result) {
           <div>${escapeHtml(result.suggestedFix)}</div>
         </div>
       ` : ""}
+    </div>
+  `;
+}
+
+function buildAiExplanationHtml(kind, explanation) {
+  return `
+    <h3>${AI_MODEL_DISPLAY} · AI讲解</h3>
+    <div class="feedback-list">
+      <div class="feedback-item ok">
+        <div><strong>当前题型</strong><span class="feedback-status ok">${escapeHtml(QUESTION_KIND_LABELS[kind] || "题目讲解")}</span></div>
+        <div>${formatPlainTextHtml(explanation)}</div>
+      </div>
     </div>
   `;
 }
@@ -3483,6 +3575,11 @@ function updateToolbarButtons() {
   prevAction.disabled = state.aiLoading || state.currentList.length <= 1 || (inFinanceExam && state.currentIndex === 0);
   nextAction.disabled = state.aiLoading || !hasQuestion || (!inFinanceExam && state.currentList.length <= 1);
   markQuestionButton.disabled = state.aiLoading || !hasQuestion;
+  if (aiExplainButton) {
+    aiExplainButton.classList.toggle("hidden", !state.currentMode || !AI_CONFIG.enabled);
+    aiExplainButton.disabled = state.aiLoading || !hasQuestion;
+    aiExplainButton.textContent = state.aiLoading ? "AI讲解中..." : "AI讲解";
+  }
   const question = state.currentList[state.currentIndex];
   const isMarked = question && state.currentMode ? isQuestionMarked(state.currentMode, question.id) : false;
   markQuestionButton.textContent = isMarked ? "取消标记" : "标记本题";
