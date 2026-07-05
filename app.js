@@ -299,7 +299,7 @@ function renderProgramQuestion(question) {
 function handlePrimaryAction() {
   if (!state.currentList[state.currentIndex]) return;
 
-  if (state.currentMode === "fill") {
+  if (isFillMode(state.currentMode)) {
     handleFillAction();
     return;
   }
