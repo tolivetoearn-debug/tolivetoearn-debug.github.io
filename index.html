@@ -11,7 +11,7 @@
     <header class="topbar">
       <div>
         <h1>程序刷题</h1>
-        <p class="subtitle">填空题、单选题、判断题、程序题，直接开刷</p>
+        <p class="subtitle">程序填空、填空题、单选题、判断题、程序题，直接开刷</p>
       </div>
       <button id="homeShortcut" class="ghost-button hidden" type="button">返回首页</button>
     </header>
@@ -20,11 +20,15 @@
       <section id="homeView" class="view active">
         <div class="hero-card">
           <h2>选择刷题模式</h2>
-          <p>填空题、单选题、判断题、程序题，直接开刷。</p>
+          <p>程序填空、填空题、单选题、判断题、程序题，直接开刷。</p>
           <div class="home-grid">
+            <button class="mode-card" type="button" data-mode="codefill">
+              <span class="mode-title">程序填空</span>
+              <span class="mode-desc">代码里的空先自己填，再看对错和答案</span>
+            </button>
             <button class="mode-card" type="button" data-mode="fill">
               <span class="mode-title">填空题</span>
-              <span class="mode-desc">先填空，再看对错和答案</span>
+              <span class="mode-desc">普通概念填空，先填再判对错</span>
             </button>
             <button class="mode-card" type="button" data-mode="single">
               <span class="mode-title">单选题</span>
