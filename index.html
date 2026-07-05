@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>1302学习中心</title>
-  <link rel="stylesheet" href="./styles.css?v=20260705-2258">
+  <link rel="stylesheet" href="./styles.css?v=20260705-2355">
 </head>
 <body>
   <header class="app-header">
@@ -13,7 +13,7 @@
         <a id="headerHomeLink" class="app-nav-link active" href="javascript:void(0)">学习仪表盘</a>
         <a id="headerFinanceExamLink" class="app-nav-link" href="javascript:void(0)">模拟考试</a>
         <a id="headerWrongReviewLink" class="app-nav-link" href="javascript:void(0)">错题复盘</a>
-        <a class="app-nav-link" href="javascript:void(0)">学习资源</a>
+        <a id="headerResourcesLink" class="app-nav-link" href="javascript:void(0)">学习资源</a>
       </nav>
 
       <div class="app-header-actions">
@@ -384,6 +384,68 @@
         </section>
       </section>
 
+      <section id="resourcesView" class="view">
+        <section class="review-center-shell">
+          <article class="review-hero-card">
+            <div class="review-hero-copy">
+              <span class="academy-summary-label">学习资源</span>
+              <h1>资料库</h1>
+              <p>这里放的是你已经喂进来的学习文件。上面这部分是站点内置资料，所有人都能直接下载；下面这部分是当前浏览器自己上传的补充资料，方便临时加文件继续学。</p>
+            </div>
+            <div class="review-hero-actions">
+              <button id="resourceUploadTrigger" class="primary-button" type="button">上传资料</button>
+              <span id="resourceUploadStatus" class="helper-text">支持 PDF / DOCX / XLSX / TXT / MD / 图片</span>
+              <input id="resourceUploadInput" class="hidden" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.md,.png,.jpg,.jpeg,.webp,.zip">
+            </div>
+          </article>
+
+          <section class="review-summary-grid">
+            <article class="academy-summary-card">
+              <span class="academy-summary-label">公共资料</span>
+              <strong id="publicResourceCount">0</strong>
+              <p id="publicResourceMeta">所有人都能下载</p>
+            </article>
+            <article class="academy-summary-card">
+              <span class="academy-summary-label">当前浏览器上传</span>
+              <strong id="uploadedResourceCount">0</strong>
+              <p id="uploadedResourceMeta">你自己补进来的资料</p>
+            </article>
+            <article class="academy-summary-card">
+              <span class="academy-summary-label">中级财务</span>
+              <strong id="financeResourceCount">0</strong>
+              <p>提纲 / 知识点 / 主观题复习资料</p>
+            </article>
+            <article class="academy-summary-card">
+              <span class="academy-summary-label">Python</span>
+              <strong id="pythonResourceCount">0</strong>
+              <p>题库 / 填空 / 选择 / 判断资料</p>
+            </article>
+          </section>
+
+          <section class="academy-course-panel finance resources-panel">
+            <div class="panel-head">
+              <div>
+                <span class="academy-summary-label">站点公共资料</span>
+                <h3>大家都能下载</h3>
+                <p>这里是已经整理进站点的复习资料，别人打开网站也能直接下载。</p>
+              </div>
+            </div>
+            <div id="publicResourceGrid" class="resource-grid"></div>
+          </section>
+
+          <section class="academy-course-panel python resources-panel">
+            <div class="panel-head">
+              <div>
+                <span class="academy-summary-label">本机补充资料</span>
+                <h3>你自己上传的文件</h3>
+                <p>上传后会保存在当前浏览器，方便你临时补资料、继续下载或回看。</p>
+              </div>
+            </div>
+            <div id="uploadedResourceGrid" class="resource-grid"></div>
+          </section>
+        </section>
+      </section>
+
       <section id="practiceView" class="view">
         <div class="practice-focus-header">
           <div class="practice-focus-left">
@@ -502,6 +564,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=20260705-2258" type="module"></script>
+  <script src="./app.js?v=20260705-2355" type="module"></script>
 </body>
 </html>
