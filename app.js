@@ -43,6 +43,8 @@ const homeShortcut = document.getElementById("homeShortcut");
 const programMarkWrong = document.getElementById("programMarkWrong");
 const questionShuffleWrap = document.getElementById("questionShuffleWrap");
 const shuffleQuestionOrderToggle = document.getElementById("shuffleQuestionOrderToggle");
+const memorizeModeWrap = document.getElementById("memorizeModeWrap");
+const memorizeModeToggle = document.getElementById("memorizeModeToggle");
 const shuffleToggleWrap = document.getElementById("shuffleToggleWrap");
 const shuffleOptionsToggle = document.getElementById("shuffleOptionsToggle");
 const navigatorSummary = document.getElementById("navigatorSummary");
@@ -75,6 +77,9 @@ async function init() {
 
   shuffleQuestionOrderToggle.checked = !!progressStore.shuffleQuestionOrder;
   shuffleQuestionOrderToggle.addEventListener("change", toggleQuestionShuffle);
+
+  memorizeModeToggle.checked = !!progressStore.memorizeMode;
+  memorizeModeToggle.addEventListener("change", toggleMemorizeMode);
 
   shuffleOptionsToggle.checked = !!progressStore.shuffleChoiceOptions;
   shuffleOptionsToggle.addEventListener("change", toggleOptionShuffle);
@@ -191,6 +196,7 @@ function renderCurrentQuestion() {
   feedbackPanel.innerHTML = "";
   programComposer.classList.add("hidden");
   programAnswerPanel.classList.add("hidden");
+  programAnswerPanel.classList.remove("memory-answer-surface");
   programAnswerPanel.innerHTML = "";
   state.revealState = false;
 
@@ -211,7 +217,7 @@ function renderCurrentQuestion() {
     primaryAction.textContent = "下一题";
   } else {
     renderProgramQuestion(question);
-    primaryAction.textContent = "显示答案";
+    primaryAction.textContent = isMemorizeMode() ? "下一题" : "显示答案";
   }
 
   renderNavigator();
@@ -234,6 +240,9 @@ function buildQuestionMetaText(question) {
   if (progressStore.shuffleQuestionOrder) {
     parts.push("题序已打乱");
   }
+  if (isMemorizeMode()) {
+    parts.push("背题模式");
+  }
   if (state.currentMode === "single" && progressStore.shuffleChoiceOptions) {
     parts.push("选项已打乱");
   }
@@ -241,9 +250,19 @@ function buildQuestionMetaText(question) {
 }
 
 function renderFillQuestion(question) {
-  questionBody.innerHTML = question.stem_html;
-  questionBody.querySelectorAll(".blank-slot").forEach((slot) => {
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = question.stem_html;
+
+  wrapper.querySelectorAll(".blank-slot").forEach((slot) => {
     const index = Number(slot.dataset.blankIndex);
+    if (isMemorizeMode()) {
+      const answer = document.createElement("span");
+      answer.className = "memory-answer-inline";
+      answer.textContent = question.display_answers[index] || question.answers[index]?.[0] || "";
+      slot.replaceWith(answer);
+      return;
+    }
+
     const input = document.createElement("input");
     input.type = "text";
     input.className = "blank-input";
@@ -251,12 +270,16 @@ function renderFillQuestion(question) {
     input.dataset.blankIndex = String(index);
     slot.replaceWith(input);
   });
+
+  questionBody.innerHTML = "";
+  questionBody.appendChild(wrapper);
 }
 
 function renderSingleChoiceQuestion(question) {
   const orderedOptions = getOrderedSingleChoiceOptions(question);
   questionBody.innerHTML = `
     <div class="choice-stem">${question.stem_html}</div>
+    ${isMemorizeMode() ? buildMemoryAnswerBlockHtml("答案", `${escapeHtml(getDisplayLabelBySourceKey(question, question.answer_key))}. ${escapeHtml(question.options.find((item) => item.key === question.answer_key)?.text || "")}`) : ""}
     <div class="choice-list">
       ${orderedOptions.map((option) => `
         <label class="choice-option" data-source-key="${option.sourceKey}" data-display-label="${option.displayLabel}">
@@ -270,11 +293,15 @@ function renderSingleChoiceQuestion(question) {
       `).join("")}
     </div>
   `;
+  if (isMemorizeMode()) {
+    revealSingleChoiceAnswer(question, null);
+  }
 }
 
 function renderJudgeQuestion(question) {
   questionBody.innerHTML = `
     <div class="choice-stem">${question.stem_html}</div>
+    ${isMemorizeMode() ? buildMemoryAnswerBlockHtml("答案", escapeHtml(question.options.find((item) => item.key === question.answer_key)?.text || "")) : ""}
     <div class="choice-list">
       ${question.options.map((option) => `
         <label class="choice-option" data-source-key="${option.key}" data-display-label="${option.text}">
@@ -288,16 +315,32 @@ function renderJudgeQuestion(question) {
       `).join("")}
     </div>
   `;
+  if (isMemorizeMode()) {
+    revealJudgeAnswer(question, null);
+  }
 }
 
 function renderProgramQuestion(question) {
-  programComposer.classList.remove("hidden");
   questionBody.innerHTML = question.prompt_html;
+  if (isMemorizeMode()) {
+    programAnswer.value = "";
+    programAnswerPanel.classList.add("memory-answer-surface");
+    programAnswerPanel.innerHTML = question.answer_html;
+    programAnswerPanel.classList.remove("hidden");
+    return;
+  }
+
+  programComposer.classList.remove("hidden");
   programAnswer.value = progressStore.programAnswers?.[question.id] || "";
 }
 
 function handlePrimaryAction() {
   if (!state.currentList[state.currentIndex]) return;
+
+  if (isMemorizeMode()) {
+    navigateRelative(1);
+    return;
+  }
 
   if (isFillMode(state.currentMode)) {
     handleFillAction();
@@ -741,6 +784,19 @@ function toggleQuestionShuffle() {
   }
 }
 
+function toggleMemorizeMode() {
+  saveCurrentQuestionState();
+  progressStore.memorizeMode = memorizeModeToggle.checked;
+  saveProgress();
+
+  if (state.currentMode) {
+    state.revealState = false;
+    renderCurrentQuestion();
+  } else {
+    updateToolbarButtons();
+  }
+}
+
 function toggleOptionShuffle() {
   progressStore.shuffleChoiceOptions = shuffleOptionsToggle.checked;
   state.singleChoiceOrders = {};
@@ -759,6 +815,7 @@ function updateToolbarButtons() {
   unfinishedOnlyButton.textContent = state.unfinishedOnly ? "当前：未做题模式" : "只看未做题";
   allQuestionsButton.classList.toggle("hidden", !state.wrongOnly && !state.unfinishedOnly);
   questionShuffleWrap.classList.toggle("hidden", !state.currentMode);
+  memorizeModeWrap.classList.toggle("hidden", !state.currentMode);
   shuffleToggleWrap.classList.toggle("hidden", state.currentMode !== "single");
   const question = state.currentList[state.currentIndex];
   const isMarked = question && state.currentMode ? isQuestionMarked(state.currentMode, question.id) : false;
@@ -779,11 +836,12 @@ function updateProgressText() {
   const wrongCount = getWrongSet(state.currentMode).size;
   const markedCount = getMarkedSet(state.currentMode).size;
   const current = state.currentList.length === 0 ? 0 : state.currentIndex + 1;
+  const memorizeLabel = isMemorizeMode() ? " · 背题模式" : "";
   if (state.unfinishedOnly) {
-    progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 未做 ${pendingCount} 题 · 标记 ${markedCount} 题`;
+    progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 未做 ${pendingCount} 题 · 标记 ${markedCount} 题${memorizeLabel}`;
     return;
   }
-  progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 错题 ${wrongCount} 题 · 标记 ${markedCount} 题`;
+  progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 错题 ${wrongCount} 题 · 标记 ${markedCount} 题${memorizeLabel}`;
 }
 
 function getOrderedSingleChoiceOptions(question) {
@@ -869,7 +927,7 @@ function saveCurrentQuestionState() {
   const question = state.currentList[state.currentIndex];
   if (!question) return;
 
-  if (state.currentMode === "program") {
+  if (state.currentMode === "program" && !isMemorizeMode()) {
     const draft = programAnswer.value || "";
     saveProgramDraft(question.id, draft);
     if (draft.trim()) {
@@ -916,6 +974,7 @@ function ensureProgressDefaults(raw) {
     programAnswers: raw?.programAnswers && typeof raw.programAnswers === "object" ? raw.programAnswers : {},
     shuffleQuestionOrder: typeof raw?.shuffleQuestionOrder === "boolean" ? raw.shuffleQuestionOrder : false,
     shuffleChoiceOptions: typeof raw?.shuffleChoiceOptions === "boolean" ? raw.shuffleChoiceOptions : false,
+    memorizeMode: typeof raw?.memorizeMode === "boolean" ? raw.memorizeMode : false,
   };
 }
 
@@ -979,8 +1038,21 @@ function isFillMode(mode) {
   return mode === "fill" || mode === "codefill";
 }
 
+function isMemorizeMode() {
+  return !!progressStore.memorizeMode;
+}
+
 function isProgramFillQuestion(question) {
   return !String(question?.id || "").startsWith("docx-fill-");
+}
+
+function buildMemoryAnswerBlockHtml(title, content) {
+  return `
+    <div class="memory-answer-block">
+      <div class="memory-answer-title">${escapeHtml(title)}</div>
+      <div class="memory-answer-text">${content}</div>
+    </div>
+  `;
 }
 
 function saveProgramDraft(id, value) {

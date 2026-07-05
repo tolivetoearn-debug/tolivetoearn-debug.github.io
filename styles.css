@@ -505,6 +505,58 @@ textarea {
   background: var(--bad-soft);
 }
 
+.memory-answer-inline {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 4px 12px;
+  margin: 0 4px;
+  border-radius: 10px;
+  border: 1px solid #86efac;
+  background: #f0fdf4;
+  color: #15803d;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.memory-answer-block {
+  margin: 16px 0;
+  border-radius: 16px;
+  border: 1px solid #86efac;
+  background: #f0fdf4;
+  padding: 16px;
+  color: #166534;
+}
+
+.memory-answer-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.memory-answer-text {
+  line-height: 1.75;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.memory-answer-block pre {
+  margin-bottom: 0;
+  border-color: #bbf7d0;
+  background: #ffffff;
+}
+
+.answer-panel.memory-answer-surface {
+  border-color: #86efac;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.answer-panel.memory-answer-surface h3,
+.answer-panel.memory-answer-surface strong {
+  color: #166534;
+}
+
 .feedback-panel,
 .answer-panel {
   margin-top: 18px;
