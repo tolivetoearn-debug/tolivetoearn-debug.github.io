@@ -986,6 +986,71 @@ textarea {
   line-height: 1.7;
 }
 
+.question-ai-chat-panel {
+  margin-top: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(89, 113, 255, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 249, 255, 0.98));
+  padding: 18px;
+  box-shadow: 0 14px 34px rgba(88, 111, 174, 0.08);
+}
+
+.question-ai-chat-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.question-ai-chat-head h3 {
+  margin: 0 0 6px;
+}
+
+.question-ai-chat-status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.question-ai-chat-messages {
+  display: grid;
+  gap: 12px;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.question-ai-chat-composer {
+  margin-top: 14px;
+  border-top: 1px dashed rgba(122, 145, 190, 0.28);
+  padding-top: 14px;
+}
+
+#questionAiChatInput {
+  width: 100%;
+  min-height: 120px;
+  border-radius: 16px;
+  border: 1px solid var(--line-strong);
+  padding: 14px;
+  resize: vertical;
+  background: #fff;
+}
+
+.question-ai-chat-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.question-ai-chat-tip {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .program-composer {
   margin-top: 18px;
 }
