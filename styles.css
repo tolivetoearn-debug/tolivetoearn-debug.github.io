@@ -629,6 +629,11 @@ textarea {
   background: #fef2f2;
 }
 
+.feedback-item.partial {
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
 .feedback-status {
   font-weight: 700;
 }
@@ -639,6 +644,24 @@ textarea {
 
 .feedback-status.bad {
   color: var(--bad);
+}
+
+.feedback-status.partial {
+  color: #b45309;
+}
+
+.feedback-bullets {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.feedback-bullets li + li {
+  margin-top: 4px;
+}
+
+.feedback-note {
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .program-composer {
@@ -686,6 +709,12 @@ textarea {
 
 .primary-button:hover {
   background: #1d4ed8;
+}
+
+.primary-button:disabled,
+.ghost-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
 }
 
 .ghost-button {

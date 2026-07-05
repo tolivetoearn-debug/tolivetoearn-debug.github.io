@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>程序刷题</title>
-  <link rel="stylesheet" href="./styles.css?v=20260705-1525">
+  <link rel="stylesheet" href="./styles.css?v=20260705-1645">
 </head>
 <body>
   <div class="app-shell">
@@ -91,15 +91,16 @@
             <div id="feedbackPanel" class="feedback-panel hidden"></div>
 
             <div id="programComposer" class="program-composer hidden">
-              <label class="composer-label" for="programAnswer">你的答案</label>
+              <label id="composerLabel" class="composer-label" for="programAnswer">你的答案</label>
               <textarea id="programAnswer" placeholder="在这里写你的 Python 程序"></textarea>
             </div>
 
             <div id="programAnswerPanel" class="answer-panel hidden"></div>
 
             <div id="manualReviewRow" class="program-mark-row hidden">
+              <button id="aiAssistButton" class="primary-button hidden" type="button">开始AI伴答</button>
               <button id="programMarkWrong" class="ghost-button" type="button">记为错题</button>
-              <span class="helper-text">主观题不自动判分，自己看完答案后决定是否记错题。</span>
+              <span id="manualReviewHelper" class="helper-text">主观题不自动判分，自己看完答案后决定是否记错题。</span>
             </div>
 
             <div class="action-row">
@@ -123,6 +124,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=20260705-1525" type="module"></script>
+  <script src="./app.js?v=20260705-1645" type="module"></script>
 </body>
 </html>

@@ -10,6 +10,90 @@ const MODE_LABELS = {
 
 const CHOICE_DISPLAY_LABELS = ["A", "B", "C", "D", "E", "F"];
 
+const AI_CONFIG = {
+  enabled: true,
+  baseUrl: "https://ergouzi.life/v1",
+  apiKey: "sk-CJF1cKOLFS80ovxx0CO3TRvudI7ivRVHTgTVZ7a9xUVOzDGK",
+  model: "gpt-5.4",
+};
+
+const AI_CORRECT_PRAISES = [
+  "这波答得太漂亮了，关键点抓得又稳又准，像开了透视。",
+  "答得真猛，核心意思基本全中，老师看了都想立刻给分。",
+  "这题你拿捏得很到位，重点踩得很准，属于一眼就知道你懂了。",
+  "回答相当扎实，信息密度很高，完全不是随便蒙出来的感觉。",
+  "这题你是真的会，思路清楚、表达到位，狠狠加分。",
+  "太顺了，这个回答已经很像标准卷上的高分答案了。",
+  "你这答法很有感觉，核心内容压得准，读起来就很像对的。",
+  "漂亮，关键点覆盖得很完整，这题你基本稳稳拿下。",
+  "这一题答得很硬核，重点、逻辑、表达都在线。",
+  "这不是答对一点点，是答得很像参考答案背后的那套理解。",
+  "真不错，说明你不是在背字面，而是真的把意思吃进去了。",
+  "这题你答得很争气，属于看到就想给你大写加分的水平。",
+];
+
+const AI_PARTIAL_PRAISES = [
+  "方向是对的，已经摸到主干了，再补一两刀就更完整。",
+  "这题你不是不会，是差一点封口，把漏掉的点补上就很强。",
+  "核心意思你抓住了一部分，再把缺的点带上就更稳了。",
+  "已经答出骨架了，剩下就是把细节补齐。",
+];
+
+const AI_WRONG_PRAISES = [
+  "别慌，这题是还有偏差，但现在最值钱的是已经能定位问题了。",
+  "这次没压准，不过问题不大，改对这一处就会顺很多。",
+  "先别急，这题主要是方向偏了一点，拉回来就行。",
+  "这题暂时没对上，但你现在最需要的是看清卡点，我来给你指出来。",
+];
+
+const AI_SHORT_SYSTEM_PROMPT = `
+你是一个严格但鼓励感很强的中文考试阅卷老师，专门审核简答题。
+你的任务不是比对字面，而是判断学生回答的意思是否到位。
+
+判题规则：
+1. 允许同义表达、换序表达、自己的话复述。
+2. 不要求完全还原标准答案。
+3. 只要关键意思基本覆盖、没有明显原则性错误，就可以判 correct。
+4. 如果答到一部分关键点，但明显缺点、漏点较多，判 partial。
+5. 如果核心意思偏了、漏得太多、或者出现明显错误，判 wrong。
+6. 反馈必须短、准、直接，适合学生继续刷题。
+
+你只能返回 JSON，不要输出任何多余文字。
+JSON 结构必须是：
+{
+  "verdict": "correct" | "partial" | "wrong",
+  "summary": "一句话总评",
+  "good_points": ["答到的点1", "答到的点2"],
+  "missing_points": ["缺失点1", "缺失点2"],
+  "wrong_points": ["明显错误1"],
+  "suggested_fix": "下一次怎么补到位"
+}
+`;
+
+const AI_CALC_SYSTEM_PROMPT = `
+你是一个严格但鼓励感很强的中文考试阅卷老师，专门审核计算题。
+学生可能只写过程，不一定写最终结果。你需要理解过程是否正确。
+
+判题规则：
+1. 允许不同但等价的计算路径。
+2. 如果学生没有写最终答案，但关键公式、思路、计算链条正确，可以判 correct。
+3. 如果方法基本对，但有局部算错、漏一步、单位问题，判 partial。
+4. 如果公式、口径、思路或关键计算明显错误，判 wrong。
+5. 必须指出错在什么步骤，不要空泛。
+6. 反馈必须短、准、直接，适合学生继续刷题。
+
+你只能返回 JSON，不要输出任何多余文字。
+JSON 结构必须是：
+{
+  "verdict": "correct" | "partial" | "wrong",
+  "summary": "一句话总评",
+  "good_points": ["正确步骤1", "正确步骤2"],
+  "error_steps": ["错误步骤1", "错误步骤2"],
+  "missing_points": ["缺失步骤1", "缺失步骤2"],
+  "suggested_fix": "下一次怎么改"
+}
+`;
+
 const state = {
   data: null,
   currentMode: null,
@@ -20,9 +104,10 @@ const state = {
   unfinishedOnly: false,
   singleChoiceOrders: {},
   questionOrders: {},
+  aiLoading: false,
 };
 
-const storageKey = "quiz-web-progress-v2";
+const storageKey = "quiz-web-progress-v3";
 
 const homeView = document.getElementById("homeView");
 const practiceView = document.getElementById("practiceView");
@@ -33,9 +118,12 @@ const questionMeta = document.getElementById("questionMeta");
 const questionBody = document.getElementById("questionBody");
 const feedbackPanel = document.getElementById("feedbackPanel");
 const programComposer = document.getElementById("programComposer");
+const composerLabel = document.getElementById("composerLabel");
 const programAnswer = document.getElementById("programAnswer");
 const programAnswerPanel = document.getElementById("programAnswerPanel");
 const manualReviewRow = document.getElementById("manualReviewRow");
+const manualReviewHelper = document.getElementById("manualReviewHelper");
+const aiAssistButton = document.getElementById("aiAssistButton");
 const primaryAction = document.getElementById("primaryAction");
 const prevAction = document.getElementById("prevAction");
 const markQuestionButton = document.getElementById("markQuestionButton");
@@ -76,6 +164,7 @@ async function init() {
   allQuestionsButton.addEventListener("click", () => switchQuestionSet("all"));
   homeShortcut.addEventListener("click", goHome);
   programMarkWrong.addEventListener("click", toggleProgramWrong);
+  aiAssistButton.addEventListener("click", handleAiAssist);
   programAnswer.addEventListener("input", handleProgramInput);
 
   shuffleQuestionOrderToggle.checked = !!progressStore.shuffleQuestionOrder;
@@ -205,6 +294,7 @@ function renderCurrentQuestion() {
   programAnswerPanel.classList.remove("memory-answer-surface");
   programAnswerPanel.innerHTML = "";
   manualReviewRow.classList.add("hidden");
+  state.aiLoading = false;
   state.revealState = false;
 
   modeTitle.textContent = MODE_LABELS[state.currentMode] || "刷题";
@@ -257,6 +347,37 @@ function buildQuestionMetaText(question) {
     parts.push("选项已打乱");
   }
   return parts.join(" · ");
+}
+
+function configureManualReviewArea(mode) {
+  const aiVisible = supportsAiCompanion(mode) && !isMemorizeMode() && AI_CONFIG.enabled;
+  aiAssistButton.classList.toggle("hidden", !aiVisible);
+  aiAssistButton.textContent = state.aiLoading ? "AI伴答中..." : "开始AI伴答";
+  aiAssistButton.disabled = state.aiLoading;
+
+  if (mode === "program") {
+    composerLabel.textContent = "你的答案";
+    programAnswer.placeholder = "在这里写你的 Python 程序";
+    manualReviewHelper.textContent = "程序题不自动判分，自己看完答案后决定是否记错题。";
+    return;
+  }
+
+  if (mode === "short") {
+    composerLabel.textContent = "你的回答";
+    programAnswer.placeholder = "先自己答一遍，再点“开始AI伴答”让 AI 看意思到不到位";
+    manualReviewHelper.textContent = isMemorizeMode()
+      ? "背题模式下直接看答案。"
+      : "简答题按意思判，不要求和答案逐字一样。";
+    return;
+  }
+
+  if (mode === "calc") {
+    composerLabel.textContent = "你的过程";
+    programAnswer.placeholder = "把计算过程写出来就行，不用特意补最终结果";
+    manualReviewHelper.textContent = isMemorizeMode()
+      ? "背题模式下直接看答案。"
+      : "计算题主要看过程和口径，最终结果不一定非要单独写。";
+  }
 }
 
 function renderFillQuestion(question) {
@@ -333,6 +454,7 @@ function renderJudgeQuestion(question) {
 function renderProgramQuestion(question) {
   questionBody.innerHTML = question.prompt_html;
   manualReviewRow.classList.remove("hidden");
+  configureManualReviewArea("program");
   if (isMemorizeMode()) {
     programAnswer.value = "";
     programAnswerPanel.classList.add("memory-answer-surface");
@@ -351,13 +473,61 @@ function renderProgramQuestion(question) {
 function renderStudyQuestion(question) {
   questionBody.innerHTML = question.prompt_html;
   manualReviewRow.classList.remove("hidden");
+  programComposer.classList.remove("hidden");
+  configureManualReviewArea(state.currentMode);
+  programAnswer.value = "";
   if (isMemorizeMode()) {
+    programComposer.classList.add("hidden");
     programAnswerPanel.classList.add("memory-answer-surface");
     programAnswerPanel.innerHTML = question.answer_html;
     programAnswerPanel.classList.remove("hidden");
     markManualReviewDone(state.currentMode, question.id);
     questionMeta.textContent = buildQuestionMetaText(question);
     updateProgressText();
+  }
+}
+
+async function handleAiAssist() {
+  const question = state.currentList[state.currentIndex];
+  if (!question || !supportsAiCompanion(state.currentMode) || isMemorizeMode()) return;
+
+  const userAnswer = programAnswer.value.trim();
+  if (!userAnswer) {
+    feedbackPanel.innerHTML = "<h3>先写一点答案或过程，再让 AI 来看。</h3>";
+    feedbackPanel.classList.remove("hidden");
+    return;
+  }
+
+  state.aiLoading = true;
+  updateToolbarButtons();
+  configureManualReviewArea(state.currentMode);
+  feedbackPanel.innerHTML = "<h3>AI 正在看你的答案...</h3><p class=\"feedback-note\">马上回来，先别切题。</p>";
+  feedbackPanel.classList.remove("hidden");
+
+  try {
+    const result = await requestAiReview(state.currentMode, question, userAnswer);
+    applyAiReviewResult(state.currentMode, question.id, result.verdict);
+    feedbackPanel.innerHTML = buildAiFeedbackHtml(state.currentMode, result);
+    feedbackPanel.classList.remove("hidden");
+    questionMeta.textContent = buildQuestionMetaText(question);
+    updateProgressText();
+    renderNavigator();
+  } catch (error) {
+    console.error(error);
+    feedbackPanel.innerHTML = `
+      <h3>AI伴答暂时没连上</h3>
+      <div class="feedback-list">
+        <div class="feedback-item bad">
+          <div><strong>当前状态</strong><span class="feedback-status bad">稍后再试</span></div>
+          <div>${escapeHtml(error.message || "这次请求没成功，等会再点一次。")}</div>
+        </div>
+      </div>
+    `;
+    feedbackPanel.classList.remove("hidden");
+  } finally {
+    state.aiLoading = false;
+    updateToolbarButtons();
+    configureManualReviewArea(state.currentMode);
   }
 }
 
@@ -553,6 +723,193 @@ function handleProgramInput() {
   updateProgressText();
   renderNavigator();
   updateToolbarButtons();
+}
+
+async function requestAiReview(mode, question, userAnswer) {
+  const payload = {
+    题型: mode === "short" ? "简答题" : "计算题",
+    题目标题: question.title,
+    题目内容: htmlToReadableText(question.prompt_html),
+    参考答案: htmlToReadableText(question.answer_html).replace(/^参考答案\s*/u, "").trim(),
+    学生作答: userAnswer,
+  };
+
+  const body = {
+    model: AI_CONFIG.model,
+    temperature: 0.2,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: mode === "short" ? AI_SHORT_SYSTEM_PROMPT : AI_CALC_SYSTEM_PROMPT },
+      { role: "user", content: JSON.stringify(payload, null, 2) },
+    ],
+  };
+
+  let response = await postAiRequest(body);
+  if (!response.ok) {
+    const firstErrorText = await response.text();
+    if (body.response_format) {
+      const fallbackBody = { ...body };
+      delete fallbackBody.response_format;
+      response = await postAiRequest(fallbackBody);
+      if (!response.ok) {
+        const secondErrorText = await response.text();
+        throw new Error(extractAiError(secondErrorText) || extractAiError(firstErrorText) || "AI伴答请求失败");
+      }
+    } else {
+      throw new Error(extractAiError(firstErrorText) || "AI伴答请求失败");
+    }
+  }
+
+  const data = await response.json();
+  const rawContent = getAiMessageContent(data);
+  const parsed = parseAiJson(rawContent);
+  return normalizeAiReview(parsed, mode);
+}
+
+async function postAiRequest(body) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
+  try {
+    return await fetch(`${AI_CONFIG.baseUrl.replace(/\/+$/u, "")}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${AI_CONFIG.apiKey}`,
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("AI伴答超时了，等会再点一次。");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function getAiMessageContent(data) {
+  const message = data?.choices?.[0]?.message;
+  const content = message?.content;
+  if (typeof content === "string") return content;
+  if (Array.isArray(content)) {
+    return content.map((item) => item?.text || item?.content || "").join("\n");
+  }
+  throw new Error("AI 返回内容为空");
+}
+
+function parseAiJson(rawContent) {
+  const clean = String(rawContent || "")
+    .trim()
+    .replace(/^```json\s*/iu, "")
+    .replace(/^```\s*/u, "")
+    .replace(/\s*```$/u, "");
+  return JSON.parse(clean);
+}
+
+function normalizeAiReview(raw, mode) {
+  const allowed = ["correct", "partial", "wrong"];
+  const verdict = allowed.includes(raw?.verdict) ? raw.verdict : "partial";
+  return {
+    verdict,
+    summary: String(raw?.summary || "").trim() || (verdict === "correct" ? "整体答得不错。" : "还有可补的地方。"),
+    goodPoints: normalizeStringList(raw?.good_points),
+    missingPoints: normalizeStringList(raw?.missing_points),
+    wrongPoints: normalizeStringList(mode === "calc" ? raw?.error_steps : raw?.wrong_points),
+    suggestedFix: String(raw?.suggested_fix || "").trim(),
+  };
+}
+
+function normalizeStringList(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => String(item || "").trim()).filter(Boolean);
+}
+
+function applyAiReviewResult(mode, id, verdict) {
+  markManualReviewDone(mode, id);
+  const wrongSet = getWrongSet(mode);
+  if (verdict === "correct") {
+    wrongSet.delete(id);
+  } else {
+    wrongSet.add(id);
+  }
+  saveWrongSet(mode, wrongSet);
+}
+
+function buildAiFeedbackHtml(mode, result) {
+  const verdictLabel = {
+    correct: "答得很到位",
+    partial: "方向基本对，但还可以更完整",
+    wrong: "这次没有答准",
+  }[result.verdict];
+  const statusClass = result.verdict === "correct" ? "ok" : result.verdict === "partial" ? "partial" : "bad";
+  const cheerText = pickAiCheer(result.verdict, mode);
+  const detailLabel = mode === "short" ? "漏掉的要点" : "需要补或改的步骤";
+  const wrongLabel = mode === "short" ? "明显偏差" : "出错的位置";
+
+  return `
+    <h3>AI伴答：${escapeHtml(verdictLabel)}</h3>
+    <div class="feedback-list">
+      <div class="feedback-item ${statusClass}">
+        <div><strong>AI判断</strong><span class="feedback-status ${statusClass}">${escapeHtml(verdictLabel)}</span></div>
+        <div>${escapeHtml(cheerText)}</div>
+        <div>${escapeHtml(result.summary)}</div>
+      </div>
+      ${renderAiListBlock("你答到的点", result.goodPoints, "ok")}
+      ${renderAiListBlock(detailLabel, result.missingPoints, "partial")}
+      ${renderAiListBlock(wrongLabel, result.wrongPoints, "bad")}
+      ${result.suggestedFix ? `
+        <div class="feedback-item">
+          <div><strong>下次怎么补</strong></div>
+          <div>${escapeHtml(result.suggestedFix)}</div>
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
+function renderAiListBlock(title, items, statusClass) {
+  if (!items.length) return "";
+  return `
+    <div class="feedback-item ${statusClass}">
+      <div><strong>${escapeHtml(title)}</strong></div>
+      <ul class="feedback-bullets">
+        ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+}
+
+function pickAiCheer(verdict, mode) {
+  let pool = AI_CORRECT_PRAISES;
+  let key = "correct";
+  if (verdict === "partial") {
+    pool = AI_PARTIAL_PRAISES;
+    key = "partial";
+  } else if (verdict === "wrong") {
+    pool = AI_WRONG_PRAISES;
+    key = "wrong";
+  }
+  const lastKey = progressStore.lastAiPraise?.[mode]?.[key] ?? -1;
+  let nextIndex = Math.floor(Math.random() * pool.length);
+  if (pool.length > 1 && nextIndex === lastKey) {
+    nextIndex = (nextIndex + 1) % pool.length;
+  }
+  progressStore.lastAiPraise ||= {};
+  progressStore.lastAiPraise[mode] ||= {};
+  progressStore.lastAiPraise[mode][key] = nextIndex;
+  saveProgress();
+  return pool[nextIndex];
+}
+
+function extractAiError(errorText) {
+  try {
+    const parsed = JSON.parse(errorText);
+    return parsed?.error?.message || parsed?.message || "";
+  } catch {
+    return String(errorText || "").trim();
+  }
 }
 
 function revealSingleChoiceAnswer(question, selectedSourceKey) {
@@ -854,6 +1211,9 @@ function updateToolbarButtons() {
   questionShuffleWrap.classList.toggle("hidden", !state.currentMode);
   memorizeModeWrap.classList.toggle("hidden", !state.currentMode);
   shuffleToggleWrap.classList.toggle("hidden", state.currentMode !== "single");
+  primaryAction.disabled = state.aiLoading || !state.currentList[state.currentIndex];
+  prevAction.disabled = state.aiLoading || state.currentList.length <= 1;
+  markQuestionButton.disabled = state.aiLoading || !state.currentList[state.currentIndex];
   const question = state.currentList[state.currentIndex];
   const isMarked = question && state.currentMode ? isQuestionMarked(state.currentMode, question.id) : false;
   markQuestionButton.textContent = isMarked ? "取消标记" : "标记本题";
@@ -862,6 +1222,13 @@ function updateToolbarButtons() {
   if (isManualReviewMode(state.currentMode)) {
     const isWrong = question ? getWrongSet(state.currentMode).has(question.id) : false;
     programMarkWrong.textContent = isWrong ? "取消错题" : "记为错题";
+    programMarkWrong.disabled = state.aiLoading;
+  } else {
+    programMarkWrong.disabled = false;
+  }
+
+  if (supportsAiCompanion(state.currentMode)) {
+    aiAssistButton.disabled = state.aiLoading;
   }
 }
 
@@ -1031,6 +1398,7 @@ function ensureProgressDefaults(raw) {
     shuffleQuestionOrder: typeof raw?.shuffleQuestionOrder === "boolean" ? raw.shuffleQuestionOrder : false,
     shuffleChoiceOptions: typeof raw?.shuffleChoiceOptions === "boolean" ? raw.shuffleChoiceOptions : false,
     memorizeMode: typeof raw?.memorizeMode === "boolean" ? raw.memorizeMode : false,
+    lastAiPraise: raw?.lastAiPraise && typeof raw.lastAiPraise === "object" ? raw.lastAiPraise : {},
   };
 }
 
@@ -1117,6 +1485,10 @@ function isManualReviewMode(mode) {
   return mode === "program" || mode === "short" || mode === "calc";
 }
 
+function supportsAiCompanion(mode) {
+  return mode === "short" || mode === "calc";
+}
+
 function isMemorizeMode() {
   return !!progressStore.memorizeMode;
 }
@@ -1138,6 +1510,26 @@ function saveProgramDraft(id, value) {
   progressStore.programAnswers ||= {};
   progressStore.programAnswers[id] = value;
   saveProgress();
+}
+
+function htmlToReadableText(html) {
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html;
+  const lines = [];
+
+  wrapper.querySelectorAll("table").forEach((table) => {
+    const rows = [...table.querySelectorAll("tr")].map((row) => [...row.children].map((cell) => cell.textContent.trim()).join(" | "));
+    table.replaceWith(document.createTextNode(rows.join("\n")));
+  });
+
+  [...wrapper.childNodes].forEach((node) => {
+    const text = node.textContent?.trim();
+    if (text) {
+      lines.push(text);
+    }
+  });
+
+  return lines.join("\n").replace(/\n{3,}/gu, "\n\n").trim();
 }
 
 function escapeHtml(value) {
