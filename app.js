@@ -1,4 +1,5 @@
 const MODE_LABELS = {
+  financeExam: "模拟考试",
   codefill: "程序填空",
   fill: "填空题",
   short: "简答题",
@@ -8,7 +9,20 @@ const MODE_LABELS = {
   program: "程序题",
 };
 
+const QUESTION_KIND_LABELS = {
+  codefill: "程序填空",
+  fill: "填空题",
+  short: "简答题",
+  calc: "计算题",
+  single: "单项选择题",
+  multi: "多项选择题",
+  judge: "判断题",
+  program: "程序题",
+  business: "业务核算题",
+};
+
 const COURSE_LABELS = {
+  financeExam: "中级财务",
   codefill: "Python",
   fill: "Python",
   single: "Python",
@@ -18,7 +32,17 @@ const COURSE_LABELS = {
   calc: "中级财务",
 };
 
+const MODE_KEYS = ["codefill", "fill", "single", "judge", "program", "short", "calc"];
+const ROUTABLE_MODES = [...MODE_KEYS, "financeExam"];
+const COURSE_MODE_GROUPS = {
+  finance: ["short", "calc"],
+  python: ["codefill", "fill", "single", "judge", "program"],
+};
+
 const CHOICE_DISPLAY_LABELS = ["A", "B", "C", "D", "E", "F"];
+const AI_MODEL_DISPLAY = "ChatGPT 5.4";
+const LEGACY_PROGRESS_STORAGE_KEY = "quiz-web-progress-v3";
+const USER_CENTER_STORAGE_KEY = "quiz-web-user-center-v1";
 
 const AI_CONFIG = {
   enabled: true,
@@ -118,9 +142,8 @@ const state = {
   singleChoiceOrders: {},
   questionOrders: {},
   aiLoading: false,
+  homeChatLoading: false,
 };
-
-const storageKey = "quiz-web-progress-v3";
 
 const homeView = document.getElementById("homeView");
 const practiceView = document.getElementById("practiceView");
@@ -153,8 +176,40 @@ const shuffleToggleWrap = document.getElementById("shuffleToggleWrap");
 const shuffleOptionsToggle = document.getElementById("shuffleOptionsToggle");
 const navigatorSummary = document.getElementById("navigatorSummary");
 const questionNavigator = document.getElementById("questionNavigator");
+const newExamSessionButton = document.getElementById("newExamSessionButton");
+const headerFinanceExamLink = document.getElementById("headerFinanceExamLink");
+const heroDoneCount = document.getElementById("heroDoneCount");
+const heroDoneMeta = document.getElementById("heroDoneMeta");
+const heroWrongCount = document.getElementById("heroWrongCount");
+const heroWrongMeta = document.getElementById("heroWrongMeta");
+const heroCourseMeta = document.getElementById("heroCourseMeta");
+const heroCompletionRate = document.getElementById("heroCompletionRate");
+const heroSuggestion = document.getElementById("heroSuggestion");
+const courseFinanceProgress = document.getElementById("courseFinanceProgress");
+const coursePythonProgress = document.getElementById("coursePythonProgress");
+const aiModelDisplay = document.getElementById("aiModelDisplay");
+const activeProfileName = document.getElementById("activeProfileName");
+const activeProfileMeta = document.getElementById("activeProfileMeta");
+const continueProfileButton = document.getElementById("continueProfileButton");
+const newProfileQuickButton = document.getElementById("newProfileQuickButton");
+const profileNameInput = document.getElementById("profileNameInput");
+const createProfileButton = document.getElementById("createProfileButton");
+const profileList = document.getElementById("profileList");
+const chatProfileName = document.getElementById("chatProfileName");
+const chatSuggestButton = document.getElementById("chatSuggestButton");
+const chatClearButton = document.getElementById("chatClearButton");
+const homeChatMessages = document.getElementById("homeChatMessages");
+const homeChatInput = document.getElementById("homeChatInput");
+const homeChatSendButton = document.getElementById("homeChatSendButton");
+const homeChatStatus = document.getElementById("homeChatStatus");
+const practiceCourseBadge = document.getElementById("practiceCourseBadge");
+const practiceModeBadge = document.getElementById("practiceModeBadge");
+const practiceSessionInfo = document.getElementById("practiceSessionInfo");
+const practiceQuestionTypeChip = document.getElementById("practiceQuestionTypeChip");
+const practiceQuestionIndexChip = document.getElementById("practiceQuestionIndexChip");
 
-const progressStore = ensureProgressDefaults(loadProgress());
+let userCenterStore = ensureUserCenterDefaults(loadUserCenterStore(), loadLegacyProgress());
+let progressStore = getActiveProfile().progress;
 
 init().catch((error) => {
   console.error(error);
@@ -164,6 +219,14 @@ init().catch((error) => {
 async function init() {
   const response = await fetch("./data/questions.json");
   state.data = await response.json();
+  if (aiModelDisplay) {
+    aiModelDisplay.textContent = AI_MODEL_DISPLAY;
+  }
+  syncProgressToggles();
+  renderHomeDashboard();
+  renderUserCenter();
+  renderHomeChatMessages();
+  updateHomeChatStatus();
 
   document.querySelectorAll("[data-mode]").forEach((button) => {
     button.addEventListener("click", () => startMode(button.dataset.mode));
@@ -179,23 +242,43 @@ async function init() {
   programMarkWrong.addEventListener("click", toggleProgramWrong);
   aiAssistButton.addEventListener("click", handleAiAssist);
   programAnswer.addEventListener("input", handleProgramInput);
+  continueProfileButton?.addEventListener("click", () => continueWithProfile());
+  newProfileQuickButton?.addEventListener("click", () => createProfileFromInput(true));
+  createProfileButton?.addEventListener("click", () => createProfileFromInput(false));
+  profileNameInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      createProfileFromInput(false);
+    }
+  });
+  homeChatSendButton?.addEventListener("click", () => submitHomeChat());
+  chatSuggestButton?.addEventListener("click", () => submitProgressSuggestionRequest());
+  chatClearButton?.addEventListener("click", clearHomeChatHistory);
+  homeChatInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      submitHomeChat();
+    }
+  });
+  newExamSessionButton?.addEventListener("click", () => startMode("financeExam", { forceNewSession: true }));
+  headerFinanceExamLink?.addEventListener("click", () => startMode("financeExam"));
 
-  shuffleQuestionOrderToggle.checked = !!progressStore.shuffleQuestionOrder;
   shuffleQuestionOrderToggle.addEventListener("change", toggleQuestionShuffle);
-
-  memorizeModeToggle.checked = !!progressStore.memorizeMode;
   memorizeModeToggle.addEventListener("change", toggleMemorizeMode);
-
-  shuffleOptionsToggle.checked = !!progressStore.shuffleChoiceOptions;
   shuffleOptionsToggle.addEventListener("change", toggleOptionShuffle);
 
   window.addEventListener("hashchange", applyRouteFromHash);
   applyRouteFromHash();
 }
 
-function startMode(mode) {
+function startMode(mode, options = {}) {
+  if (mode === "financeExam") {
+    ensureFinanceExamSession(options.forceNewSession === true);
+  }
   saveCurrentQuestionState();
   state.currentMode = mode;
+  progressStore.lastMode = mode;
+  saveProgress();
   state.wrongOnly = false;
   state.unfinishedOnly = false;
   state.currentIndex = 0;
@@ -206,6 +289,161 @@ function startMode(mode) {
     history.replaceState(null, "", `#${mode}`);
   }
   renderCurrentQuestion();
+}
+
+function ensureFinanceExamSession(forceNewSession = false) {
+  const currentSession = getActiveFinanceExamSession();
+  if (!forceNewSession && currentSession?.questions?.length) {
+    return currentSession;
+  }
+
+  const newSession = buildFinanceExamSession();
+  progressStore.financeExamSessions ||= [];
+  progressStore.financeExamSessions.unshift(newSession);
+  progressStore.financeExamSessions = progressStore.financeExamSessions.slice(0, 3);
+  progressStore.financeExamCurrentSessionId = newSession.id;
+  saveProgress();
+  return newSession;
+}
+
+function buildFinanceExamSession() {
+  const paper = state.data?.finance_exam?.paper || {
+    single_count: 20,
+    multiple_count: 5,
+    judgment_count: 10,
+    short_count: 2,
+    calc_count: 2,
+    business_count: 4,
+    total_score: 100,
+  };
+  const sessionId = `finance-exam-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const createdAt = new Date().toISOString();
+  const questions = [];
+
+  const singleBank = sampleQuestions(state.data?.finance_exam?.single_choice_bank || [], paper.single_count);
+  singleBank.forEach((source, index) => {
+    questions.push({
+      id: `${sessionId}-single-${String(index + 1).padStart(2, "0")}`,
+      examType: "single",
+      score: 1,
+      title: `单项选择题 ${String(index + 1).padStart(2, "0")}`,
+      sourceId: source.id,
+      sourceTitle: source.title,
+      stem_text: source.stem_text,
+      stem_html: source.stem_html,
+      options: source.options,
+      answer_key: source.answer_key,
+      answer_text: source.answer_text,
+    });
+  });
+
+  const multiBank = sampleQuestions(state.data?.finance_exam?.multiple_choice_bank || [], paper.multiple_count);
+  multiBank.forEach((source, index) => {
+    questions.push({
+      id: `${sessionId}-multi-${String(index + 1).padStart(2, "0")}`,
+      examType: "multi",
+      score: 2,
+      title: `多项选择题 ${String(index + 1).padStart(2, "0")}`,
+      sourceId: source.id,
+      sourceTitle: source.title,
+      stem_text: source.stem_text,
+      stem_html: source.stem_html,
+      options: source.options,
+      answer_keys: source.answer_keys,
+      answer_texts: source.answer_texts,
+    });
+  });
+
+  const judgeBank = sampleQuestions(state.data?.finance_exam?.judgment_bank || [], paper.judgment_count);
+  judgeBank.forEach((source, index) => {
+    questions.push({
+      id: `${sessionId}-judge-${String(index + 1).padStart(2, "0")}`,
+      examType: "judge",
+      score: 1,
+      title: `判断题 ${String(index + 1).padStart(2, "0")}`,
+      sourceId: source.id,
+      sourceTitle: source.title,
+      stem_text: source.stem_text,
+      stem_html: source.stem_html,
+      options: source.options,
+      answer_key: source.answer_key,
+      answer_text: source.answer_text,
+    });
+  });
+
+  const shortBank = sampleQuestions(state.data?.short_answer_questions || [], paper.short_count);
+  shortBank.forEach((source, index) => {
+    questions.push({
+      id: `${sessionId}-short-${String(index + 1).padStart(2, "0")}`,
+      examType: "short",
+      score: 5,
+      title: `简答题 ${String(index + 1).padStart(2, "0")} · ${simplifyExamSourceTitle(source.title)}`,
+      sourceId: source.id,
+      sourceTitle: source.title,
+      prompt_html: source.prompt_html,
+      answer_html: source.answer_html,
+    });
+  });
+
+  const calcBank = sampleQuestions(state.data?.calculation_questions || [], paper.calc_count);
+  calcBank.forEach((source, index) => {
+    questions.push({
+      id: `${sessionId}-calc-${String(index + 1).padStart(2, "0")}`,
+      examType: "calc",
+      score: 5,
+      title: `计算题 ${String(index + 1).padStart(2, "0")} · ${simplifyExamSourceTitle(source.title)}`,
+      sourceId: source.id,
+      sourceTitle: source.title,
+      prompt_html: source.prompt_html,
+      answer_html: source.answer_html,
+    });
+  });
+
+  const businessBank = sampleQuestions(state.data?.business_case_questions || [], paper.business_count);
+  businessBank.forEach((source, index) => {
+    questions.push({
+      id: `${sessionId}-business-${String(index + 1).padStart(2, "0")}`,
+      examType: "business",
+      score: 10,
+      title: `业务核算题 ${String(index + 1).padStart(2, "0")} · ${simplifyExamSourceTitle(source.title)}`,
+      sourceId: source.id,
+      sourceTitle: source.title,
+      prompt_html: source.prompt_html,
+      answer_html: source.answer_html,
+    });
+  });
+
+  return {
+    id: sessionId,
+    title: `中财模拟卷 · ${formatFinanceExamTime(createdAt)}`,
+    createdAt,
+    updatedAt: createdAt,
+    paper,
+    questions,
+  };
+}
+
+function sampleQuestions(list, count) {
+  if (!Array.isArray(list) || list.length === 0 || count <= 0) return [];
+  return shuffleArray(list).slice(0, Math.min(count, list.length));
+}
+
+function simplifyExamSourceTitle(title) {
+  const text = String(title || "").trim();
+  return text.replace(/^[^-]+-/u, "").trim() || text;
+}
+
+function formatFinanceExamTime(isoString) {
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return "最新一套";
+  return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+function getActiveFinanceExamSession(progressData = progressStore) {
+  const sessions = Array.isArray(progressData?.financeExamSessions) ? progressData.financeExamSessions : [];
+  if (!sessions.length) return null;
+  const matched = sessions.find((session) => session.id === progressData?.financeExamCurrentSessionId);
+  return matched || sessions[0];
 }
 
 function rebuildQuestionList() {
@@ -242,6 +480,9 @@ function switchQuestionSet(filterMode) {
 }
 
 function getQuestionsByMode(mode) {
+  if (mode === "financeExam") {
+    return getActiveFinanceExamSession()?.questions || [];
+  }
   if (mode === "codefill") {
     return (state.data.fill_questions || []).filter((question) => isProgramFillQuestion(question));
   }
@@ -255,10 +496,27 @@ function getQuestionsByMode(mode) {
   return state.data.program_questions || [];
 }
 
+function getQuestionKind(mode, question) {
+  if (mode === "financeExam") {
+    return question?.examType || "financeExam";
+  }
+  return mode;
+}
+
+function getQuestionTypeLabel(mode, question) {
+  const kind = getQuestionKind(mode, question);
+  return QUESTION_KIND_LABELS[kind] || MODE_LABELS[mode] || "题目";
+}
+
+function isObjectiveKind(kind) {
+  return kind === "single" || kind === "multi" || kind === "judge";
+}
+
 function showPractice() {
   homeView.classList.remove("active");
   practiceView.classList.add("active");
   homeShortcut.classList.remove("hidden");
+  updatePracticeHeader();
 }
 
 function goHome() {
@@ -266,6 +524,10 @@ function goHome() {
   practiceView.classList.remove("active");
   homeView.classList.add("active");
   homeShortcut.classList.add("hidden");
+  renderHomeDashboard();
+  renderUserCenter();
+  renderHomeChatMessages();
+  updateHomeChatStatus();
   updateDocumentTitle(null);
   if (location.hash) {
     history.replaceState(null, "", location.pathname + location.search);
@@ -275,6 +537,7 @@ function goHome() {
 function renderCurrentQuestion() {
   const question = state.currentList[state.currentIndex];
   updateDocumentTitle(state.currentMode);
+  updatePracticeHeader();
   if (!question) {
     modeTitle.textContent = getModeHeading(state.currentMode);
     updateProgressText();
@@ -317,21 +580,33 @@ function renderCurrentQuestion() {
 
   questionTitle.textContent = getQuestionDisplayTitle(question);
   questionMeta.textContent = buildQuestionMetaText(question);
+  const currentKind = getQuestionKind(state.currentMode, question);
+  if (practiceQuestionTypeChip) {
+    practiceQuestionTypeChip.textContent = state.currentMode === "financeExam"
+      ? `${getQuestionTypeLabel(state.currentMode, question)} · ${question.score || 0}分`
+      : getQuestionTypeLabel(state.currentMode, question);
+  }
+  if (practiceQuestionIndexChip) {
+    practiceQuestionIndexChip.textContent = `第 ${state.currentIndex + 1} 题`;
+  }
 
-  if (isFillMode(state.currentMode)) {
+  if (isFillMode(currentKind)) {
     renderFillQuestion(question);
     primaryAction.textContent = "下一题";
-  } else if (state.currentMode === "single") {
+  } else if (currentKind === "single") {
     renderSingleChoiceQuestion(question);
-    primaryAction.textContent = "下一题";
-  } else if (state.currentMode === "judge") {
+    primaryAction.textContent = "提交本题";
+  } else if (currentKind === "multi") {
+    renderMultipleChoiceQuestion(question);
+    primaryAction.textContent = "提交本题";
+  } else if (currentKind === "judge") {
     renderJudgeQuestion(question);
-    primaryAction.textContent = "下一题";
-  } else if (state.currentMode === "program") {
+    primaryAction.textContent = "提交本题";
+  } else if (currentKind === "program") {
     renderProgramQuestion(question);
     primaryAction.textContent = isMemorizeMode() ? "下一题" : "显示答案";
   } else {
-    renderStudyQuestion(question);
+    renderStudyQuestion(question, currentKind);
     primaryAction.textContent = isMemorizeMode() ? "下一题" : "显示答案";
   }
 
@@ -341,6 +616,7 @@ function renderCurrentQuestion() {
 
 function buildQuestionMetaText(question) {
   const status = getQuestionStatus(state.currentMode, question);
+  const kind = getQuestionKind(state.currentMode, question);
   const parts = [];
   if (state.wrongOnly) {
     parts.push("错题模式");
@@ -352,13 +628,16 @@ function buildQuestionMetaText(question) {
   if (isQuestionMarked(state.currentMode, question.id)) {
     parts.push("已标记");
   }
-  if (progressStore.shuffleQuestionOrder) {
+  if (state.currentMode === "financeExam" && question?.score) {
+    parts.push(`${question.score}分`);
+  }
+  if (state.currentMode !== "financeExam" && progressStore.shuffleQuestionOrder) {
     parts.push("题序已打乱");
   }
   if (isMemorizeMode()) {
     parts.push("背题模式");
   }
-  if (state.currentMode === "single" && progressStore.shuffleChoiceOptions) {
+  if (state.currentMode !== "financeExam" && kind === "single" && progressStore.shuffleChoiceOptions) {
     parts.push("选项已打乱");
   }
   return parts.join(" · ");
@@ -381,38 +660,605 @@ function getQuestionDisplayTitle(question, fallbackIndex = state.currentIndex) {
 }
 
 function updateDocumentTitle(mode) {
-  document.title = mode ? `${getModeHeading(mode)}｜刷题中心` : "刷题中心";
+  document.title = mode ? `${getModeHeading(mode)}｜学术卓越练习平台` : "学术卓越练习平台";
 }
 
-function configureManualReviewArea(mode) {
-  const aiVisible = supportsAiCompanion(mode) && !isMemorizeMode() && AI_CONFIG.enabled;
+function updatePracticeHeader() {
+  if (!state.currentMode) return;
+  const question = state.currentList[state.currentIndex];
+  if (practiceCourseBadge) {
+    practiceCourseBadge.textContent = COURSE_LABELS[state.currentMode] || "课程";
+  }
+  if (practiceModeBadge) {
+    practiceModeBadge.textContent = MODE_LABELS[state.currentMode] || "题型";
+  }
+  if (practiceSessionInfo) {
+    const current = state.currentList.length === 0 ? 0 : state.currentIndex + 1;
+    if (state.currentMode === "financeExam") {
+      const session = getActiveFinanceExamSession();
+      practiceSessionInfo.textContent = `${session?.title || "中财模拟卷"} · ${current}/${state.currentList.length || 0}`;
+    } else {
+      practiceSessionInfo.textContent = `当前进度 ${current}/${state.currentList.length || 0}`;
+    }
+  }
+  if (practiceQuestionTypeChip) {
+    practiceQuestionTypeChip.textContent = question
+      ? (state.currentMode === "financeExam"
+        ? `${getQuestionTypeLabel(state.currentMode, question)} · ${question.score || 0}分`
+        : getQuestionTypeLabel(state.currentMode, question))
+      : (MODE_LABELS[state.currentMode] || "题型");
+  }
+  if (practiceQuestionIndexChip) {
+    practiceQuestionIndexChip.textContent = `第 ${state.currentList.length === 0 ? 0 : state.currentIndex + 1} 题`;
+  }
+}
+
+function renderHomeDashboard() {
+  if (!state.data) return;
+
+  let totalQuestions = 0;
+  let totalDone = 0;
+  let totalWrong = 0;
+
+  MODE_KEYS.forEach((mode) => {
+    const stats = getModeDashboardStats(mode, progressStore);
+    totalQuestions += stats.total;
+    totalDone += stats.done;
+    totalWrong += stats.wrong;
+
+    const statusNode = document.querySelector(`[data-mode-status="${mode}"]`);
+    const textNode = document.querySelector(`[data-mode-progress-text="${mode}"]`);
+    const rateNode = document.querySelector(`[data-mode-progress-rate="${mode}"]`);
+    const barNode = document.querySelector(`[data-mode-progress-bar="${mode}"]`);
+    const actionNode = document.querySelector(`[data-mode-action="${mode}"]`);
+
+    if (statusNode) statusNode.textContent = stats.statusText;
+    if (textNode) textNode.textContent = `${stats.done} / ${stats.total || 0}`;
+    if (rateNode) rateNode.textContent = `${stats.percent}%`;
+    if (barNode) barNode.style.width = `${stats.percent}%`;
+    if (actionNode) actionNode.textContent = stats.actionText;
+  });
+
+  const financeExamStats = getFinanceExamDashboardStats(progressStore);
+  const financeExamStatusNode = document.querySelector('[data-mode-status="financeExam"]');
+  const financeExamTextNode = document.querySelector('[data-mode-progress-text="financeExam"]');
+  const financeExamRateNode = document.querySelector('[data-mode-progress-rate="financeExam"]');
+  const financeExamBarNode = document.querySelector('[data-mode-progress-bar="financeExam"]');
+  const financeExamActionNode = document.querySelector('[data-mode-action="financeExam"]');
+  if (financeExamStatusNode) financeExamStatusNode.textContent = financeExamStats.statusText;
+  if (financeExamTextNode) financeExamTextNode.textContent = `${financeExamStats.done} / ${financeExamStats.total || 0}`;
+  if (financeExamRateNode) financeExamRateNode.textContent = `${financeExamStats.percent}%`;
+  if (financeExamBarNode) financeExamBarNode.style.width = `${financeExamStats.percent}%`;
+  if (financeExamActionNode) financeExamActionNode.textContent = financeExamStats.actionText;
+
+  const financeStats = getCourseDashboardStats("finance", progressStore);
+  const pythonStats = getCourseDashboardStats("python", progressStore);
+  const financeCombinedDone = financeStats.done + financeExamStats.done;
+  const financeCombinedTotal = financeStats.total + financeExamStats.total;
+
+  if (courseFinanceProgress) {
+    courseFinanceProgress.textContent = `${financeCombinedDone} / ${financeCombinedTotal || financeStats.total}`;
+  }
+  if (coursePythonProgress) {
+    coursePythonProgress.textContent = `${pythonStats.done} / ${pythonStats.total}`;
+  }
+
+  const completionRate = totalQuestions ? Math.round((totalDone / totalQuestions) * 100) : 0;
+  const hardestMode = MODE_KEYS
+    .map((mode) => ({ mode, wrong: getModeDashboardStats(mode, progressStore).wrong }))
+    .sort((a, b) => b.wrong - a.wrong)[0];
+  const mostPendingMode = MODE_KEYS
+    .map((mode) => ({ mode, pending: getModeDashboardStats(mode, progressStore).pending }))
+    .sort((a, b) => b.pending - a.pending)[0];
+
+  if (heroDoneCount) heroDoneCount.textContent = String(totalDone);
+  if (heroDoneMeta) heroDoneMeta.textContent = `全部 ${totalQuestions} 题里，已完成 ${totalDone} 题`;
+  if (heroWrongCount) heroWrongCount.textContent = String(totalWrong);
+  if (heroWrongMeta) {
+    heroWrongMeta.textContent = totalWrong > 0 && hardestMode?.wrong
+      ? `${MODE_LABELS[hardestMode.mode]} 当前错题最多，建议优先复习`
+      : "当前没有沉淀下来的错题";
+  }
+  if (heroCourseMeta) {
+    heroCourseMeta.textContent = `中财 ${financeCombinedDone}/${financeCombinedTotal || financeStats.total} · Python ${pythonStats.done}/${pythonStats.total}`;
+  }
+  if (heroCompletionRate) heroCompletionRate.textContent = `${completionRate}%`;
+  if (heroSuggestion) {
+    if (totalDone === 0) {
+      heroSuggestion.textContent = "从任意板块直接开始";
+    } else if (totalWrong > 0 && hardestMode?.wrong) {
+      heroSuggestion.textContent = `优先回刷 ${MODE_LABELS[hardestMode.mode]}`;
+    } else if (mostPendingMode?.pending > 0) {
+      heroSuggestion.textContent = `继续推进 ${MODE_LABELS[mostPendingMode.mode]}`;
+    } else {
+      heroSuggestion.textContent = "全部刷过一轮了，适合开背题模式";
+    }
+  }
+}
+
+function getFinanceExamDashboardStats(progressData = progressStore) {
+  const session = getActiveFinanceExamSession(progressData);
+  if (!session?.questions?.length) {
+    return { total: 0, done: 0, percent: 0, statusText: "待开始", actionText: "开始模拟" };
+  }
+
+  const stats = getFinanceExamSessionStats(session, progressData);
+
+  let statusText = "待开始";
+  if (stats.done >= stats.total) {
+    statusText = "已完成";
+  } else if (stats.done > 0) {
+    statusText = "进行中";
+  }
+
+  const actionText = stats.done === 0 ? "开始模拟" : stats.done >= stats.total ? "继续复盘" : "继续答卷";
+  return { total: stats.total, done: stats.done, percent: stats.percent, statusText, actionText };
+}
+
+function getFinanceExamSessionStats(session, progressData = progressStore) {
+  const questions = Array.isArray(session?.questions) ? session.questions : [];
+  const markedSet = getMarkedSet("financeExam", progressData);
+  const total = questions.length;
+  let done = 0;
+  let wrong = 0;
+  let marked = 0;
+  let objectiveScore = 0;
+  let objectiveTotal = 0;
+  let subjectiveDone = 0;
+  let subjectiveTotal = 0;
+
+  questions.forEach((question) => {
+    const status = getQuestionStatus("financeExam", question, progressData);
+    const kind = getQuestionKind("financeExam", question);
+    if (status.key !== "pending") done += 1;
+    if (status.key === "wrong") wrong += 1;
+    if (markedSet.has(question.id)) marked += 1;
+    if (isObjectiveKind(kind)) {
+      objectiveTotal += question.score || 0;
+      if (status.key === "correct") {
+        objectiveScore += question.score || 0;
+      }
+    } else {
+      subjectiveTotal += 1;
+      if (status.key !== "pending") {
+        subjectiveDone += 1;
+      }
+    }
+  });
+
+  const percent = total ? Math.round((done / total) * 100) : 0;
+  return { total, done, wrong, marked, percent, objectiveScore, objectiveTotal, subjectiveDone, subjectiveTotal };
+}
+
+function renderFinanceExamCompletionSummary() {
+  const session = getActiveFinanceExamSession();
+  const stats = getFinanceExamSessionStats(session);
+  feedbackPanel.innerHTML = `
+    <h3>这套中财模拟卷已经做到最后一题</h3>
+    <div class="feedback-list">
+      <div class="feedback-item ok">
+        <div><strong>当前客观分</strong><span class="feedback-status ok">${stats.objectiveScore}/${stats.objectiveTotal}</span></div>
+        <div>单选、多选、判断已经自动统计完成。</div>
+      </div>
+      <div class="feedback-item partial">
+        <div><strong>主观题进度</strong></div>
+        <div>简答 / 计算 / 业务核算已做 ${stats.subjectiveDone}/${stats.subjectiveTotal} 题，右侧答题卡可以随时跳转复查。</div>
+      </div>
+      <div class="feedback-item">
+        <div><strong>接下来可以做什么</strong></div>
+        <div>你可以继续点右侧题目回看答案，也可以点上方“重新抽一套”再生成新卷。</div>
+      </div>
+    </div>
+  `;
+  feedbackPanel.classList.remove("hidden");
+  primaryAction.textContent = "本套已完成";
+  primaryAction.disabled = true;
+}
+
+function getModeDashboardStats(mode, progressData = progressStore) {
+  const questions = getQuestionsByMode(mode);
+  const total = questions.length;
+  const wrong = questions.filter((question) => getQuestionStatus(mode, question, progressData).key === "wrong").length;
+  const done = questions.filter((question) => getQuestionStatus(mode, question, progressData).key !== "pending").length;
+  const pending = Math.max(total - done, 0);
+  const percent = total ? Math.round((done / total) * 100) : 0;
+
+  let statusText = "待开始";
+  if (wrong > 0) {
+    statusText = `错题 ${wrong}`;
+  } else if (done === 0) {
+    statusText = "待开始";
+  } else if (done >= total && total > 0) {
+    statusText = "已完成";
+  } else {
+    statusText = "进行中";
+  }
+
+  let actionText = "开始练习";
+  if (wrong > 0) {
+    actionText = "继续复习";
+  } else if (done > 0) {
+    actionText = done >= total ? "继续巩固" : "继续练习";
+  }
+
+  return { total, done, pending, wrong, percent, statusText, actionText };
+}
+
+function getCourseDashboardStats(courseKey, progressData = progressStore) {
+  const modes = COURSE_MODE_GROUPS[courseKey] || [];
+  return modes.reduce((acc, mode) => {
+    const stats = getModeDashboardStats(mode, progressData);
+    acc.total += stats.total;
+    acc.done += stats.done;
+    acc.wrong += stats.wrong;
+    return acc;
+  }, { total: 0, done: 0, wrong: 0 });
+}
+
+function renderUserCenter() {
+  const activeProfile = getActiveProfile();
+  if (!activeProfile) return;
+
+  if (activeProfileName) {
+    activeProfileName.textContent = activeProfile.name;
+  }
+  if (activeProfileMeta) {
+    const stats = getProgressOverview(activeProfile.progress);
+    const lastModeText = activeProfile.progress.lastMode ? ` · 上次刷到 ${MODE_LABELS[activeProfile.progress.lastMode]}` : "";
+    activeProfileMeta.textContent = `${stats.done} / ${stats.total} 已完成 · ${stats.wrong} 道错题${lastModeText}`;
+  }
+  if (chatProfileName) {
+    chatProfileName.textContent = activeProfile.name;
+  }
+
+  if (!profileList) return;
+
+  profileList.innerHTML = userCenterStore.profiles.map((profile) => {
+    const stats = getProgressOverview(profile.progress);
+    const isActive = profile.id === userCenterStore.activeProfileId;
+    const updatedText = formatProfileTime(profile.updatedAt);
+    return `
+      <article class="profile-item ${isActive ? "active" : ""}">
+        <div class="profile-item-main">
+          <div class="profile-item-title-row">
+            <strong>${escapeHtml(profile.name)}</strong>
+            <span class="profile-item-tag">${isActive ? "当前使用中" : "历史存档"}</span>
+          </div>
+          <p>${stats.done}/${stats.total} 已完成 · 错题 ${stats.wrong} · 标记 ${stats.marked}</p>
+          <span class="profile-item-time">最近更新：${escapeHtml(updatedText)}</span>
+        </div>
+        <div class="profile-item-actions">
+          <button class="ghost-button" type="button" data-profile-action="continue" data-profile-id="${profile.id}">${isActive ? "继续当前" : "切换并继续"}</button>
+          <button class="ghost-button" type="button" data-profile-action="rename" data-profile-id="${profile.id}">重命名</button>
+          <button class="ghost-button" type="button" data-profile-action="delete" data-profile-id="${profile.id}">删除</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+
+  profileList.querySelectorAll("[data-profile-action]").forEach((button) => {
+    button.addEventListener("click", () => handleProfileAction(button.dataset.profileAction, button.dataset.profileId));
+  });
+}
+
+function getProgressOverview(progressData = progressStore) {
+  const total = MODE_KEYS.reduce((sum, mode) => sum + getModeDashboardStats(mode, progressData).total, 0);
+  const done = MODE_KEYS.reduce((sum, mode) => sum + getModeDashboardStats(mode, progressData).done, 0);
+  const wrong = MODE_KEYS.reduce((sum, mode) => sum + getModeDashboardStats(mode, progressData).wrong, 0);
+  const marked = MODE_KEYS.reduce((sum, mode) => sum + getMarkedSet(mode, progressData).size, 0);
+  const pending = Math.max(total - done, 0);
+  return { total, done, wrong, marked, pending };
+}
+
+function buildChatWelcomeMessage(progressData = progressStore) {
+  const overview = getProgressOverview(progressData);
+  const suggestedMode = pickRecommendedMode(progressData);
+  const suggestedLabel = MODE_LABELS[suggestedMode] || "简答题";
+  if (overview.done === 0) {
+    return `你好，我是 ${AI_MODEL_DISPLAY}。你现在还没开始刷题，可以先从 ${suggestedLabel} 开始，我也可以按你的进度随时给复习建议。`;
+  }
+  if (overview.wrong > 0) {
+    return `你好，我是 ${AI_MODEL_DISPLAY}。你当前已完成 ${overview.done} 题，累计错题 ${overview.wrong} 题。现在最适合优先回刷 ${suggestedLabel}。`;
+  }
+  return `你好，我是 ${AI_MODEL_DISPLAY}。你当前已完成 ${overview.done} 题，整体状态不错。要不要我直接按你的进度给你安排下一轮复习顺序？`;
+}
+
+function renderHomeChatMessages() {
+  if (!homeChatMessages) return;
+  const history = Array.isArray(progressStore.homeChatHistory) ? progressStore.homeChatHistory : [];
+  const displayMessages = history.length
+    ? history
+    : [{ role: "assistant", content: buildChatWelcomeMessage(progressStore) }];
+
+  homeChatMessages.innerHTML = displayMessages.map((message) => `
+    <div class="home-chat-message ${message.role === "user" ? "user" : "assistant"}">
+      <div class="home-chat-message-role">${message.role === "user" ? "你" : AI_MODEL_DISPLAY}</div>
+      <div class="home-chat-message-body">${escapeHtml(message.content).replace(/\n/gu, "<br>")}</div>
+    </div>
+  `).join("");
+  homeChatMessages.scrollTop = homeChatMessages.scrollHeight;
+}
+
+function updateHomeChatStatus(text) {
+  if (!homeChatStatus) return;
+  homeChatStatus.textContent = text || (state.homeChatLoading ? `${AI_MODEL_DISPLAY} 正在思考...` : `已连接 ${AI_MODEL_DISPLAY}`);
+}
+
+function syncProgressToggles() {
+  if (shuffleQuestionOrderToggle) {
+    shuffleQuestionOrderToggle.checked = !!progressStore.shuffleQuestionOrder;
+  }
+  if (memorizeModeToggle) {
+    memorizeModeToggle.checked = !!progressStore.memorizeMode;
+  }
+  if (shuffleOptionsToggle) {
+    shuffleOptionsToggle.checked = !!progressStore.shuffleChoiceOptions;
+  }
+}
+
+function handleProfileAction(action, profileId) {
+  if (action === "continue") {
+    continueWithProfile(profileId);
+    return;
+  }
+  if (action === "rename") {
+    renameProfile(profileId);
+    return;
+  }
+  if (action === "delete") {
+    deleteProfile(profileId);
+  }
+}
+
+function createProfileFromInput(forceQuickName = false) {
+  const typedName = profileNameInput?.value?.trim();
+  const name = typedName || (forceQuickName ? `新练习 ${userCenterStore.profiles.length + 1}` : "");
+  if (!name) {
+    profileNameInput?.focus();
+    updateHomeChatStatus("先给新存档起个名字");
+    return;
+  }
+
+  const profile = createProfileRecord(name);
+  userCenterStore.profiles.unshift(profile);
+  userCenterStore.activeProfileId = profile.id;
+  progressStore = profile.progress;
+  profileNameInput.value = "";
+  saveProgress();
+  renderUserCenter();
+  renderHomeChatMessages();
+  updateHomeChatStatus(`已切换到新存档：${profile.name}`);
+}
+
+function renameProfile(profileId) {
+  const profile = userCenterStore.profiles.find((item) => item.id === profileId);
+  if (!profile) return;
+  const nextName = window.prompt("给这个练习存档改个名字：", profile.name);
+  if (!nextName) return;
+  profile.name = nextName.trim() || profile.name;
+  profile.updatedAt = new Date().toISOString();
+  saveUserCenterStore();
+  renderUserCenter();
+  renderHomeChatMessages();
+  updateHomeChatStatus(`已重命名为：${profile.name}`);
+}
+
+function deleteProfile(profileId) {
+  const profile = userCenterStore.profiles.find((item) => item.id === profileId);
+  if (!profile) return;
+  const ok = window.confirm(`确定删除存档「${profile.name}」吗？这个存档里的做题进度和聊天记录会一起删掉。`);
+  if (!ok) return;
+  const deletingActive = userCenterStore.activeProfileId === profileId;
+
+  userCenterStore.profiles = userCenterStore.profiles.filter((item) => item.id !== profileId);
+  if (!userCenterStore.profiles.length) {
+    const freshProfile = createProfileRecord("默认练习");
+    userCenterStore.profiles = [freshProfile];
+    userCenterStore.activeProfileId = freshProfile.id;
+  } else if (userCenterStore.activeProfileId === profileId) {
+    userCenterStore.activeProfileId = userCenterStore.profiles[0].id;
+  }
+
+  progressStore = getActiveProfile().progress;
+  syncProgressToggles();
+  saveUserCenterStore();
+  renderHomeDashboard();
+  renderUserCenter();
+  renderHomeChatMessages();
+  updateHomeChatStatus("存档已删除");
+  if (practiceView.classList.contains("active") && deletingActive) {
+    goHome();
+  }
+}
+
+function continueWithProfile(profileId = userCenterStore.activeProfileId) {
+  const nextProfile = userCenterStore.profiles.find((item) => item.id === profileId);
+  if (!nextProfile) return;
+
+  if (userCenterStore.activeProfileId !== profileId) {
+    saveCurrentQuestionState();
+    userCenterStore.activeProfileId = profileId;
+    progressStore = nextProfile.progress;
+    syncProgressToggles();
+    saveUserCenterStore();
+    renderHomeDashboard();
+    renderUserCenter();
+    renderHomeChatMessages();
+    updateHomeChatStatus(`已切换到存档：${nextProfile.name}`);
+  }
+
+  const targetMode = progressStore.lastMode || pickRecommendedMode(progressStore);
+  if (targetMode) {
+    startMode(targetMode);
+  }
+}
+
+function pickRecommendedMode(progressData = progressStore) {
+  const ranked = MODE_KEYS.map((mode) => {
+    const stats = getModeDashboardStats(mode, progressData);
+    return { mode, wrong: stats.wrong, pending: stats.pending, total: stats.total };
+  }).filter((item) => item.total > 0);
+
+  const byWrong = [...ranked].sort((a, b) => b.wrong - a.wrong)[0];
+  if (byWrong?.wrong > 0) return byWrong.mode;
+  const byPending = [...ranked].sort((a, b) => b.pending - a.pending)[0];
+  return byPending?.mode || "short";
+}
+
+async function submitProgressSuggestionRequest() {
+  await submitHomeChat("请根据我当前这个存档的学习进度，给我一个直接能照着执行的复习建议，最好告诉我先刷什么、为什么、怎么安排下一轮。");
+}
+
+async function submitHomeChat(forcedMessage) {
+  if (state.homeChatLoading) return;
+  const message = String(forcedMessage || homeChatInput?.value || "").trim();
+  if (!message) {
+    homeChatInput?.focus();
+    return;
+  }
+
+  appendHomeChatMessage("user", message);
+  if (!forcedMessage && homeChatInput) {
+    homeChatInput.value = "";
+  }
+
+  state.homeChatLoading = true;
+  updateHomeChatStatus();
+  homeChatSendButton && (homeChatSendButton.disabled = true);
+  chatSuggestButton && (chatSuggestButton.disabled = true);
+  chatClearButton && (chatClearButton.disabled = true);
+
+  try {
+    const reply = await requestHomeChatReply(message);
+    appendHomeChatMessage("assistant", reply);
+    updateHomeChatStatus("建议已生成");
+  } catch (error) {
+    appendHomeChatMessage("assistant", `这次没连上，我先本地给你一句建议：${buildChatWelcomeMessage(progressStore)}\n\n错误信息：${error.message || "请求失败"}`);
+    updateHomeChatStatus("这次连接失败，稍后再试");
+  } finally {
+    state.homeChatLoading = false;
+    homeChatSendButton && (homeChatSendButton.disabled = false);
+    chatSuggestButton && (chatSuggestButton.disabled = false);
+    chatClearButton && (chatClearButton.disabled = false);
+    updateHomeChatStatus();
+  }
+}
+
+async function requestHomeChatReply(userMessage) {
+  const context = buildStudyContextForChat(getActiveProfile());
+  const history = (progressStore.homeChatHistory || []).slice(-10).map((item) => ({
+    role: item.role,
+    content: item.content,
+  }));
+
+  const body = {
+    model: AI_CONFIG.model,
+    temperature: 0.6,
+    messages: [
+      {
+        role: "system",
+        content: [
+          `你是 ${AI_MODEL_DISPLAY}，也是一个中文学习搭子。`,
+          "你的任务：结合用户当前练习进度，给出具体、可执行、简洁直接的建议。",
+          "你可以自由聊天，但回答要尽量结合当前进度，不要空泛。",
+          "如果用户问复习安排，就给出优先级、原因、建议时长或顺序。",
+          "如果用户问薄弱点，就直接指出错题多、未做多或主观题/客观题的卡点。",
+          "回答风格：中文，友好，直接，不啰嗦，必要时用短列表。",
+        ].join("\n"),
+      },
+      {
+        role: "system",
+        content: `当前存档与学习进度：\n${context}`,
+      },
+      ...history,
+    ],
+  };
+
+  const response = await postAiRequest(body);
+  if (!response.ok) {
+    throw new Error(extractAiError(await response.text()) || "聊天请求失败");
+  }
+  const data = await response.json();
+  return getAiMessageContent(data).trim() || "我已经看完你的进度了，建议先从错题最多的板块开始回刷。";
+}
+
+function buildStudyContextForChat(profile) {
+  const progressData = profile?.progress || progressStore;
+  const overview = getProgressOverview(progressData);
+  const modeLines = MODE_KEYS.map((mode) => {
+    const stats = getModeDashboardStats(mode, progressData);
+    return `${COURSE_LABELS[mode]} - ${MODE_LABELS[mode]}：总题 ${stats.total}，已做 ${stats.done}，未做 ${stats.pending}，错题 ${stats.wrong}`;
+  });
+  return [
+    `存档名称：${profile?.name || "默认练习"}`,
+    `总完成：${overview.done}/${overview.total}`,
+    `当前错题：${overview.wrong}`,
+    `当前标记：${overview.marked}`,
+    `推荐优先板块：${MODE_LABELS[pickRecommendedMode(progressData)] || "简答题"}`,
+    ...modeLines,
+  ].join("\n");
+}
+
+function appendHomeChatMessage(role, content) {
+  progressStore.homeChatHistory ||= [];
+  progressStore.homeChatHistory.push({
+    role,
+    content: String(content || "").trim(),
+    createdAt: new Date().toISOString(),
+  });
+  progressStore.homeChatHistory = progressStore.homeChatHistory.slice(-20);
+  saveProgress();
+  renderHomeChatMessages();
+}
+
+function clearHomeChatHistory() {
+  progressStore.homeChatHistory = [];
+  saveProgress();
+  renderHomeChatMessages();
+  updateHomeChatStatus("聊天已清空");
+}
+
+function formatProfileTime(isoString) {
+  if (!isoString) return "刚刚";
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return "刚刚";
+  return `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+function configureManualReviewArea(kind) {
+  const aiVisible = supportsAiCompanion(state.currentMode, state.currentList[state.currentIndex]) && !isMemorizeMode() && AI_CONFIG.enabled;
   aiAssistButton.classList.toggle("hidden", !aiVisible);
   aiAssistButton.textContent = state.aiLoading ? "AI伴答中..." : "开始AI伴答";
   aiAssistButton.disabled = state.aiLoading;
 
-  if (mode === "program") {
+  if (kind === "program") {
     composerLabel.textContent = "你的答案";
     programAnswer.placeholder = "在这里写你的 Python 程序";
     manualReviewHelper.textContent = "程序题不自动判分，自己看完答案后决定是否记错题。";
     return;
   }
 
-  if (mode === "short") {
+  if (kind === "short") {
     composerLabel.textContent = "你的回答";
     programAnswer.placeholder = "先自己答一遍，再点“开始AI伴答”让 AI 看意思到不到位";
     manualReviewHelper.textContent = isMemorizeMode()
       ? "背题模式下直接看答案。"
-      : "简答题按意思判，不要求和答案逐字一样。";
+      : `简答题按意思判，不要求和答案逐字一样。当前使用 ${AI_MODEL_DISPLAY}。`;
     return;
   }
 
-  if (mode === "calc") {
+  if (kind === "calc") {
     composerLabel.textContent = "你的过程";
     programAnswer.placeholder = "把计算过程写出来就行，不用特意补最终结果";
     manualReviewHelper.textContent = isMemorizeMode()
       ? "背题模式下直接看答案。"
-      : "计算题主要看过程和口径，最终结果不一定非要单独写。";
+      : `计算题主要看过程和口径，最终结果不一定非要单独写。当前使用 ${AI_MODEL_DISPLAY}。`;
+    return;
   }
+
+  composerLabel.textContent = "你的作答";
+  programAnswer.placeholder = "把分录、步骤或关键结论写在这里，再对照参考答案";
+  manualReviewHelper.textContent = "业务核算题先自己做，再看参考答案核对分录和步骤。";
 }
 
 function renderFillQuestion(question) {
@@ -464,6 +1310,28 @@ function renderSingleChoiceQuestion(question) {
   }
 }
 
+function renderMultipleChoiceQuestion(question) {
+  questionBody.innerHTML = `
+    <div class="choice-stem">${question.stem_html}</div>
+    ${isMemorizeMode() ? buildMemoryAnswerBlockHtml("答案", buildMultipleAnswerText(question)) : ""}
+    <div class="choice-list">
+      ${question.options.map((option, index) => `
+        <label class="choice-option" data-source-key="${option.key}" data-display-label="${CHOICE_DISPLAY_LABELS[index] || option.key}">
+          <input type="checkbox" name="multiChoice" value="${option.key}">
+          <span class="choice-badge">${CHOICE_DISPLAY_LABELS[index] || option.key}</span>
+          <div class="choice-content">
+            <div class="choice-text">${escapeHtml(option.text)}</div>
+            <div class="choice-tags"></div>
+          </div>
+        </label>
+      `).join("")}
+    </div>
+  `;
+  if (isMemorizeMode()) {
+    revealMultipleChoiceAnswer(question, []);
+  }
+}
+
 function renderJudgeQuestion(question) {
   questionBody.innerHTML = `
     <div class="choice-stem">${question.stem_html}</div>
@@ -505,12 +1373,12 @@ function renderProgramQuestion(question) {
   programAnswer.value = progressStore.programAnswers?.[question.id] || "";
 }
 
-function renderStudyQuestion(question) {
+function renderStudyQuestion(question, kind = getQuestionKind(state.currentMode, question)) {
   questionBody.innerHTML = question.prompt_html;
   manualReviewRow.classList.remove("hidden");
   programComposer.classList.remove("hidden");
-  configureManualReviewArea(state.currentMode);
-  programAnswer.value = "";
+  configureManualReviewArea(kind);
+  programAnswer.value = getManualDraftValue(question, kind);
   if (isMemorizeMode()) {
     programComposer.classList.add("hidden");
     programAnswerPanel.classList.add("memory-answer-surface");
@@ -524,7 +1392,8 @@ function renderStudyQuestion(question) {
 
 async function handleAiAssist() {
   const question = state.currentList[state.currentIndex];
-  if (!question || !supportsAiCompanion(state.currentMode) || isMemorizeMode()) return;
+  const kind = getQuestionKind(state.currentMode, question);
+  if (!question || !supportsAiCompanion(state.currentMode, question) || isMemorizeMode()) return;
 
   const userAnswer = programAnswer.value.trim();
   if (!userAnswer) {
@@ -540,9 +1409,9 @@ async function handleAiAssist() {
   feedbackPanel.classList.remove("hidden");
 
   try {
-    const result = await requestAiReview(state.currentMode, question, userAnswer);
+    const result = await requestAiReview(kind, question, userAnswer);
     applyAiReviewResult(state.currentMode, question.id, result.verdict);
-    feedbackPanel.innerHTML = buildAiFeedbackHtml(state.currentMode, result);
+    feedbackPanel.innerHTML = buildAiFeedbackHtml(kind, result);
     feedbackPanel.classList.remove("hidden");
     questionMeta.textContent = buildQuestionMetaText(question);
     updateProgressText();
@@ -562,29 +1431,36 @@ async function handleAiAssist() {
   } finally {
     state.aiLoading = false;
     updateToolbarButtons();
-    configureManualReviewArea(state.currentMode);
+    configureManualReviewArea(kind);
   }
 }
 
 function handlePrimaryAction() {
-  if (!state.currentList[state.currentIndex]) return;
+  const question = state.currentList[state.currentIndex];
+  if (!question) return;
+  const kind = getQuestionKind(state.currentMode, question);
 
   if (isMemorizeMode()) {
     navigateRelative(1);
     return;
   }
 
-  if (isFillMode(state.currentMode)) {
+  if (isFillMode(kind)) {
     handleFillAction();
     return;
   }
 
-  if (state.currentMode === "single") {
+  if (kind === "single") {
     handleSingleChoiceAction();
     return;
   }
 
-  if (state.currentMode === "judge") {
+  if (kind === "multi") {
+    handleMultipleChoiceAction();
+    return;
+  }
+
+  if (kind === "judge") {
     handleJudgeAction();
     return;
   }
@@ -628,6 +1504,8 @@ function handleFillAction() {
     `;
     feedbackPanel.classList.remove("hidden");
     markAutoGradedProgress("fill", question.id, allCorrect);
+    questionMeta.textContent = buildQuestionMetaText(question);
+    updateProgressText();
     state.revealState = true;
     primaryAction.textContent = "进入下一题";
     renderNavigator();
@@ -641,6 +1519,7 @@ function handleFillAction() {
 function handleSingleChoiceAction() {
   const question = state.currentList[state.currentIndex];
   const selectedInput = questionBody.querySelector('input[name="singleChoice"]:checked');
+  const gradingMode = state.currentMode === "financeExam" ? "financeExam" : "single";
 
   if (!state.revealState) {
     if (!selectedInput) {
@@ -671,7 +1550,52 @@ function handleSingleChoiceAction() {
       </div>
     `;
     feedbackPanel.classList.remove("hidden");
-    markAutoGradedProgress("single", question.id, correct);
+    markAutoGradedProgress(gradingMode, question.id, correct);
+    questionMeta.textContent = buildQuestionMetaText(question);
+    updateProgressText();
+    state.revealState = true;
+    primaryAction.textContent = "进入下一题";
+    renderNavigator();
+    updateToolbarButtons();
+    return;
+  }
+
+  navigateRelative(1);
+}
+
+function handleMultipleChoiceAction() {
+  const question = state.currentList[state.currentIndex];
+  const selectedInputs = [...questionBody.querySelectorAll('input[name="multiChoice"]:checked')];
+
+  if (!state.revealState) {
+    if (!selectedInputs.length) {
+      feedbackPanel.innerHTML = "<h3>请先选择至少一个选项</h3>";
+      feedbackPanel.classList.remove("hidden");
+      return;
+    }
+
+    const selectedKeys = selectedInputs.map((input) => input.value).sort();
+    const answerKeys = [...(question.answer_keys || [])].sort();
+    const correct = selectedKeys.length === answerKeys.length && selectedKeys.every((key, index) => key === answerKeys[index]);
+
+    revealMultipleChoiceAnswer(question, selectedKeys);
+    feedbackPanel.innerHTML = `
+      <h3>${correct ? "本题答对了" : "本题答错了"}</h3>
+      <div class="feedback-list">
+        <div class="feedback-item ${correct ? "ok" : "bad"}">
+          <div><strong>你的选择</strong><span class="feedback-status ${correct ? "ok" : "bad"}">${correct ? "正确" : "不对"}</span></div>
+          <div><code>${escapeHtml(buildSelectedMultiChoiceText(question, selectedKeys) || "（空）")}</code></div>
+        </div>
+        <div class="feedback-item ok">
+          <div><strong>正确答案</strong></div>
+          <div><code>${escapeHtml(buildMultipleAnswerText(question))}</code></div>
+        </div>
+      </div>
+    `;
+    feedbackPanel.classList.remove("hidden");
+    markAutoGradedProgress(state.currentMode, question.id, correct);
+    questionMeta.textContent = buildQuestionMetaText(question);
+    updateProgressText();
     state.revealState = true;
     primaryAction.textContent = "进入下一题";
     renderNavigator();
@@ -685,6 +1609,7 @@ function handleSingleChoiceAction() {
 function handleJudgeAction() {
   const question = state.currentList[state.currentIndex];
   const selectedInput = questionBody.querySelector('input[name="judgeChoice"]:checked');
+  const gradingMode = state.currentMode === "financeExam" ? "financeExam" : "judge";
 
   if (!state.revealState) {
     if (!selectedInput) {
@@ -713,7 +1638,9 @@ function handleJudgeAction() {
       </div>
     `;
     feedbackPanel.classList.remove("hidden");
-    markAutoGradedProgress("judge", question.id, correct);
+    markAutoGradedProgress(gradingMode, question.id, correct);
+    questionMeta.textContent = buildQuestionMetaText(question);
+    updateProgressText();
     state.revealState = true;
     primaryAction.textContent = "进入下一题";
     renderNavigator();
@@ -726,8 +1653,11 @@ function handleJudgeAction() {
 
 function handleManualReviewAction() {
   const question = state.currentList[state.currentIndex];
-  if (state.currentMode === "program") {
+  const kind = getQuestionKind(state.currentMode, question);
+  if (kind === "program") {
     saveProgramDraft(question.id, programAnswer.value);
+  } else if (state.currentMode === "financeExam") {
+    saveFinanceExamDraft(question.id, programAnswer.value);
   }
 
   if (!state.revealState) {
@@ -747,12 +1677,22 @@ function handleManualReviewAction() {
 }
 
 function handleProgramInput() {
-  if (state.currentMode !== "program") return;
   const question = state.currentList[state.currentIndex];
   if (!question) return;
-  saveProgramDraft(question.id, programAnswer.value);
-  if (programAnswer.value.trim()) {
-    markProgramDone(question.id);
+  const kind = getQuestionKind(state.currentMode, question);
+  if (kind === "program") {
+    saveProgramDraft(question.id, programAnswer.value);
+    if (programAnswer.value.trim()) {
+      markProgramDone(question.id);
+    }
+    questionMeta.textContent = buildQuestionMetaText(question);
+    updateProgressText();
+    renderNavigator();
+    updateToolbarButtons();
+    return;
+  }
+  if (state.currentMode === "financeExam") {
+    saveFinanceExamDraft(question.id, programAnswer.value);
   }
   questionMeta.textContent = buildQuestionMetaText(question);
   updateProgressText();
@@ -919,7 +1859,7 @@ function buildAiFeedbackHtml(mode, result) {
   const wrongLabel = mode === "short" ? "明显偏差" : "出错的位置";
 
   return `
-    <h3>AI伴答：${escapeHtml(verdictLabel)}</h3>
+    <h3>${AI_MODEL_DISPLAY} · AI伴答：${escapeHtml(verdictLabel)}</h3>
     <div class="feedback-list">
       <div class="feedback-item ${statusClass}">
         <div><strong>AI判断</strong><span class="feedback-status ${statusClass}">${escapeHtml(verdictLabel)}</span></div>
@@ -1034,6 +1974,54 @@ function revealJudgeAnswer(question, selectedSourceKey) {
   });
 }
 
+function revealMultipleChoiceAnswer(question, selectedKeys) {
+  const selectedSet = new Set(selectedKeys);
+  const answerSet = new Set(question.answer_keys || []);
+
+  questionBody.querySelectorAll(".choice-option").forEach((optionEl) => {
+    const sourceKey = optionEl.dataset.sourceKey;
+    const input = optionEl.querySelector('input[name="multiChoice"]');
+    const tags = optionEl.querySelector(".choice-tags");
+
+    optionEl.classList.add("locked");
+    input.disabled = true;
+
+    if (answerSet.has(sourceKey)) {
+      optionEl.classList.add("correct");
+    } else if (selectedSet.has(sourceKey)) {
+      optionEl.classList.add("wrong");
+    }
+
+    const tagHtml = [];
+    if (selectedSet.has(sourceKey)) {
+      tagHtml.push('<span class="choice-tag selected">你的选择</span>');
+    }
+    if (answerSet.has(sourceKey)) {
+      tagHtml.push('<span class="choice-tag correct">正确答案</span>');
+    }
+    tags.innerHTML = tagHtml.join("");
+  });
+}
+
+function getStaticChoiceLabel(question, sourceKey) {
+  const index = (question.options || []).findIndex((item) => item.key === sourceKey);
+  return CHOICE_DISPLAY_LABELS[index] || sourceKey;
+}
+
+function buildMultipleAnswerText(question) {
+  return (question.answer_keys || []).map((key) => {
+    const option = (question.options || []).find((item) => item.key === key);
+    return `${getStaticChoiceLabel(question, key)}. ${option?.text || ""}`;
+  }).join("；");
+}
+
+function buildSelectedMultiChoiceText(question, selectedKeys) {
+  return selectedKeys.map((key) => {
+    const option = (question.options || []).find((item) => item.key === key);
+    return `${getStaticChoiceLabel(question, key)}. ${option?.text || ""}`;
+  }).join("；");
+}
+
 function navigateRelative(delta) {
   if (state.currentList.length === 0) return;
 
@@ -1042,6 +2030,15 @@ function navigateRelative(delta) {
   const previousIndex = state.currentIndex;
 
   if (!isSubsetMode()) {
+    if (state.currentMode === "financeExam") {
+      if (delta > 0 && state.currentIndex >= state.currentList.length - 1) {
+        renderFinanceExamCompletionSummary();
+        return;
+      }
+      state.currentIndex = Math.max(0, Math.min(state.currentIndex + delta, state.currentList.length - 1));
+      renderCurrentQuestion();
+      return;
+    }
     state.currentIndex = normalizeIndex(state.currentIndex + delta, state.currentList.length);
     renderCurrentQuestion();
     return;
@@ -1122,6 +2119,12 @@ function renderNavigator() {
 }
 
 function buildNavigatorSummary(list) {
+  if (state.currentMode === "financeExam") {
+    const session = getActiveFinanceExamSession();
+    const stats = getFinanceExamSessionStats(session);
+    return `客观 ${stats.objectiveScore}/${stats.objectiveTotal} · 主观已做 ${stats.subjectiveDone}/${stats.subjectiveTotal} · 标记 ${stats.marked}`;
+  }
+
   const allQuestions = getQuestionsByMode(state.currentMode);
   let pending = 0;
   let wrong = 0;
@@ -1145,45 +2148,57 @@ function buildNavigatorSummary(list) {
   return `未做 ${pending} · 正确 ${correct} · 错题 ${wrong} · 标记 ${marked}`;
 }
 
-function getQuestionStatus(mode, question) {
+function getQuestionStatus(mode, question, progressData = progressStore) {
   if (!question) {
     return { key: "pending", label: "未做" };
   }
 
-  if (isFillMode(mode)) {
-    const result = progressStore.fillResults?.[question.id];
+  if (mode === "financeExam") {
+    const result = progressData.financeExamResults?.[question.id];
     if (result === "correct") return { key: "correct", label: "正确" };
-    if (result === "wrong" || progressStore.fillWrongIds.includes(question.id)) {
+    if (result === "wrong" || progressData.financeExamWrongIds.includes(question.id)) {
+      return { key: "wrong", label: "错题" };
+    }
+    if (progressData.financeExamDoneIds.includes(question.id)) {
+      return { key: "done", label: "已做" };
+    }
+    return { key: "pending", label: "未做" };
+  }
+
+  if (isFillMode(mode)) {
+    const result = progressData.fillResults?.[question.id];
+    if (result === "correct") return { key: "correct", label: "正确" };
+    if (result === "wrong" || progressData.fillWrongIds.includes(question.id)) {
       return { key: "wrong", label: "错题" };
     }
     return { key: "pending", label: "未做" };
   }
 
   if (mode === "single") {
-    const result = progressStore.singleResults?.[question.id];
+    const result = progressData.singleResults?.[question.id];
     if (result === "correct") return { key: "correct", label: "正确" };
-    if (result === "wrong" || progressStore.singleWrongIds.includes(question.id)) {
+    if (result === "wrong" || progressData.singleWrongIds.includes(question.id)) {
       return { key: "wrong", label: "错题" };
     }
     return { key: "pending", label: "未做" };
   }
 
   if (mode === "judge") {
-    const result = progressStore.judgeResults?.[question.id];
+    const result = progressData.judgeResults?.[question.id];
     if (result === "correct") return { key: "correct", label: "正确" };
-    if (result === "wrong" || progressStore.judgeWrongIds.includes(question.id)) {
+    if (result === "wrong" || progressData.judgeWrongIds.includes(question.id)) {
       return { key: "wrong", label: "错题" };
     }
     return { key: "pending", label: "未做" };
   }
 
   if (isManualReviewMode(mode)) {
-    if (getWrongSet(mode).has(question.id)) {
+    if (getWrongSet(mode, progressData).has(question.id)) {
       return { key: "wrong", label: "错题" };
     }
 
-    const hasDraft = mode === "program" && Boolean(progressStore.programAnswers?.[question.id]?.trim());
-    const doneSet = getDoneSet(mode);
+    const hasDraft = mode === "program" && Boolean(progressData.programAnswers?.[question.id]?.trim());
+    const doneSet = getDoneSet(mode, progressData);
     const done = doneSet.has(question.id) || hasDraft;
     if (done) {
       return { key: "done", label: "已做" };
@@ -1275,14 +2290,18 @@ function toggleOptionShuffle() {
 }
 
 function updateToolbarButtons() {
+  const inFinanceExam = state.currentMode === "financeExam";
   wrongOnlyButton.textContent = state.wrongOnly ? "当前：错题模式" : "错题再练";
   unfinishedOnlyButton.textContent = state.unfinishedOnly ? "当前：未做题模式" : "只看未做题";
-  allQuestionsButton.classList.toggle("hidden", !state.wrongOnly && !state.unfinishedOnly);
-  questionShuffleWrap.classList.toggle("hidden", !state.currentMode);
-  memorizeModeWrap.classList.toggle("hidden", !state.currentMode);
-  shuffleToggleWrap.classList.toggle("hidden", state.currentMode !== "single");
+  wrongOnlyButton.classList.toggle("hidden", inFinanceExam || !state.currentMode);
+  unfinishedOnlyButton.classList.toggle("hidden", inFinanceExam || !state.currentMode);
+  allQuestionsButton.classList.toggle("hidden", inFinanceExam || (!state.wrongOnly && !state.unfinishedOnly));
+  questionShuffleWrap.classList.toggle("hidden", !state.currentMode || inFinanceExam);
+  memorizeModeWrap.classList.toggle("hidden", !state.currentMode || inFinanceExam);
+  shuffleToggleWrap.classList.toggle("hidden", state.currentMode !== "single" || inFinanceExam);
+  newExamSessionButton?.classList.toggle("hidden", !inFinanceExam);
   primaryAction.disabled = state.aiLoading || !state.currentList[state.currentIndex];
-  prevAction.disabled = state.aiLoading || state.currentList.length <= 1;
+  prevAction.disabled = state.aiLoading || state.currentList.length <= 1 || (inFinanceExam && state.currentIndex === 0);
   markQuestionButton.disabled = state.aiLoading || !state.currentList[state.currentIndex];
   const question = state.currentList[state.currentIndex];
   const isMarked = question && state.currentMode ? isQuestionMarked(state.currentMode, question.id) : false;
@@ -1304,10 +2323,19 @@ function updateToolbarButtons() {
 
 function updateProgressText() {
   if (!state.currentMode) return;
-  const modeCount = getQuestionsByMode(state.currentMode).length;
-  const pendingCount = getQuestionsByMode(state.currentMode)
+  if (state.currentMode === "financeExam") {
+    const session = getActiveFinanceExamSession();
+    const stats = getFinanceExamSessionStats(session);
+    const current = state.currentList.length === 0 ? 0 : state.currentIndex + 1;
+    progressText.textContent = `第 ${current} / ${stats.total} 题 · 客观得分 ${stats.objectiveScore}/${stats.objectiveTotal} · 主观已做 ${stats.subjectiveDone}/${stats.subjectiveTotal} · 标记 ${stats.marked}`;
+    return;
+  }
+  const modeQuestions = getQuestionsByMode(state.currentMode);
+  const modeCount = modeQuestions.length;
+  const pendingCount = modeQuestions
     .filter((question) => getQuestionStatus(state.currentMode, question).key === "pending").length;
-  const wrongCount = getWrongSet(state.currentMode).size;
+  const wrongCount = modeQuestions
+    .filter((question) => getQuestionStatus(state.currentMode, question).key === "wrong").length;
   const markedCount = getMarkedSet(state.currentMode).size;
   const current = state.currentList.length === 0 ? 0 : state.currentIndex + 1;
   const memorizeLabel = isMemorizeMode() ? " · 背题模式" : "";
@@ -1322,7 +2350,7 @@ function getOrderedSingleChoiceOptions(question) {
   const optionMap = new Map(question.options.map((item) => [item.key, item]));
   let orderedKeys = question.options.map((item) => item.key);
 
-  if (progressStore.shuffleChoiceOptions) {
+  if (state.currentMode !== "financeExam" && progressStore.shuffleChoiceOptions) {
     if (!state.singleChoiceOrders[question.id]) {
       state.singleChoiceOrders[question.id] = shuffleArray([...orderedKeys]);
     }
@@ -1337,6 +2365,9 @@ function getOrderedSingleChoiceOptions(question) {
 }
 
 function applyQuestionOrder(mode, list) {
+  if (mode === "financeExam") {
+    return list;
+  }
   if (!progressStore.shuffleQuestionOrder) {
     return list;
   }
@@ -1379,7 +2410,12 @@ function markAutoGradedProgress(mode, id, allCorrect) {
   }
   saveWrongSet(mode, wrongSet);
 
-  if (mode === "fill") {
+  if (mode === "financeExam") {
+    progressStore.financeExamResults[id] = allCorrect ? "correct" : "wrong";
+    if (!progressStore.financeExamDoneIds.includes(id)) {
+      progressStore.financeExamDoneIds.push(id);
+    }
+  } else if (mode === "fill") {
     progressStore.fillResults[id] = allCorrect ? "correct" : "wrong";
   } else if (mode === "single") {
     progressStore.singleResults[id] = allCorrect ? "correct" : "wrong";
@@ -1398,6 +2434,14 @@ function markProgramDone(id) {
 }
 
 function markManualReviewDone(mode, id) {
+  if (mode === "financeExam") {
+    if (!progressStore.financeExamDoneIds.includes(id)) {
+      progressStore.financeExamDoneIds.push(id);
+      saveProgress();
+    }
+    return;
+  }
+
   if (mode === "program") {
     markProgramDone(id);
     return;
@@ -1413,13 +2457,19 @@ function markManualReviewDone(mode, id) {
 function saveCurrentQuestionState() {
   const question = state.currentList[state.currentIndex];
   if (!question) return;
+  const kind = getQuestionKind(state.currentMode, question);
 
-  if (state.currentMode === "program" && !isMemorizeMode()) {
+  if (kind === "program" && !isMemorizeMode()) {
     const draft = programAnswer.value || "";
     saveProgramDraft(question.id, draft);
     if (draft.trim()) {
       markProgramDone(question.id);
     }
+    return;
+  }
+
+  if (state.currentMode === "financeExam" && ["short", "calc", "business"].includes(kind)) {
+    saveFinanceExamDraft(question.id, programAnswer.value || "");
   }
 }
 
@@ -1458,59 +2508,148 @@ function ensureProgressDefaults(raw) {
     singleMarkedIds: Array.isArray(raw?.singleMarkedIds) ? raw.singleMarkedIds : [],
     judgeMarkedIds: Array.isArray(raw?.judgeMarkedIds) ? raw.judgeMarkedIds : [],
     programMarkedIds: Array.isArray(raw?.programMarkedIds) ? raw.programMarkedIds : [],
+    financeExamWrongIds: Array.isArray(raw?.financeExamWrongIds) ? raw.financeExamWrongIds : [],
+    financeExamMarkedIds: Array.isArray(raw?.financeExamMarkedIds) ? raw.financeExamMarkedIds : [],
     fillResults: raw?.fillResults && typeof raw.fillResults === "object" ? raw.fillResults : {},
     singleResults: raw?.singleResults && typeof raw.singleResults === "object" ? raw.singleResults : {},
     judgeResults: raw?.judgeResults && typeof raw.judgeResults === "object" ? raw.judgeResults : {},
+    financeExamResults: raw?.financeExamResults && typeof raw.financeExamResults === "object" ? raw.financeExamResults : {},
     shortDoneIds: Array.isArray(raw?.shortDoneIds) ? raw.shortDoneIds : [],
     calcDoneIds: Array.isArray(raw?.calcDoneIds) ? raw.calcDoneIds : [],
     programDoneIds: Array.isArray(raw?.programDoneIds) ? raw.programDoneIds : [],
+    financeExamDoneIds: Array.isArray(raw?.financeExamDoneIds) ? raw.financeExamDoneIds : [],
     programAnswers: raw?.programAnswers && typeof raw.programAnswers === "object" ? raw.programAnswers : {},
+    financeExamAnswerDrafts: raw?.financeExamAnswerDrafts && typeof raw.financeExamAnswerDrafts === "object" ? raw.financeExamAnswerDrafts : {},
+    financeExamSessions: Array.isArray(raw?.financeExamSessions)
+      ? raw.financeExamSessions
+        .filter((item) => item?.id && Array.isArray(item?.questions))
+        .slice(0, 3)
+      : [],
+    financeExamCurrentSessionId: String(raw?.financeExamCurrentSessionId || ""),
     shuffleQuestionOrder: typeof raw?.shuffleQuestionOrder === "boolean" ? raw.shuffleQuestionOrder : false,
     shuffleChoiceOptions: typeof raw?.shuffleChoiceOptions === "boolean" ? raw.shuffleChoiceOptions : false,
     memorizeMode: typeof raw?.memorizeMode === "boolean" ? raw.memorizeMode : false,
     lastAiPraise: raw?.lastAiPraise && typeof raw.lastAiPraise === "object" ? raw.lastAiPraise : {},
+    homeChatHistory: Array.isArray(raw?.homeChatHistory)
+      ? raw.homeChatHistory
+        .map((item) => ({
+          role: item?.role === "user" ? "user" : "assistant",
+          content: String(item?.content || "").trim(),
+          createdAt: item?.createdAt || "",
+        }))
+        .filter((item) => item.content)
+      : [],
+    lastMode: ROUTABLE_MODES.includes(raw?.lastMode) ? raw.lastMode : "",
   };
 }
 
-function loadProgress() {
+function loadLegacyProgress() {
   try {
-    return JSON.parse(localStorage.getItem(storageKey)) || {};
+    return JSON.parse(localStorage.getItem(LEGACY_PROGRESS_STORAGE_KEY)) || {};
   } catch {
     return {};
   }
 }
 
+function loadUserCenterStore() {
+  try {
+    return JSON.parse(localStorage.getItem(USER_CENTER_STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function ensureUserCenterDefaults(raw, legacyRaw) {
+  if (Array.isArray(raw?.profiles) && raw.profiles.length) {
+    const profiles = raw.profiles.map((profile, index) => ({
+      id: String(profile?.id || `profile-${index + 1}`),
+      name: String(profile?.name || `练习存档 ${index + 1}`).trim(),
+      createdAt: profile?.createdAt || new Date().toISOString(),
+      updatedAt: profile?.updatedAt || profile?.createdAt || new Date().toISOString(),
+      progress: ensureProgressDefaults(profile?.progress || {}),
+    }));
+    const activeProfileId = profiles.some((item) => item.id === raw?.activeProfileId)
+      ? raw.activeProfileId
+      : profiles[0].id;
+    return { activeProfileId, profiles };
+  }
+
+  const migratedProgress = ensureProgressDefaults(legacyRaw || {});
+  const firstProfile = createProfileRecord("默认练习", migratedProgress);
+  return {
+    activeProfileId: firstProfile.id,
+    profiles: [firstProfile],
+  };
+}
+
+function createProfileRecord(name, seedProgress = {}) {
+  const now = new Date().toISOString();
+  return {
+    id: `profile-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name: String(name || "默认练习").trim() || "默认练习",
+    createdAt: now,
+    updatedAt: now,
+    progress: ensureProgressDefaults(seedProgress),
+  };
+}
+
+function getActiveProfile() {
+  const matched = userCenterStore.profiles.find((profile) => profile.id === userCenterStore.activeProfileId);
+  return matched || userCenterStore.profiles[0];
+}
+
+function saveUserCenterStore() {
+  localStorage.setItem(USER_CENTER_STORAGE_KEY, JSON.stringify(userCenterStore));
+}
+
 function saveProgress() {
-  localStorage.setItem(storageKey, JSON.stringify(progressStore));
+  const activeProfile = getActiveProfile();
+  if (activeProfile) {
+    activeProfile.progress = progressStore;
+    activeProfile.updatedAt = new Date().toISOString();
+  }
+  saveUserCenterStore();
+  if (state.data) {
+    renderHomeDashboard();
+    renderUserCenter();
+    if (homeView.classList.contains("active")) {
+      renderHomeChatMessages();
+    }
+  }
 }
 
-function getWrongSet(mode) {
-  if (isFillMode(mode)) return new Set(progressStore.fillWrongIds);
-  if (mode === "short") return new Set(progressStore.shortWrongIds);
-  if (mode === "calc") return new Set(progressStore.calcWrongIds);
-  if (mode === "single") return new Set(progressStore.singleWrongIds);
-  if (mode === "judge") return new Set(progressStore.judgeWrongIds);
-  return new Set(progressStore.programWrongIds);
+function getWrongSet(mode, progressData = progressStore) {
+  if (mode === "financeExam") return new Set(progressData.financeExamWrongIds);
+  if (isFillMode(mode)) return new Set(progressData.fillWrongIds);
+  if (mode === "short") return new Set(progressData.shortWrongIds);
+  if (mode === "calc") return new Set(progressData.calcWrongIds);
+  if (mode === "single") return new Set(progressData.singleWrongIds);
+  if (mode === "judge") return new Set(progressData.judgeWrongIds);
+  return new Set(progressData.programWrongIds);
 }
 
-function getMarkedSet(mode) {
-  if (isFillMode(mode)) return new Set(progressStore.fillMarkedIds);
-  if (mode === "short") return new Set(progressStore.shortMarkedIds);
-  if (mode === "calc") return new Set(progressStore.calcMarkedIds);
-  if (mode === "single") return new Set(progressStore.singleMarkedIds);
-  if (mode === "judge") return new Set(progressStore.judgeMarkedIds);
-  return new Set(progressStore.programMarkedIds);
+function getMarkedSet(mode, progressData = progressStore) {
+  if (mode === "financeExam") return new Set(progressData.financeExamMarkedIds);
+  if (isFillMode(mode)) return new Set(progressData.fillMarkedIds);
+  if (mode === "short") return new Set(progressData.shortMarkedIds);
+  if (mode === "calc") return new Set(progressData.calcMarkedIds);
+  if (mode === "single") return new Set(progressData.singleMarkedIds);
+  if (mode === "judge") return new Set(progressData.judgeMarkedIds);
+  return new Set(progressData.programMarkedIds);
 }
 
-function getDoneSet(mode) {
-  if (mode === "short") return new Set(progressStore.shortDoneIds);
-  if (mode === "calc") return new Set(progressStore.calcDoneIds);
-  if (mode === "program") return new Set(progressStore.programDoneIds);
+function getDoneSet(mode, progressData = progressStore) {
+  if (mode === "financeExam") return new Set(progressData.financeExamDoneIds);
+  if (mode === "short") return new Set(progressData.shortDoneIds);
+  if (mode === "calc") return new Set(progressData.calcDoneIds);
+  if (mode === "program") return new Set(progressData.programDoneIds);
   return new Set();
 }
 
 function saveWrongSet(mode, wrongSet) {
-  if (isFillMode(mode)) {
+  if (mode === "financeExam") {
+    progressStore.financeExamWrongIds = [...wrongSet];
+  } else if (isFillMode(mode)) {
     progressStore.fillWrongIds = [...wrongSet];
   } else if (mode === "short") {
     progressStore.shortWrongIds = [...wrongSet];
@@ -1527,7 +2666,9 @@ function saveWrongSet(mode, wrongSet) {
 }
 
 function saveMarkedSet(mode, markedSet) {
-  if (isFillMode(mode)) {
+  if (mode === "financeExam") {
+    progressStore.financeExamMarkedIds = [...markedSet];
+  } else if (isFillMode(mode)) {
     progressStore.fillMarkedIds = [...markedSet];
   } else if (mode === "short") {
     progressStore.shortMarkedIds = [...markedSet];
@@ -1551,15 +2692,18 @@ function isFillMode(mode) {
   return mode === "fill" || mode === "codefill";
 }
 
-function isManualReviewMode(mode) {
-  return mode === "program" || mode === "short" || mode === "calc";
+function isManualReviewMode(mode, question = state.currentList[state.currentIndex]) {
+  const kind = getQuestionKind(mode, question);
+  return kind === "program" || kind === "short" || kind === "calc" || kind === "business";
 }
 
-function supportsAiCompanion(mode) {
-  return mode === "short" || mode === "calc";
+function supportsAiCompanion(mode, question = state.currentList[state.currentIndex]) {
+  const kind = getQuestionKind(mode, question);
+  return kind === "short" || kind === "calc";
 }
 
 function isMemorizeMode() {
+  if (state.currentMode === "financeExam") return false;
   return !!progressStore.memorizeMode;
 }
 
@@ -1580,6 +2724,22 @@ function saveProgramDraft(id, value) {
   progressStore.programAnswers ||= {};
   progressStore.programAnswers[id] = value;
   saveProgress();
+}
+
+function saveFinanceExamDraft(id, value) {
+  progressStore.financeExamAnswerDrafts ||= {};
+  progressStore.financeExamAnswerDrafts[id] = value;
+  saveProgress();
+}
+
+function getManualDraftValue(question, kind) {
+  if (kind === "program") {
+    return progressStore.programAnswers?.[question.id] || "";
+  }
+  if (state.currentMode === "financeExam") {
+    return progressStore.financeExamAnswerDrafts?.[question.id] || "";
+  }
+  return "";
 }
 
 function htmlToReadableText(html) {
@@ -1612,8 +2772,9 @@ function escapeHtml(value) {
 }
 
 function applyRouteFromHash() {
-  const mode = location.hash.replace("#", "");
-  if (mode === "codefill" || mode === "fill" || mode === "short" || mode === "calc" || mode === "single" || mode === "judge" || mode === "program") {
+  const rawMode = location.hash.replace("#", "");
+  const mode = rawMode === "finance-exam" ? "financeExam" : rawMode;
+  if (ROUTABLE_MODES.includes(mode)) {
     if (!state.data) return;
     if (state.currentMode !== mode || !practiceView.classList.contains("active")) {
       startMode(mode);

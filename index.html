@@ -3,162 +3,358 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>刷题中心</title>
-  <link rel="stylesheet" href="./styles.css?v=20260705-1938">
+  <title>学术卓越练习平台</title>
+  <link rel="stylesheet" href="./styles.css?v=20260705-1743">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div class="brand-copy">
-        <span class="eyebrow">Smart Practice Studio</span>
-        <h1>刷题中心</h1>
-        <p class="subtitle">把题目拆成两门课：中级财务、Python。点进去就能直接刷。</p>
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="app-brand-block">
+        <div class="app-brand">学术卓越练习平台</div>
+        <div class="app-brand-sub">专项练习中心</div>
       </div>
-      <button id="homeShortcut" class="ghost-button hidden" type="button">返回首页</button>
+
+      <nav class="app-nav">
+        <a class="app-nav-link active" href="javascript:void(0)">学习仪表盘</a>
+        <a id="headerFinanceExamLink" class="app-nav-link" href="javascript:void(0)">模拟考试</a>
+        <a class="app-nav-link" href="javascript:void(0)">错题复盘</a>
+        <a class="app-nav-link" href="javascript:void(0)">学习资源</a>
+      </nav>
+
+      <div class="app-header-actions">
+        <span class="app-icon-chip">专注练习</span>
+        <button id="homeShortcut" class="ghost-button hidden" type="button">返回首页</button>
+      </div>
     </header>
 
-    <main>
+  <div class="app-shell">
+    <main class="page-main">
       <section id="homeView" class="view active">
-        <div class="hero-card hero-card-home">
-          <div class="hero-copy">
-            <span class="hero-badge">课程入口</span>
-            <h2>按课程进入，界面更清楚</h2>
-            <p>中级财务集中主观题，Python 集中程序题和客观题，刷题路径更直观。</p>
-            <div class="hero-stat-row">
-              <div class="hero-stat">
-                <strong>2</strong>
-                <span>课程板块</span>
-              </div>
-              <div class="hero-stat">
-                <strong>7</strong>
-                <span>刷题入口</span>
-              </div>
-              <div class="hero-stat">
-                <strong>AI</strong>
-                <span>主观题伴答</span>
-              </div>
-            </div>
-          </div>
-          <div class="hero-side">
-            <div class="feature-card">
-              <span class="feature-kicker">当前支持</span>
-              <ul class="feature-list">
-                <li>填空、单选、判断自动判对错</li>
-                <li>简答题、计算题支持 AI 伴答</li>
-                <li>错题、未做题、标记题都能反复刷</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <section class="academy-hero">
+          <div class="academy-hero-icon">📘</div>
+          <h1>学术卓越：专项练习中心</h1>
+          <p>按课程直接进入练习。中级财务专注主观题，Python 专注程序与客观题，所有进度都会自动记录。</p>
+        </section>
 
-        <div class="course-sections">
-          <section class="course-card course-card-finance">
-            <div class="course-header">
+        <section class="academy-summary-grid">
+          <article class="academy-summary-card">
+            <span class="academy-summary-label">课程板块</span>
+            <strong>2</strong>
+            <p>中级财务 / Python</p>
+          </article>
+          <article class="academy-summary-card">
+            <span class="academy-summary-label">已完成题目</span>
+            <strong id="heroDoneCount">0</strong>
+            <p id="heroDoneMeta">刚开始也没关系，直接点进去刷</p>
+          </article>
+          <article class="academy-summary-card">
+            <span class="academy-summary-label">当前错题</span>
+            <strong id="heroWrongCount">0</strong>
+            <p id="heroWrongMeta">错题会自动沉淀，方便反复复习</p>
+          </article>
+          <article class="academy-summary-card">
+            <span class="academy-summary-label">AI 伴答</span>
+            <strong id="aiModelDisplay">ChatGPT 5.4</strong>
+            <p>简答题、计算题提交后可直接智能点评</p>
+          </article>
+        </section>
+
+        <div class="academy-course-grid">
+          <section class="academy-course-panel finance">
+            <div class="academy-course-head">
               <div>
-                <span class="course-kicker">中级财务</span>
-                <h3>主观题专区</h3>
-                <p>简答题、计算题分开刷，支持背题模式和 AI 辅助点评。</p>
+                <span class="academy-course-tag">中级财务</span>
+                <h2>主观题训练区</h2>
+                <p>简答题、计算题和模拟考试都在这里，模拟卷严格按提纲结构来抽题。</p>
               </div>
-              <span class="course-count">2 个入口</span>
+              <div class="academy-course-meta">
+                <span>3 个入口</span>
+                <strong id="courseFinanceProgress">0 / 0</strong>
+              </div>
             </div>
-            <div class="course-tag-row">
-              <span class="course-tag">简答题</span>
-              <span class="course-tag">计算题</span>
-              <span class="course-tag">AI伴答</span>
+            <div class="academy-pills">
+              <span class="academy-pill">模拟考试</span>
+              <span class="academy-pill">简答题</span>
+              <span class="academy-pill">计算题</span>
+              <span class="academy-pill">AI伴答</span>
             </div>
-            <div class="course-grid course-grid-compact">
-              <button class="mode-card" type="button" data-mode="short">
-                <span class="mode-topline">中财 · 01</span>
-                <span class="mode-title">简答题</span>
-                <span class="mode-desc">回答意思到位就行，提交后让 AI 帮你判断。</span>
-                <span class="mode-link">进入刷题</span>
+            <div class="academy-mode-grid two-cols">
+              <button class="academy-mode-card academy-mode-card-featured academy-mode-card-exam" type="button" data-mode="financeExam">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">期末模拟卷</span>
+                  <span class="academy-mode-state" data-mode-status="financeExam">待开始</span>
+                </div>
+                <h3>中财模拟考试</h3>
+                <p>按提纲出一整套：单选 / 多选 / 判断按知识点抽，简答 / 计算 / 业务核算直接从原题抽。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="financeExam">0 / 0</span>
+                  <span data-mode-progress-rate="financeExam">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="financeExam"></span></div>
+                <span class="academy-mode-action" data-mode-action="financeExam">开始模拟</span>
               </button>
-              <button class="mode-card" type="button" data-mode="calc">
-                <span class="mode-topline">中财 · 02</span>
-                <span class="mode-title">计算题</span>
-                <span class="mode-desc">写过程即可，AI 会看公式、口径和步骤是否合理。</span>
-                <span class="mode-link">进入刷题</span>
+              <button class="academy-mode-card" type="button" data-mode="short">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">论述分析</span>
+                  <span class="academy-mode-state" data-mode-status="short">待开始</span>
+                </div>
+                <h3>简答题</h3>
+                <p>按意思作答即可，AI 会判断关键点是否到位。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="short">0 / 0</span>
+                  <span data-mode-progress-rate="short">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="short"></span></div>
+                <span class="academy-mode-action" data-mode-action="short">开始练习</span>
+              </button>
+              <button class="academy-mode-card" type="button" data-mode="calc">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">数理推演</span>
+                  <span class="academy-mode-state" data-mode-status="calc">待开始</span>
+                </div>
+                <h3>计算题</h3>
+                <p>写过程就行，AI 会看公式、步骤和口径有没有问题。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="calc">0 / 0</span>
+                  <span data-mode-progress-rate="calc">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="calc"></span></div>
+                <span class="academy-mode-action" data-mode-action="calc">开始练习</span>
               </button>
             </div>
           </section>
 
-          <section class="course-card course-card-python">
-            <div class="course-header">
+          <section class="academy-course-panel python">
+            <div class="academy-course-head">
               <div>
-                <span class="course-kicker">Python</span>
-                <h3>程序刷题专区</h3>
-                <p>程序填空、基础填空、单选、判断、程序题，一次刷全。</p>
+                <span class="academy-course-tag">Python</span>
+                <h2>程序刷题专区</h2>
+                <p>程序填空、基础填空、单选、判断、程序题，一次进入集中刷。</p>
               </div>
-              <span class="course-count">5 个入口</span>
+              <div class="academy-course-meta">
+                <span>5 个入口</span>
+                <strong id="coursePythonProgress">0 / 0</strong>
+              </div>
             </div>
-            <div class="course-tag-row">
-              <span class="course-tag">程序填空</span>
-              <span class="course-tag">客观题</span>
-              <span class="course-tag">程序题</span>
+            <div class="academy-pills">
+              <span class="academy-pill">程序填空</span>
+              <span class="academy-pill">客观题</span>
+              <span class="academy-pill">程序题</span>
             </div>
-            <div class="course-grid">
-              <button class="mode-card" type="button" data-mode="codefill">
-                <span class="mode-topline">Python · 01</span>
-                <span class="mode-title">程序填空</span>
-                <span class="mode-desc">代码里的空自己先填，再看正确答案和结果。</span>
-                <span class="mode-link">进入刷题</span>
+            <div class="academy-mode-grid">
+              <button class="academy-mode-card" type="button" data-mode="codefill">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">代码阅读</span>
+                  <span class="academy-mode-state" data-mode-status="codefill">待开始</span>
+                </div>
+                <h3>程序填空</h3>
+                <p>先补全代码，再看正确写法和本题结果。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="codefill">0 / 0</span>
+                  <span data-mode-progress-rate="codefill">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="codefill"></span></div>
+                <span class="academy-mode-action" data-mode-action="codefill">开始练习</span>
               </button>
-              <button class="mode-card" type="button" data-mode="fill">
-                <span class="mode-topline">Python · 02</span>
-                <span class="mode-title">填空题</span>
-                <span class="mode-desc">普通知识点填空，支持一题多种正确写法。</span>
-                <span class="mode-link">进入刷题</span>
+              <button class="academy-mode-card" type="button" data-mode="fill">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">基础知识</span>
+                  <span class="academy-mode-state" data-mode-status="fill">待开始</span>
+                </div>
+                <h3>填空题</h3>
+                <p>普通填空题，支持一题多种正确写法。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="fill">0 / 0</span>
+                  <span data-mode-progress-rate="fill">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="fill"></span></div>
+                <span class="academy-mode-action" data-mode-action="fill">开始练习</span>
               </button>
-              <button class="mode-card" type="button" data-mode="single">
-                <span class="mode-topline">Python · 03</span>
-                <span class="mode-title">单选题</span>
-                <span class="mode-desc">自动判分，支持打乱选项和题目顺序。</span>
-                <span class="mode-link">进入刷题</span>
+              <button class="academy-mode-card" type="button" data-mode="single">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">客观评估</span>
+                  <span class="academy-mode-state" data-mode-status="single">待开始</span>
+                </div>
+                <h3>单选题</h3>
+                <p>自动判对错，支持打乱选项和随机题序。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="single">0 / 0</span>
+                  <span data-mode-progress-rate="single">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="single"></span></div>
+                <span class="academy-mode-action" data-mode-action="single">开始练习</span>
               </button>
-              <button class="mode-card" type="button" data-mode="judge">
-                <span class="mode-topline">Python · 04</span>
-                <span class="mode-title">判断题</span>
-                <span class="mode-desc">快速判断对错，适合刷基础概念和细节。</span>
-                <span class="mode-link">进入刷题</span>
+              <button class="academy-mode-card" type="button" data-mode="judge">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">概念明辨</span>
+                  <span class="academy-mode-state" data-mode-status="judge">待开始</span>
+                </div>
+                <h3>判断题</h3>
+                <p>快速刷基础概念和容易混淆的知识点。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="judge">0 / 0</span>
+                  <span data-mode-progress-rate="judge">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="judge"></span></div>
+                <span class="academy-mode-action" data-mode-action="judge">开始练习</span>
               </button>
-              <button class="mode-card" type="button" data-mode="program">
-                <span class="mode-topline">Python · 05</span>
-                <span class="mode-title">程序题</span>
-                <span class="mode-desc">先自己完整写程序，再对照参考答案和思路。</span>
-                <span class="mode-link">进入刷题</span>
+              <button class="academy-mode-card academy-mode-card-featured" type="button" data-mode="program">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">综合能力</span>
+                  <span class="academy-mode-state" data-mode-status="program">待开始</span>
+                </div>
+                <h3>程序题</h3>
+                <p>先完整写程序，再对照参考答案和思路。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="program">0 / 0</span>
+                  <span data-mode-progress-rate="program">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="program"></span></div>
+                <span class="academy-mode-action" data-mode-action="program">开始练习</span>
               </button>
             </div>
           </section>
         </div>
+
+        <section class="academy-bottom-stats">
+          <div class="academy-bottom-stat">
+            <span>今日学习状态</span>
+            <strong id="heroCourseMeta">已就绪</strong>
+          </div>
+          <div class="academy-bottom-stat">
+            <span>整体完成率</span>
+            <strong id="heroCompletionRate">0%</strong>
+          </div>
+          <div class="academy-bottom-stat">
+            <span>推荐动作</span>
+            <strong id="heroSuggestion">从任意板块直接开始</strong>
+          </div>
+        </section>
+
+        <section class="academy-side-grid">
+          <article class="user-center-panel">
+            <div class="panel-head">
+              <div>
+                <span class="academy-summary-label">用户中心</span>
+                <h3>练习存档</h3>
+                <p>每个存档都有独立做题进度和独立聊天记录，你可以新开一套，也可以继续之前的练习。</p>
+              </div>
+              <span class="user-center-badge">本地存档</span>
+            </div>
+
+            <div class="active-profile-card">
+              <div class="active-profile-copy">
+                <span class="active-profile-label">当前存档</span>
+                <strong id="activeProfileName">默认练习</strong>
+                <p id="activeProfileMeta">0 / 0 已完成 · 0 道错题</p>
+              </div>
+              <div class="active-profile-actions">
+                <button id="continueProfileButton" class="primary-button" type="button">继续当前练习</button>
+                <button id="newProfileQuickButton" class="ghost-button" type="button">新开练习</button>
+              </div>
+            </div>
+
+            <div class="profile-create-row">
+              <input id="profileNameInput" type="text" placeholder="输入新存档名称，例如：期末冲刺 / 第二轮复习">
+              <button id="createProfileButton" class="primary-button" type="button">创建存档</button>
+            </div>
+
+            <div id="profileList" class="profile-list"></div>
+          </article>
+
+          <article class="study-chat-panel">
+            <div class="panel-head">
+              <div>
+                <span class="academy-summary-label">ChatGPT 5.4</span>
+                <h3>学习搭子</h3>
+                <p>可以直接聊天，也可以让我根据你当前存档的做题进度给出复习建议、补弱路线和刷题顺序。</p>
+              </div>
+              <span class="chat-model-badge">模型：ChatGPT 5.4</span>
+            </div>
+
+            <div class="chat-toolbar">
+              <button id="chatSuggestButton" class="ghost-button" type="button">根据进度给建议</button>
+              <button id="chatClearButton" class="ghost-button" type="button">清空聊天</button>
+            </div>
+
+            <div class="chat-context-row">
+              <span>当前基于存档：</span>
+              <strong id="chatProfileName">默认练习</strong>
+            </div>
+
+            <div id="homeChatMessages" class="home-chat-messages"></div>
+
+            <div class="chat-input-card">
+              <label class="sr-only" for="homeChatInput">和 ChatGPT 5.4 对话</label>
+              <textarea id="homeChatInput" placeholder="例如：我今天应该先刷哪一类？我现在最薄弱的是哪里？"></textarea>
+              <div class="chat-input-actions">
+                <span id="homeChatStatus" class="home-chat-status">已连接 ChatGPT 5.4</span>
+                <button id="homeChatSendButton" class="primary-button" type="button">发送</button>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <footer class="academy-footer">
+          <div class="academy-footer-brand">学术卓越练习平台</div>
+          <div class="academy-footer-links">
+            <span>专项练习</span>
+            <span>错题复盘</span>
+            <span>AI伴答</span>
+            <span>进度记录</span>
+          </div>
+        </footer>
       </section>
 
       <section id="practiceView" class="view">
-        <div class="toolbar">
-          <div>
-            <div id="modeTitle" class="toolbar-title"></div>
-            <div id="progressText" class="toolbar-meta"></div>
+        <div class="practice-focus-header">
+          <div class="practice-focus-left">
+            <span id="practiceCourseBadge" class="practice-course-badge">课程</span>
+            <span id="practiceModeBadge" class="practice-mode-badge">题型</span>
           </div>
-          <div class="toolbar-actions">
-            <label id="questionShuffleWrap" class="toggle-chip">
-              <input id="shuffleQuestionOrderToggle" type="checkbox">
-              <span>随机题序</span>
-            </label>
-            <label id="memorizeModeWrap" class="toggle-chip">
-              <input id="memorizeModeToggle" type="checkbox">
-              <span>背题模式</span>
-            </label>
-            <label id="shuffleToggleWrap" class="toggle-chip hidden">
-              <input id="shuffleOptionsToggle" type="checkbox">
-              <span>打乱选项</span>
-            </label>
-            <button id="wrongOnlyButton" class="ghost-button" type="button">错题再练</button>
-            <button id="unfinishedOnlyButton" class="ghost-button" type="button">只看未做题</button>
-            <button id="allQuestionsButton" class="ghost-button" type="button">全部题目</button>
+          <div class="practice-focus-right">
+            <span class="practice-model-pill">ChatGPT 5.4</span>
+            <span id="practiceSessionInfo" class="practice-session-pill">开始练习</span>
           </div>
         </div>
 
-        <div class="practice-layout">
-          <article class="question-card question-main-card">
+        <div class="practice-toolbar-surface">
+          <div class="toolbar">
+            <div>
+              <div id="modeTitle" class="toolbar-title"></div>
+              <div id="progressText" class="toolbar-meta"></div>
+            </div>
+            <div class="toolbar-actions">
+              <label id="questionShuffleWrap" class="toggle-chip">
+                <input id="shuffleQuestionOrderToggle" type="checkbox">
+                <span>随机题序</span>
+              </label>
+              <label id="memorizeModeWrap" class="toggle-chip">
+                <input id="memorizeModeToggle" type="checkbox">
+                <span>背题模式</span>
+              </label>
+              <label id="shuffleToggleWrap" class="toggle-chip hidden">
+                <input id="shuffleOptionsToggle" type="checkbox">
+                <span>打乱选项</span>
+              </label>
+              <button id="wrongOnlyButton" class="ghost-button" type="button">错题再练</button>
+              <button id="unfinishedOnlyButton" class="ghost-button" type="button">只看未做题</button>
+              <button id="allQuestionsButton" class="ghost-button" type="button">全部题目</button>
+              <button id="newExamSessionButton" class="ghost-button hidden" type="button">重新抽一套</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="practice-layout practice-layout-academic">
+          <article class="question-card question-main-card practice-question-card">
+            <div class="practice-question-head">
+              <div class="practice-question-labels">
+                <span id="practiceQuestionTypeChip" class="practice-question-type-chip">题型</span>
+                <span id="practiceQuestionIndexChip" class="practice-question-index-chip">第 1 题</span>
+              </div>
+              <button id="markQuestionButton" class="ghost-button" type="button">标记本题</button>
+            </div>
+
             <div class="question-header">
               <h2 id="questionTitle">题目</h2>
               <span id="questionMeta" class="chip"></span>
@@ -166,12 +362,12 @@
 
             <div id="questionBody" class="question-body"></div>
 
-            <div id="feedbackPanel" class="feedback-panel hidden"></div>
-
             <div id="programComposer" class="program-composer hidden">
               <label id="composerLabel" class="composer-label" for="programAnswer">你的答案</label>
               <textarea id="programAnswer" placeholder="在这里写你的 Python 程序"></textarea>
             </div>
+
+            <div id="feedbackPanel" class="feedback-panel hidden"></div>
 
             <div id="programAnswerPanel" class="answer-panel hidden"></div>
 
@@ -183,17 +379,17 @@
 
             <div class="action-row">
               <button id="prevAction" class="ghost-button" type="button">上一题</button>
-              <button id="markQuestionButton" class="ghost-button" type="button">标记本题</button>
               <button id="primaryAction" class="primary-button" type="button">下一题</button>
             </div>
           </article>
 
-          <aside class="navigator-card">
+          <aside class="navigator-card practice-side-card">
             <div class="navigator-header">
               <div>
                 <h3>题目导航</h3>
                 <p id="navigatorSummary" class="navigator-summary">未做 0 · 错题 0</p>
               </div>
+              <span class="practice-model-mini">ChatGPT 5.4</span>
             </div>
             <div id="questionNavigator" class="navigator-list"></div>
           </aside>
@@ -202,6 +398,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=20260705-1938" type="module"></script>
+  <script src="./app.js?v=20260705-1743" type="module"></script>
 </body>
 </html>
