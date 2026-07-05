@@ -376,6 +376,33 @@ textarea {
   margin-top: 0;
 }
 
+.table-wrap {
+  margin: 16px 0;
+  overflow-x: auto;
+}
+
+.doc-question-table {
+  width: 100%;
+  min-width: 420px;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.doc-question-table th,
+.doc-question-table td {
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.7;
+}
+
+.doc-question-table th {
+  background: #f8fafc;
+  font-weight: 700;
+}
+
 .question-body > p:last-child,
 .question-body > pre:last-child,
 .question-body > div:last-child {
@@ -555,6 +582,10 @@ textarea {
 .answer-panel.memory-answer-surface h3,
 .answer-panel.memory-answer-surface strong {
   color: #166534;
+}
+
+.answer-panel.memory-answer-surface .doc-question-table th {
+  background: #dcfce7;
 }
 
 .feedback-panel,

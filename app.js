@@ -1,6 +1,8 @@
 const MODE_LABELS = {
   codefill: "程序填空",
   fill: "填空题",
+  short: "简答题",
+  calc: "计算题",
   single: "单选题",
   judge: "判断题",
   program: "程序题",
@@ -33,6 +35,7 @@ const feedbackPanel = document.getElementById("feedbackPanel");
 const programComposer = document.getElementById("programComposer");
 const programAnswer = document.getElementById("programAnswer");
 const programAnswerPanel = document.getElementById("programAnswerPanel");
+const manualReviewRow = document.getElementById("manualReviewRow");
 const primaryAction = document.getElementById("primaryAction");
 const prevAction = document.getElementById("prevAction");
 const markQuestionButton = document.getElementById("markQuestionButton");
@@ -143,6 +146,8 @@ function getQuestionsByMode(mode) {
   if (mode === "fill") {
     return (state.data.fill_questions || []).filter((question) => !isProgramFillQuestion(question));
   }
+  if (mode === "short") return state.data.short_answer_questions || [];
+  if (mode === "calc") return state.data.calculation_questions || [];
   if (mode === "single") return state.data.single_choice_questions || [];
   if (mode === "judge") return state.data.judgment_questions || [];
   return state.data.program_questions || [];
@@ -180,6 +185,7 @@ function renderCurrentQuestion() {
     feedbackPanel.innerHTML = "";
     programComposer.classList.add("hidden");
     programAnswerPanel.classList.add("hidden");
+    manualReviewRow.classList.add("hidden");
     programAnswerPanel.innerHTML = "";
     primaryAction.disabled = true;
     prevAction.disabled = true;
@@ -198,6 +204,7 @@ function renderCurrentQuestion() {
   programAnswerPanel.classList.add("hidden");
   programAnswerPanel.classList.remove("memory-answer-surface");
   programAnswerPanel.innerHTML = "";
+  manualReviewRow.classList.add("hidden");
   state.revealState = false;
 
   modeTitle.textContent = MODE_LABELS[state.currentMode] || "刷题";
@@ -215,8 +222,11 @@ function renderCurrentQuestion() {
   } else if (state.currentMode === "judge") {
     renderJudgeQuestion(question);
     primaryAction.textContent = "下一题";
-  } else {
+  } else if (state.currentMode === "program") {
     renderProgramQuestion(question);
+    primaryAction.textContent = isMemorizeMode() ? "下一题" : "显示答案";
+  } else {
+    renderStudyQuestion(question);
     primaryAction.textContent = isMemorizeMode() ? "下一题" : "显示答案";
   }
 
@@ -322,16 +332,33 @@ function renderJudgeQuestion(question) {
 
 function renderProgramQuestion(question) {
   questionBody.innerHTML = question.prompt_html;
+  manualReviewRow.classList.remove("hidden");
   if (isMemorizeMode()) {
     programAnswer.value = "";
     programAnswerPanel.classList.add("memory-answer-surface");
     programAnswerPanel.innerHTML = question.answer_html;
     programAnswerPanel.classList.remove("hidden");
+    markManualReviewDone("program", question.id);
+    questionMeta.textContent = buildQuestionMetaText(question);
+    updateProgressText();
     return;
   }
 
   programComposer.classList.remove("hidden");
   programAnswer.value = progressStore.programAnswers?.[question.id] || "";
+}
+
+function renderStudyQuestion(question) {
+  questionBody.innerHTML = question.prompt_html;
+  manualReviewRow.classList.remove("hidden");
+  if (isMemorizeMode()) {
+    programAnswerPanel.classList.add("memory-answer-surface");
+    programAnswerPanel.innerHTML = question.answer_html;
+    programAnswerPanel.classList.remove("hidden");
+    markManualReviewDone(state.currentMode, question.id);
+    questionMeta.textContent = buildQuestionMetaText(question);
+    updateProgressText();
+  }
 }
 
 function handlePrimaryAction() {
@@ -357,7 +384,7 @@ function handlePrimaryAction() {
     return;
   }
 
-  handleProgramAction();
+  handleManualReviewAction();
 }
 
 function handleFillAction() {
@@ -492,14 +519,18 @@ function handleJudgeAction() {
   navigateRelative(1);
 }
 
-function handleProgramAction() {
+function handleManualReviewAction() {
   const question = state.currentList[state.currentIndex];
-  saveProgramDraft(question.id, programAnswer.value);
+  if (state.currentMode === "program") {
+    saveProgramDraft(question.id, programAnswer.value);
+  }
 
   if (!state.revealState) {
     programAnswerPanel.innerHTML = question.answer_html;
     programAnswerPanel.classList.remove("hidden");
-    markProgramDone(question.id);
+    markManualReviewDone(state.currentMode, question.id);
+    questionMeta.textContent = buildQuestionMetaText(question);
+    updateProgressText();
     state.revealState = true;
     primaryAction.textContent = "进入下一题";
     renderNavigator();
@@ -518,6 +549,8 @@ function handleProgramInput() {
   if (programAnswer.value.trim()) {
     markProgramDone(question.id);
   }
+  questionMeta.textContent = buildQuestionMetaText(question);
+  updateProgressText();
   renderNavigator();
   updateToolbarButtons();
 }
@@ -678,7 +711,7 @@ function buildNavigatorSummary(list) {
     if (isQuestionMarked(state.currentMode, question.id)) marked += 1;
   });
 
-  if (state.currentMode === "program") {
+  if (isManualReviewMode(state.currentMode)) {
     return `未做 ${pending} · 已做 ${done} · 错题 ${wrong} · 标记 ${marked}`;
   }
 
@@ -717,30 +750,34 @@ function getQuestionStatus(mode, question) {
     return { key: "pending", label: "未做" };
   }
 
-  if (progressStore.programWrongIds.includes(question.id)) {
-    return { key: "wrong", label: "错题" };
-  }
+  if (isManualReviewMode(mode)) {
+    if (getWrongSet(mode).has(question.id)) {
+      return { key: "wrong", label: "错题" };
+    }
 
-  const hasDraft = Boolean(progressStore.programAnswers?.[question.id]?.trim());
-  const done = progressStore.programDoneIds.includes(question.id) || hasDraft;
-  if (done) {
-    return { key: "done", label: "已做" };
+    const hasDraft = mode === "program" && Boolean(progressStore.programAnswers?.[question.id]?.trim());
+    const doneSet = getDoneSet(mode);
+    const done = doneSet.has(question.id) || hasDraft;
+    if (done) {
+      return { key: "done", label: "已做" };
+    }
   }
 
   return { key: "pending", label: "未做" };
 }
 
 function toggleProgramWrong() {
-  if (state.currentMode !== "program") return;
+  if (!isManualReviewMode(state.currentMode)) return;
   const question = state.currentList[state.currentIndex];
-  const wrongSet = getWrongSet("program");
+  const wrongSet = getWrongSet(state.currentMode);
   if (wrongSet.has(question.id)) {
     wrongSet.delete(question.id);
   } else {
     wrongSet.add(question.id);
-    markProgramDone(question.id);
+    markManualReviewDone(state.currentMode, question.id);
   }
-  saveWrongSet("program", wrongSet);
+  saveWrongSet(state.currentMode, wrongSet);
+  questionMeta.textContent = buildQuestionMetaText(question);
   updateToolbarButtons();
   updateProgressText();
   renderNavigator();
@@ -822,8 +859,8 @@ function updateToolbarButtons() {
   markQuestionButton.textContent = isMarked ? "取消标记" : "标记本题";
   markQuestionButton.classList.toggle("active", !!isMarked);
 
-  if (state.currentMode === "program") {
-    const isWrong = question ? getWrongSet("program").has(question.id) : false;
+  if (isManualReviewMode(state.currentMode)) {
+    const isWrong = question ? getWrongSet(state.currentMode).has(question.id) : false;
     programMarkWrong.textContent = isWrong ? "取消错题" : "记为错题";
   }
 }
@@ -923,6 +960,19 @@ function markProgramDone(id) {
   }
 }
 
+function markManualReviewDone(mode, id) {
+  if (mode === "program") {
+    markProgramDone(id);
+    return;
+  }
+
+  const key = mode === "short" ? "shortDoneIds" : "calcDoneIds";
+  if (!progressStore[key].includes(id)) {
+    progressStore[key].push(id);
+    saveProgress();
+  }
+}
+
 function saveCurrentQuestionState() {
   const question = state.currentList[state.currentIndex];
   if (!question) return;
@@ -960,16 +1010,22 @@ function normalizeAnswer(value) {
 function ensureProgressDefaults(raw) {
   return {
     fillWrongIds: Array.isArray(raw?.fillWrongIds) ? raw.fillWrongIds : [],
+    shortWrongIds: Array.isArray(raw?.shortWrongIds) ? raw.shortWrongIds : [],
+    calcWrongIds: Array.isArray(raw?.calcWrongIds) ? raw.calcWrongIds : [],
     singleWrongIds: Array.isArray(raw?.singleWrongIds) ? raw.singleWrongIds : [],
     judgeWrongIds: Array.isArray(raw?.judgeWrongIds) ? raw.judgeWrongIds : [],
     programWrongIds: Array.isArray(raw?.programWrongIds) ? raw.programWrongIds : [],
     fillMarkedIds: Array.isArray(raw?.fillMarkedIds) ? raw.fillMarkedIds : [],
+    shortMarkedIds: Array.isArray(raw?.shortMarkedIds) ? raw.shortMarkedIds : [],
+    calcMarkedIds: Array.isArray(raw?.calcMarkedIds) ? raw.calcMarkedIds : [],
     singleMarkedIds: Array.isArray(raw?.singleMarkedIds) ? raw.singleMarkedIds : [],
     judgeMarkedIds: Array.isArray(raw?.judgeMarkedIds) ? raw.judgeMarkedIds : [],
     programMarkedIds: Array.isArray(raw?.programMarkedIds) ? raw.programMarkedIds : [],
     fillResults: raw?.fillResults && typeof raw.fillResults === "object" ? raw.fillResults : {},
     singleResults: raw?.singleResults && typeof raw.singleResults === "object" ? raw.singleResults : {},
     judgeResults: raw?.judgeResults && typeof raw.judgeResults === "object" ? raw.judgeResults : {},
+    shortDoneIds: Array.isArray(raw?.shortDoneIds) ? raw.shortDoneIds : [],
+    calcDoneIds: Array.isArray(raw?.calcDoneIds) ? raw.calcDoneIds : [],
     programDoneIds: Array.isArray(raw?.programDoneIds) ? raw.programDoneIds : [],
     programAnswers: raw?.programAnswers && typeof raw.programAnswers === "object" ? raw.programAnswers : {},
     shuffleQuestionOrder: typeof raw?.shuffleQuestionOrder === "boolean" ? raw.shuffleQuestionOrder : false,
@@ -992,6 +1048,8 @@ function saveProgress() {
 
 function getWrongSet(mode) {
   if (isFillMode(mode)) return new Set(progressStore.fillWrongIds);
+  if (mode === "short") return new Set(progressStore.shortWrongIds);
+  if (mode === "calc") return new Set(progressStore.calcWrongIds);
   if (mode === "single") return new Set(progressStore.singleWrongIds);
   if (mode === "judge") return new Set(progressStore.judgeWrongIds);
   return new Set(progressStore.programWrongIds);
@@ -999,14 +1057,27 @@ function getWrongSet(mode) {
 
 function getMarkedSet(mode) {
   if (isFillMode(mode)) return new Set(progressStore.fillMarkedIds);
+  if (mode === "short") return new Set(progressStore.shortMarkedIds);
+  if (mode === "calc") return new Set(progressStore.calcMarkedIds);
   if (mode === "single") return new Set(progressStore.singleMarkedIds);
   if (mode === "judge") return new Set(progressStore.judgeMarkedIds);
   return new Set(progressStore.programMarkedIds);
 }
 
+function getDoneSet(mode) {
+  if (mode === "short") return new Set(progressStore.shortDoneIds);
+  if (mode === "calc") return new Set(progressStore.calcDoneIds);
+  if (mode === "program") return new Set(progressStore.programDoneIds);
+  return new Set();
+}
+
 function saveWrongSet(mode, wrongSet) {
   if (isFillMode(mode)) {
     progressStore.fillWrongIds = [...wrongSet];
+  } else if (mode === "short") {
+    progressStore.shortWrongIds = [...wrongSet];
+  } else if (mode === "calc") {
+    progressStore.calcWrongIds = [...wrongSet];
   } else if (mode === "single") {
     progressStore.singleWrongIds = [...wrongSet];
   } else if (mode === "judge") {
@@ -1020,6 +1091,10 @@ function saveWrongSet(mode, wrongSet) {
 function saveMarkedSet(mode, markedSet) {
   if (isFillMode(mode)) {
     progressStore.fillMarkedIds = [...markedSet];
+  } else if (mode === "short") {
+    progressStore.shortMarkedIds = [...markedSet];
+  } else if (mode === "calc") {
+    progressStore.calcMarkedIds = [...markedSet];
   } else if (mode === "single") {
     progressStore.singleMarkedIds = [...markedSet];
   } else if (mode === "judge") {
@@ -1036,6 +1111,10 @@ function isQuestionMarked(mode, id) {
 
 function isFillMode(mode) {
   return mode === "fill" || mode === "codefill";
+}
+
+function isManualReviewMode(mode) {
+  return mode === "program" || mode === "short" || mode === "calc";
 }
 
 function isMemorizeMode() {
@@ -1072,7 +1151,7 @@ function escapeHtml(value) {
 
 function applyRouteFromHash() {
   const mode = location.hash.replace("#", "");
-  if (mode === "codefill" || mode === "fill" || mode === "single" || mode === "judge" || mode === "program") {
+  if (mode === "codefill" || mode === "fill" || mode === "short" || mode === "calc" || mode === "single" || mode === "judge" || mode === "program") {
     if (!state.data) return;
     if (state.currentMode !== mode || !practiceView.classList.contains("active")) {
       startMode(mode);

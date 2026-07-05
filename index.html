@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>程序刷题</title>
-  <link rel="stylesheet" href="./styles.css?v=20260705-1315">
+  <link rel="stylesheet" href="./styles.css?v=20260705-1525">
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <div>
         <h1>程序刷题</h1>
-        <p class="subtitle">程序填空、填空题、单选题、判断题、程序题，直接开刷</p>
+        <p class="subtitle">程序填空、填空题、简答题、计算题、单选题、判断题、程序题，直接开刷</p>
       </div>
       <button id="homeShortcut" class="ghost-button hidden" type="button">返回首页</button>
     </header>
@@ -20,7 +20,7 @@
       <section id="homeView" class="view active">
         <div class="hero-card">
           <h2>选择刷题模式</h2>
-          <p>程序填空、填空题、单选题、判断题、程序题，直接开刷。</p>
+          <p>程序填空、填空题、简答题、计算题、单选题、判断题、程序题，直接开刷。</p>
           <div class="home-grid">
             <button class="mode-card" type="button" data-mode="codefill">
               <span class="mode-title">程序填空</span>
@@ -29,6 +29,14 @@
             <button class="mode-card" type="button" data-mode="fill">
               <span class="mode-title">填空题</span>
               <span class="mode-desc">普通概念填空，先填再判对错</span>
+            </button>
+            <button class="mode-card" type="button" data-mode="short">
+              <span class="mode-title">简答题</span>
+              <span class="mode-desc">主观背题，先自己想，再看参考答案</span>
+            </button>
+            <button class="mode-card" type="button" data-mode="calc">
+              <span class="mode-title">计算题</span>
+              <span class="mode-desc">计算步骤题，支持直接背答案</span>
             </button>
             <button class="mode-card" type="button" data-mode="single">
               <span class="mode-title">单选题</span>
@@ -85,13 +93,14 @@
             <div id="programComposer" class="program-composer hidden">
               <label class="composer-label" for="programAnswer">你的答案</label>
               <textarea id="programAnswer" placeholder="在这里写你的 Python 程序"></textarea>
-              <div id="programMarkRow" class="program-mark-row">
-                <button id="programMarkWrong" class="ghost-button" type="button">记为错题</button>
-                <span class="helper-text">程序题不自动判分，自己看完答案后决定是否记错题。</span>
-              </div>
             </div>
 
             <div id="programAnswerPanel" class="answer-panel hidden"></div>
+
+            <div id="manualReviewRow" class="program-mark-row hidden">
+              <button id="programMarkWrong" class="ghost-button" type="button">记为错题</button>
+              <span class="helper-text">主观题不自动判分，自己看完答案后决定是否记错题。</span>
+            </div>
 
             <div class="action-row">
               <button id="prevAction" class="ghost-button" type="button">上一题</button>
@@ -114,6 +123,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=20260705-1315" type="module"></script>
+  <script src="./app.js?v=20260705-1525" type="module"></script>
 </body>
 </html>
