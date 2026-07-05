@@ -874,6 +874,2266 @@
         "填空1",
         "填空2"
       ]
+    },
+    {
+      "id": "docx-fill-001",
+      "title": "Word填空001",
+      "stem_html": "<p>Python 3.x语句 for i in range(3):print(i, end=&#x27;,&#x27;) 的输出结果为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "0,1,2,"
+        ]
+      ],
+      "display_answers": [
+        "0,1,2,"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-002",
+      "title": "Word填空002",
+      "stem_html": "<p>Python 3.x语句 print(1, 2, 3, sep=&#x27;:&#x27;) 的输出结果为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "1:2:3"
+        ]
+      ],
+      "display_answers": [
+        "1:2:3"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-003",
+      "title": "Word填空003",
+      "stem_html": "<p>Python运算符中用来计算整商的是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "//"
+        ]
+      ],
+      "display_answers": [
+        "//"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-004",
+      "title": "Word填空004",
+      "stem_html": "<p>表达式 &#x27;%s&#x27;%65 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "'65'"
+        ]
+      ],
+      "display_answers": [
+        "'65'"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-005",
+      "title": "Word填空005",
+      "stem_html": "<p>表达式 &#x27;,&#x27;.join(&#x27;a     b  ccc\\n\\n\\nddd     &#x27;.split(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>)) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空2】</span><span class=\"blank-slot\" data-blank-index=\"1\"></span>。</p>",
+      "answers": [
+        [
+          "'a,b,ccc,ddd'"
+        ]
+      ],
+      "display_answers": [
+        "'a,b,ccc,ddd'"
+      ],
+      "blank_labels": [
+        "填空1",
+        "填空2"
+      ]
+    },
+    {
+      "id": "docx-fill-006",
+      "title": "Word填空006",
+      "stem_html": "<p>表达式 [1, 2] * 2 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1, 2, 1, 2]"
+        ]
+      ],
+      "display_answers": [
+        "[1, 2, 1, 2]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-007",
+      "title": "Word填空007",
+      "stem_html": "<p>表达式 [1,2,3].count(4) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "0"
+        ]
+      ],
+      "display_answers": [
+        "0"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-008",
+      "title": "Word填空008",
+      "stem_html": "<p>表达式 [i for i in range(10) if i&gt;8] 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[9]"
+        ]
+      ],
+      "display_answers": [
+        "[9]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-009",
+      "title": "Word填空009",
+      "stem_html": "<p>表达式 3 &amp; 6 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "2"
+        ]
+      ],
+      "display_answers": [
+        "2"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-010",
+      "title": "Word填空010",
+      "stem_html": "<p>表达式 3 and not 5 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "假",
+          "False"
+        ]
+      ],
+      "display_answers": [
+        "假"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-011",
+      "title": "Word填空011",
+      "stem_html": "<p>表达式 3 not in [1, 2, 3]的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "假",
+          "False"
+        ]
+      ],
+      "display_answers": [
+        "假"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-012",
+      "title": "Word填空012",
+      "stem_html": "<p>表达式 3&lt;5&gt;2 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "真",
+          "True"
+        ]
+      ],
+      "display_answers": [
+        "真"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-013",
+      "title": "Word填空013",
+      "stem_html": "<p>表达式 &#x27;aaasdf&#x27;.rstrip(&#x27;af&#x27;) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "'aaasd'"
+        ]
+      ],
+      "display_answers": [
+        "'aaasd'"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-014",
+      "title": "Word填空014",
+      "stem_html": "<p>表达式 &#x27;abc&#x27; in (&#x27;abcdefg&#x27;) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "真",
+          "True"
+        ]
+      ],
+      "display_answers": [
+        "真"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-015",
+      "title": "Word填空015",
+      "stem_html": "<p>表达式 &#x27;abc10&#x27;.isalnum(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空2】</span><span class=\"blank-slot\" data-blank-index=\"1\"></span>。</p>",
+      "answers": [
+        [
+          "真",
+          "True"
+        ]
+      ],
+      "display_answers": [
+        "真"
+      ],
+      "blank_labels": [
+        "填空1",
+        "填空2"
+      ]
+    },
+    {
+      "id": "docx-fill-016",
+      "title": "Word填空016",
+      "stem_html": "<p>表达式 &#x27;abcdefg&#x27;.split(&#x27;d&#x27;) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "['abc', 'efg']"
+        ]
+      ],
+      "display_answers": [
+        "['abc', 'efg']"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-017",
+      "title": "Word填空017",
+      "stem_html": "<p>表达式 abs(-3) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "3"
+        ]
+      ],
+      "display_answers": [
+        "3"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-018",
+      "title": "Word填空018",
+      "stem_html": "<p>表达式 &#x27;ac&#x27; in &#x27;abce&#x27; 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "假",
+          "False"
+        ]
+      ],
+      "display_answers": [
+        "假"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-019",
+      "title": "Word填空019",
+      "stem_html": "<p>表达式 &#x27;C:\\\\windows\\\\notepad.exe&#x27;.endswith(&#x27;.exe&#x27;) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "真",
+          "True"
+        ]
+      ],
+      "display_answers": [
+        "真"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-020",
+      "title": "Word填空020",
+      "stem_html": "<p>表达式 callable(int) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "真",
+          "True"
+        ]
+      ],
+      "display_answers": [
+        "真"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-021",
+      "title": "Word填空021",
+      "stem_html": "<p>表达式 eval(&#x27;*&#x27;.join(map(str, range(1, 6)))) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "120"
+        ]
+      ],
+      "display_answers": [
+        "120"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-022",
+      "title": "Word填空022",
+      "stem_html": "<p>表达式 eval(&#x27;[1, 2, 3]&#x27;) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1, 2, 3]"
+        ]
+      ],
+      "display_answers": [
+        "[1, 2, 3]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-023",
+      "title": "Word填空023",
+      "stem_html": "<p>表达式 int(&#x27;101&#x27;,2) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "5"
+        ]
+      ],
+      "display_answers": [
+        "5"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-024",
+      "title": "Word填空024",
+      "stem_html": "<p>表达式 int(&#x27;123&#x27;, 16) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "291"
+        ]
+      ],
+      "display_answers": [
+        "291"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-025",
+      "title": "Word填空025",
+      "stem_html": "<p>表达式 int(4**0.5) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "2"
+        ]
+      ],
+      "display_answers": [
+        "2"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-026",
+      "title": "Word填空026",
+      "stem_html": "<p>表达式 isinstance(&#x27;4&#x27;, (int, float, complex)) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "假",
+          "False"
+        ]
+      ],
+      "display_answers": [
+        "假"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-027",
+      "title": "Word填空027",
+      "stem_html": "<p>表达式 len(range(1,10)) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "9"
+        ]
+      ],
+      "display_answers": [
+        "9"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-028",
+      "title": "Word填空028",
+      "stem_html": "<p>表达式 len(&#x27;中国&#x27;.encode(&#x27;gbk&#x27;)) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "4"
+        ]
+      ],
+      "display_answers": [
+        "4"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-029",
+      "title": "Word填空029",
+      "stem_html": "<p>表达式 sorted(random.sample(range(5), 5)) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[0, 1, 2, 3, 4]"
+        ]
+      ],
+      "display_answers": [
+        "[0, 1, 2, 3, 4]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-030",
+      "title": "Word填空030",
+      "stem_html": "<p>表达式 sum(range(1, 10)) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "45"
+        ]
+      ],
+      "display_answers": [
+        "45"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-031",
+      "title": "Word填空031",
+      "stem_html": "<p>表达式 sum(range(1, 10, 2)) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "25"
+        ]
+      ],
+      "display_answers": [
+        "25"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-032",
+      "title": "Word填空032",
+      "stem_html": "<p>表达式 True*3 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "3"
+        ]
+      ],
+      "display_answers": [
+        "3"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-033",
+      "title": "Word填空033",
+      "stem_html": "<p>表达式len(&#x27;aaaassddf&#x27;.strip(&#x27;afds&#x27;))的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "0"
+        ]
+      ],
+      "display_answers": [
+        "0"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-034",
+      "title": "Word填空034",
+      "stem_html": "<p>表达式type({}) == dict的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "真",
+          "True"
+        ]
+      ],
+      "display_answers": [
+        "真"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-035",
+      "title": "Word填空035",
+      "stem_html": "<p>假设n为整数，那么表达式 n&amp;1 == n%2 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "真",
+          "True"
+        ]
+      ],
+      "display_answers": [
+        "真"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-036",
+      "title": "Word填空036",
+      "stem_html": "<p>假设已成功导入Python标准库string，那么表达式len(string.digits)的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "10"
+        ]
+      ],
+      "display_answers": [
+        "10"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-037",
+      "title": "Word填空037",
+      "stem_html": "<p>假设已从标准库functools导入reduce(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>)函数，那么表达式 reduce(lambda x, y: x-y, [1, 2, 3]) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空2】</span><span class=\"blank-slot\" data-blank-index=\"1\"></span>。</p>",
+      "answers": [
+        [
+          "-4"
+        ]
+      ],
+      "display_answers": [
+        "-4"
+      ],
+      "blank_labels": [
+        "填空1",
+        "填空2"
+      ]
+    },
+    {
+      "id": "docx-fill-038",
+      "title": "Word填空038",
+      "stem_html": "<p>为了提高Python代码运行速度和进行适当的保密，可以将Python程序文件编译为扩展名<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>的文件。</p>",
+      "answers": [
+        [
+          "pyc"
+        ]
+      ],
+      "display_answers": [
+        "pyc"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-039",
+      "title": "Word填空039",
+      "stem_html": "<p>已知 x = &#x27;123&#x27; 和 y = &#x27;456&#x27;，那么表达式 x + y 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "'123456'"
+        ]
+      ],
+      "display_answers": [
+        "'123456'"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-040",
+      "title": "Word填空040",
+      "stem_html": "<p>已知 x = range(1,4) 和 y = range(4,7)，那么表达式 sum([i*j for i,j in zip(x,y)]) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "32"
+        ]
+      ],
+      "display_answers": [
+        "32"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-041",
+      "title": "Word填空041",
+      "stem_html": "<p>已知 x, y = 3, 5，那么执行x, y = y, x 之后，x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "5"
+        ]
+      ],
+      "display_answers": [
+        "5"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-042",
+      "title": "Word填空042",
+      "stem_html": "<p>已知x = &#x27;aa b ccc dddd&#x27;，那么表达式&#x27;&#x27;.join([v for i,v in enumerate(x[:-1]) if v==x[i+1]])的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "'accddd'"
+        ]
+      ],
+      "display_answers": [
+        "'accddd'"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-043",
+      "title": "Word填空043",
+      "stem_html": "<p>已知x = &#x27;hello world.&#x27;，那么表达式x.find(&#x27;x&#x27;)和x.rfind(&#x27;x&#x27;)的值都为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "-1"
+        ]
+      ],
+      "display_answers": [
+        "-1"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-044",
+      "title": "Word填空044",
+      "stem_html": "<p>已知x = list(range(20))，那么表达式x[-1]的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "19"
+        ]
+      ],
+      "display_answers": [
+        "19"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-045",
+      "title": "Word填空045",
+      "stem_html": "<p>已知x=3和y=5，执行语句 x, y = y, x 后x的值是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "5"
+        ]
+      ],
+      "display_answers": [
+        "5"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-046",
+      "title": "Word填空046",
+      "stem_html": "<p>已知函数定义 def func(**p):return &#x27;&#x27;.join(sorted(p))，那么表达式  func(x=1, y=2, z=3)的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "'xyz'"
+        ]
+      ],
+      "display_answers": [
+        "'xyz'"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-047",
+      "title": "Word填空047",
+      "stem_html": "<p>已知函数定义 def func(**p):return sum(p.values(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>))，那么表达式 func(x=1, y=2, z=3) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空2】</span><span class=\"blank-slot\" data-blank-index=\"1\"></span>。</p>",
+      "answers": [
+        [
+          "6"
+        ]
+      ],
+      "display_answers": [
+        "6"
+      ],
+      "blank_labels": [
+        "填空1",
+        "填空2"
+      ]
+    },
+    {
+      "id": "docx-fill-048",
+      "title": "Word填空048",
+      "stem_html": "<p>已知函数定义def demo(x, y, op):return eval(str(x)+op+str(y))，那么表达式demo(3, 5, &#x27;-&#x27;)的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "-2"
+        ]
+      ],
+      "display_answers": [
+        "-2"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-049",
+      "title": "Word填空049",
+      "stem_html": "<p>已知函数定义def demo(x, y, op):return eval(str(x)+op+str(y))，那么表达式demo(3, 5, &#x27;*&#x27;)的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "15"
+        ]
+      ],
+      "display_answers": [
+        "15"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-050",
+      "title": "Word填空050",
+      "stem_html": "<p>语句x = 3==3, 5执行结束后，变量x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "(True, 5)"
+        ]
+      ],
+      "display_answers": [
+        "(True, 5)"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-051",
+      "title": "Word填空051",
+      "stem_html": "<p>已知tup = (1,2,3,4)，执行tup.index(3)的结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "2"
+        ]
+      ],
+      "display_answers": [
+        "2"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-052",
+      "title": "Word填空052",
+      "stem_html": "<p><span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>关键字可以强制终止当前循环。</p>",
+      "answers": [
+        [
+          "break"
+        ]
+      ],
+      "display_answers": [
+        "break"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-053",
+      "title": "Word填空053",
+      "stem_html": "<p>Python 中创建匿名函数的关键字是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "lambda"
+        ]
+      ],
+      "display_answers": [
+        "lambda"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-054",
+      "title": "Word填空054",
+      "stem_html": "<p>Python 中定义自定义函数的关键字是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "def"
+        ]
+      ],
+      "display_answers": [
+        "def"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-055",
+      "title": "Word填空055",
+      "stem_html": "<p>Python标准库<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>中提供了计算MD5摘要的方法md5(<span style=\"color:#b45309;font-weight:700;\">【填空2】</span><span class=\"blank-slot\" data-blank-index=\"1\"></span>)。</p>",
+      "answers": [
+        [
+          "hashlib"
+        ]
+      ],
+      "display_answers": [
+        "hashlib"
+      ],
+      "blank_labels": [
+        "填空1",
+        "填空2"
+      ]
+    },
+    {
+      "id": "docx-fill-056",
+      "title": "Word填空056",
+      "stem_html": "<p>Python标准库os.path中用来判断指定路径是否为文件夹的方法是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "isdir()"
+        ]
+      ],
+      "display_answers": [
+        "isdir()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-057",
+      "title": "Word填空057",
+      "stem_html": "<p>Python标准库os中用来列出指定文件夹中的文件和子文件夹列表的方式是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "listdir()"
+        ]
+      ],
+      "display_answers": [
+        "listdir()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-058",
+      "title": "Word填空058",
+      "stem_html": "<p>Python内置函数<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>用来返回数值型序列中所有元素之和。</p>",
+      "answers": [
+        [
+          "sum()"
+        ]
+      ],
+      "display_answers": [
+        "sum()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-059",
+      "title": "Word填空059",
+      "stem_html": "<p>Python内置函数<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>用来打开或创建文件并返回文件对象。</p>",
+      "answers": [
+        [
+          "open()"
+        ]
+      ],
+      "display_answers": [
+        "open()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-060",
+      "title": "Word填空060",
+      "stem_html": "<p>Python内置函数<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>用来返回序列中的最大元素。</p>",
+      "answers": [
+        [
+          "max()"
+        ]
+      ],
+      "display_answers": [
+        "max()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-061",
+      "title": "Word填空061",
+      "stem_html": "<p>Python内置函数<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>可以返回列表、元组、字典、集合、字符串以及range对象中元素个数。</p>",
+      "answers": [
+        [
+          "len()"
+        ]
+      ],
+      "display_answers": [
+        "len()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-062",
+      "title": "Word填空062",
+      "stem_html": "<p>Python用来访问和操作内置数据库SQLite的标准库是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "sqlite3"
+        ]
+      ],
+      "display_answers": [
+        "sqlite3"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-063",
+      "title": "Word填空063",
+      "stem_html": "<p>Python中，判断指定键是否在字典中的运算符是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "in"
+        ]
+      ],
+      "display_answers": [
+        "in"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-064",
+      "title": "Word填空064",
+      "stem_html": "<p>Python中常用的中文分词第三方库是（<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>）</p>",
+      "answers": [
+        [
+          "jieba"
+        ]
+      ],
+      "display_answers": [
+        "jieba"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-065",
+      "title": "Word填空065",
+      "stem_html": "<p>Python中使用<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>语句打开文件，可自动实现文件的关闭。</p>",
+      "answers": [
+        [
+          "with"
+        ]
+      ],
+      "display_answers": [
+        "with"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-066",
+      "title": "Word填空066",
+      "stem_html": "<p>Python中字典的元素以<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>的形式存储，键和值之间用冒号分隔。</p>",
+      "answers": [
+        [
+          "键值对"
+        ]
+      ],
+      "display_answers": [
+        "键值对"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-067",
+      "title": "Word填空067",
+      "stem_html": "<p>random模块中<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>方法的作用是将列表中的元素随机乱序。</p>",
+      "answers": [
+        [
+          "shuffle()"
+        ]
+      ],
+      "display_answers": [
+        "shuffle()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-068",
+      "title": "Word填空068",
+      "stem_html": "<p>表达式  5 if 5&gt;6 else (6 if 3&gt;2 else 5) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "6"
+        ]
+      ],
+      "display_answers": [
+        "6"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-069",
+      "title": "Word填空069",
+      "stem_html": "<p>表达式 {1, 2, 3, 4, 5} ^ {4, 5, 6, 7} 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "{1, 2, 3, 6, 7}"
+        ]
+      ],
+      "display_answers": [
+        "{1, 2, 3, 6, 7}"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-070",
+      "title": "Word填空070",
+      "stem_html": "<p>表达式 {1, 2, 3, 4} - {3, 4, 5, 6}的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "{1, 2}"
+        ]
+      ],
+      "display_answers": [
+        "{1, 2}"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-071",
+      "title": "Word填空071",
+      "stem_html": "<p>表达式 {1, 2, 3} &amp; {2, 3, 4} 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "{2, 3}"
+        ]
+      ],
+      "display_answers": [
+        "{2, 3}"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-072",
+      "title": "Word填空072",
+      "stem_html": "<p>表达式[x for x in [1,2,3,4,5] if x&lt;3]的值是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1,2]"
+        ]
+      ],
+      "display_answers": [
+        "[1,2]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-073",
+      "title": "Word填空073",
+      "stem_html": "<p>表达式set([1,1,2,3])的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "{1,2,3}"
+        ]
+      ],
+      "display_answers": [
+        "{1,2,3}"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-074",
+      "title": "Word填空074",
+      "stem_html": "<p>表达式sorted({&#x27;a&#x27;:3, &#x27;b&#x27;:9, &#x27;c&#x27;:78}.values(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>))的值为<span style=\"color:#b45309;font-weight:700;\">【填空2】</span><span class=\"blank-slot\" data-blank-index=\"1\"></span>。</p>",
+      "answers": [
+        [
+          "[3, 9, 78]"
+        ]
+      ],
+      "display_answers": [
+        "[3, 9, 78]"
+      ],
+      "blank_labels": [
+        "填空1",
+        "填空2"
+      ]
+    },
+    {
+      "id": "docx-fill-075",
+      "title": "Word填空075",
+      "stem_html": "<p>不定长位置参数使用<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>符号表示，可接收多个位置参数并打包为元组。</p>",
+      "answers": [
+        [
+          "*args"
+        ]
+      ],
+      "display_answers": [
+        "*args"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-076",
+      "title": "Word填空076",
+      "stem_html": "<p>查看变量类型的 Python 内置函数是 <span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "type()"
+        ]
+      ],
+      "display_answers": [
+        "type()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-077",
+      "title": "Word填空077",
+      "stem_html": "<p>创建空集合的Python语句是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "s = set()"
+        ]
+      ],
+      "display_answers": [
+        "s = set()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-078",
+      "title": "Word填空078",
+      "stem_html": "<p>对文件进行写入操作之后，<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>方法用来在不关闭文件对象的情况下将缓冲区内容写入文件。</p>",
+      "answers": [
+        [
+          "flush()"
+        ]
+      ],
+      "display_answers": [
+        "flush()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-079",
+      "title": "Word填空079",
+      "stem_html": "<p>函数 def f(a, b=2): return a+b，调用 f(1) 的返回值是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "3"
+        ]
+      ],
+      "display_answers": [
+        "3"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-080",
+      "title": "Word填空080",
+      "stem_html": "<p>函数可以调用自身，这种特殊函数叫做<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>函数。</p>",
+      "answers": [
+        [
+          "递归"
+        ]
+      ],
+      "display_answers": [
+        "递归"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-081",
+      "title": "Word填空081",
+      "stem_html": "<p>函数执行完毕后，使用<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>关键字向函数外部返回数据。</p>",
+      "answers": [
+        [
+          "return"
+        ]
+      ],
+      "display_answers": [
+        "return"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-082",
+      "title": "Word填空082",
+      "stem_html": "<p>集合 s={1,2,3}，执行 s.add(3) 后，集合元素个数为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "3"
+        ]
+      ],
+      "display_answers": [
+        "3"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-083",
+      "title": "Word填空083",
+      "stem_html": "<p>假设列表对象aList的值为[3, 4, 5, 6, 7, 9, 11, 13, 15, 17]，那么切片aList[3:7]得到的值是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[6, 7, 9, 11]"
+        ]
+      ],
+      "display_answers": [
+        "[6, 7, 9, 11]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-084",
+      "title": "Word填空084",
+      "stem_html": "<p>将列表lst = [1,2,3]转换为元组的语句是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "tuple(lst)"
+        ]
+      ],
+      "display_answers": [
+        "tuple(lst)"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-085",
+      "title": "Word填空085",
+      "stem_html": "<p>列表对象的<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>方法用于删除列表中首次出现的指定元素，如果该元素不存在，则会抛出异常。</p>",
+      "answers": [
+        [
+          "remove"
+        ]
+      ],
+      "display_answers": [
+        "remove"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-086",
+      "title": "Word填空086",
+      "stem_html": "<p>列表推导式 [i + j for i in range(3) for j in range(2)] 的值为（<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>）</p>",
+      "answers": [
+        [
+          "[0,1,1,2,2,3]"
+        ]
+      ],
+      "display_answers": [
+        "[0,1,1,2,2,3]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-087",
+      "title": "Word填空087",
+      "stem_html": "<p>列表推导式 [i if i % 2 == 0 else i * 2 for i in range(5)] 的值为（<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>）</p>",
+      "answers": [
+        [
+          "[0,2,2,6,4]"
+        ]
+      ],
+      "display_answers": [
+        "[0,2,2,6,4]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-088",
+      "title": "Word填空088",
+      "stem_html": "<p>列表推导式[x**2 for x in range(5)]的值为(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>)</p>",
+      "answers": [
+        [
+          "[0, 1, 4, 9, 16]"
+        ]
+      ],
+      "display_answers": [
+        "[0, 1, 4, 9, 16]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-089",
+      "title": "Word填空089",
+      "stem_html": "<p>生成词云图常用的第三方库是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span></p>",
+      "answers": [
+        [
+          "wordcloud"
+        ]
+      ],
+      "display_answers": [
+        "wordcloud"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-090",
+      "title": "Word填空090",
+      "stem_html": "<p>使用 open(&#x27;file.txt&#x27;, &#x27;r&#x27;) 打开文件时，如果文件不存在，会抛出(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>)异常</p>",
+      "answers": [
+        [
+          "FileNotFoundError"
+        ]
+      ],
+      "display_answers": [
+        "FileNotFoundError"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-091",
+      "title": "Word填空091",
+      "stem_html": "<p>使用大括号 {} 存储键值对的数据类型是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "字典"
+        ]
+      ],
+      "display_answers": [
+        "字典"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-092",
+      "title": "Word填空092",
+      "stem_html": "<p>文件对象的<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>方法用于关闭文件，释放资源。</p>",
+      "answers": [
+        [
+          "close()"
+        ]
+      ],
+      "display_answers": [
+        "close()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-093",
+      "title": "Word填空093",
+      "stem_html": "<p>向文件写入多个字符串的方法是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "writelines()"
+        ]
+      ],
+      "display_answers": [
+        "writelines()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-094",
+      "title": "Word填空094",
+      "stem_html": "<p>循环中使用<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>语句来跳出循环。</p>",
+      "answers": [
+        [
+          "break"
+        ]
+      ],
+      "display_answers": [
+        "break"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-095",
+      "title": "Word填空095",
+      "stem_html": "<p>一次性读取文件所有行并返回列表的方法是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "readlines()"
+        ]
+      ],
+      "display_answers": [
+        "readlines()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-096",
+      "title": "Word填空096",
+      "stem_html": "<p>已知 lst=[1,2,3,4]，表达式 lst[1:3] 的结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[2,3]"
+        ]
+      ],
+      "display_answers": [
+        "[2,3]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-097",
+      "title": "Word填空097",
+      "stem_html": "<p>已知 x = [1, 2, 3, 2, 3]，执行语句 x.remove(2) 之后，x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1, 3, 2, 3]"
+        ]
+      ],
+      "display_answers": [
+        "[1, 3, 2, 3]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-098",
+      "title": "Word填空098",
+      "stem_html": "<p>已知 x = [1, 2, 3, 4, 5]，那么执行语句 del x[:3] 之后，x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[4, 5]"
+        ]
+      ],
+      "display_answers": [
+        "[4, 5]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-099",
+      "title": "Word填空099",
+      "stem_html": "<p>已知 x = [1, 2, 3]，那么执行语句 x[len(x)-1:] = [4, 5, 6]之后，变量x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1, 2, 4, 5, 6]"
+        ]
+      ],
+      "display_answers": [
+        "[1, 2, 4, 5, 6]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-100",
+      "title": "Word填空100",
+      "stem_html": "<p>已知 x = [1, 2]，那么执行语句 x[0:1] = [3, 3]之后，x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[3, 3, 2]"
+        ]
+      ],
+      "display_answers": [
+        "[3, 3, 2]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-101",
+      "title": "Word填空101",
+      "stem_html": "<p>已知 x = [3, 5, 7]，那么表达式 x[10:]的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[]"
+        ]
+      ],
+      "display_answers": [
+        "[]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-102",
+      "title": "Word填空102",
+      "stem_html": "<p>已知 x = [3, 7, 5]，那么执行语句 x = x.sort(reverse=True)之后，x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "None"
+        ]
+      ],
+      "display_answers": [
+        "None"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-103",
+      "title": "Word填空103",
+      "stem_html": "<p>已知 x = {1:1}，那么执行语句 x[2] = 2之后，len(x)的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "2"
+        ]
+      ],
+      "display_answers": [
+        "2"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-104",
+      "title": "Word填空104",
+      "stem_html": "<p>已知 x = {1:2, 2:3, 3:4}，那么表达式 sum(x) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "6"
+        ]
+      ],
+      "display_answers": [
+        "6"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-105",
+      "title": "Word填空105",
+      "stem_html": "<p>已知 x = {1:2}，那么执行语句 x[2] = 3之后，x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "{1: 2, 2: 3}"
+        ]
+      ],
+      "display_answers": [
+        "{1: 2, 2: 3}"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-106",
+      "title": "Word填空106",
+      "stem_html": "<p>已知 x = 3，那么执行语句 x *= 6 之后， x 的值为 <span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "18"
+        ]
+      ],
+      "display_answers": [
+        "18"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-107",
+      "title": "Word填空107",
+      "stem_html": "<p>已知a = [1,2,3]，b = a[:]，执行b[0] = 0后，a的结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1,2,3]"
+        ]
+      ],
+      "display_answers": [
+        "[1,2,3]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-108",
+      "title": "Word填空108",
+      "stem_html": "<p>已知a = 1，b = 2，利用元组解包交换两个变量值的语句是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "a,b = b,a"
+        ]
+      ],
+      "display_answers": [
+        "a,b = b,a"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-109",
+      "title": "Word填空109",
+      "stem_html": "<p>已知d = {&#x27;a&#x27;:1, &#x27;b&#x27;:2}，获取字典中所有值的方法是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "d.values()"
+        ]
+      ],
+      "display_answers": [
+        "d.values()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-110",
+      "title": "Word填空110",
+      "stem_html": "<p>已知d = {&#x27;x&#x27;:1, &#x27;y&#x27;:2}，执行d.pop(&#x27;x&#x27;)后，字典d的结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "{'y':2}"
+        ]
+      ],
+      "display_answers": [
+        "{'y':2}"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-111",
+      "title": "Word填空111",
+      "stem_html": "<p>已知lst = [1,2,3,4]，删除列表中第一个出现的元素2的方法是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "lst.remove(2)"
+        ]
+      ],
+      "display_answers": [
+        "lst.remove(2)"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-112",
+      "title": "Word填空112",
+      "stem_html": "<p>已知lst = [1,2,3,4]，执行del lst[2]后，lst的结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1,2,4]"
+        ]
+      ],
+      "display_answers": [
+        "[1,2,4]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-113",
+      "title": "Word填空113",
+      "stem_html": "<p>已知lst = [1,2,3]，要将列表中的元素全部清空，使用的方法是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "lst.clear()"
+        ]
+      ],
+      "display_answers": [
+        "lst.clear()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-114",
+      "title": "Word填空114",
+      "stem_html": "<p>已知lst = [1,2,3]，要在列表末尾添加元素4，使用的方法是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "lst.append(4)"
+        ]
+      ],
+      "display_answers": [
+        "lst.append(4)"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-115",
+      "title": "Word填空115",
+      "stem_html": "<p>已知lst = [1,2,3]，执行lst += [4,5]后，lst的结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1,2,3,4,5]"
+        ]
+      ],
+      "display_answers": [
+        "[1,2,3,4,5]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-116",
+      "title": "Word填空116",
+      "stem_html": "<p>已知lst = [1,2,3]，执行lst.insert(0,0)后，lst的结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[0,1,2,3]"
+        ]
+      ],
+      "display_answers": [
+        "[0,1,2,3]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-117",
+      "title": "Word填空117",
+      "stem_html": "<p>已知lst = [1,3,2,5,4]，执行lst.sort(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>)后，lst的结果是<span style=\"color:#b45309;font-weight:700;\">【填空2】</span><span class=\"blank-slot\" data-blank-index=\"1\"></span>。</p>",
+      "answers": [
+        [
+          "[1,2,3,4,5]"
+        ]
+      ],
+      "display_answers": [
+        "[1,2,3,4,5]"
+      ],
+      "blank_labels": [
+        "填空1",
+        "填空2"
+      ]
+    },
+    {
+      "id": "docx-fill-118",
+      "title": "Word填空118",
+      "stem_html": "<p>已知lst = [5,4,3,2,1]，将列表反转的方法是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "lst.reverse()"
+        ]
+      ],
+      "display_answers": [
+        "lst.reverse()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-119",
+      "title": "Word填空119",
+      "stem_html": "<p>已知tup = (1,2,3,2,1,2)，执行tup.count(2)的结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "3"
+        ]
+      ],
+      "display_answers": [
+        "3"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-120",
+      "title": "Word填空120",
+      "stem_html": "<p>已知x = (1, 2, 3, 4)，则表达式x[1:3] + x[3:5]的值为(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>)</p>",
+      "answers": [
+        [
+          "(2,3,4)"
+        ]
+      ],
+      "display_answers": [
+        "(2,3,4)"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-121",
+      "title": "Word填空121",
+      "stem_html": "<p>已知x = [[<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>]] * 3，那么执行语句x[0].append(1)之后，x的值为<span style=\"color:#b45309;font-weight:700;\">【填空2】</span><span class=\"blank-slot\" data-blank-index=\"1\"></span>。</p>",
+      "answers": [
+        [
+          "[[1], [1], [1]]"
+        ]
+      ],
+      "display_answers": [
+        "[[1], [1], [1]]"
+      ],
+      "blank_labels": [
+        "填空1",
+        "填空2"
+      ]
+    },
+    {
+      "id": "docx-fill-122",
+      "title": "Word填空122",
+      "stem_html": "<p>已知x = [1, 2, 3]，那么连续执行y = [1, 2, 3]和y.append(4)这两条语句之后，x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1, 2, 3]"
+        ]
+      ],
+      "display_answers": [
+        "[1, 2, 3]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-123",
+      "title": "Word填空123",
+      "stem_html": "<p>已知列表 x = [1, 2]，那么执行语句 x.extend([3]) 之后， x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1, 2, 3]"
+        ]
+      ],
+      "display_answers": [
+        "[1, 2, 3]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-124",
+      "title": "Word填空124",
+      "stem_html": "<p>已知列表 x = [1, 3, 2]，那么执行语句 y = list(reversed(x)) 之后，x的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "[1, 3, 2]"
+        ]
+      ],
+      "display_answers": [
+        "[1, 3, 2]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-125",
+      "title": "Word填空125",
+      "stem_html": "<p>已知列表lst = [&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;d&#x27;]，则表达式len(lst)的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span></p>",
+      "answers": [
+        [
+          "4"
+        ]
+      ],
+      "display_answers": [
+        "4"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-126",
+      "title": "Word填空126",
+      "stem_html": "<p>已知字典 x = {i:str(i+3) for i in range(3)}，那么表达式 sum(item[0] for item in x.items(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>)) 的值为<span style=\"color:#b45309;font-weight:700;\">【填空2】</span><span class=\"blank-slot\" data-blank-index=\"1\"></span>。</p>",
+      "answers": [
+        [
+          "3"
+        ]
+      ],
+      "display_answers": [
+        "3"
+      ],
+      "blank_labels": [
+        "填空1",
+        "填空2"
+      ]
+    },
+    {
+      "id": "docx-fill-127",
+      "title": "Word填空127",
+      "stem_html": "<p>以二进制写入模式打开文件的模式字符是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "wb"
+        ]
+      ],
+      "display_answers": [
+        "wb"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-128",
+      "title": "Word填空128",
+      "stem_html": "<p>以写入模式打开文件，若文件已存在会覆盖原内容，对应的模式字符串是(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>)</p>",
+      "answers": [
+        [
+          "w"
+        ]
+      ],
+      "display_answers": [
+        "w"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-129",
+      "title": "Word填空129",
+      "stem_html": "<p>以只读模式打开文件的模式字符是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "r"
+        ]
+      ],
+      "display_answers": [
+        "r"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-130",
+      "title": "Word填空130",
+      "stem_html": "<p>元组 t=(1,2,3)，表达式 t*2 的结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "(1,2,3,1,2,3)"
+        ]
+      ],
+      "display_answers": [
+        "(1,2,3,1,2,3)"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-131",
+      "title": "Word填空131",
+      "stem_html": "<p>在Python中<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>表示空类型。</p>",
+      "answers": [
+        [
+          "None"
+        ]
+      ],
+      "display_answers": [
+        "None"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-132",
+      "title": "Word填空132",
+      "stem_html": "<p>在Python中使用内置语法<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>来声明全局变量。</p>",
+      "answers": [
+        [
+          "globals"
+        ]
+      ],
+      "display_answers": [
+        "globals"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-133",
+      "title": "Word填空133",
+      "stem_html": "<p>执行 {x for x in [1, 2, 2, 3, 3, 3]} 的值为（<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>）</p>",
+      "answers": [
+        [
+          "{1,2,3}"
+        ]
+      ],
+      "display_answers": [
+        "{1,2,3}"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-134",
+      "title": "Word填空134",
+      "stem_html": "<p>执行 a = [1,2]; b = a; b = b + [3]; print(a) 输出（<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>）</p>",
+      "answers": [
+        [
+          "[1,2]"
+        ]
+      ],
+      "display_answers": [
+        "[1,2]"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-135",
+      "title": "Word填空135",
+      "stem_html": "<p>执行 d = {&#x27;a&#x27;: 1, &#x27;b&#x27;: 2, &#x27;c&#x27;: 3}; list(d.keys(<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>))[1] 的值为</p>",
+      "answers": [
+        [
+          "\"b\""
+        ]
+      ],
+      "display_answers": [
+        "\"b\""
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-136",
+      "title": "Word填空136",
+      "stem_html": "<p>执行 s1 = {1, 2, 3}; s2 = {2, 3, 4}; print(s1 ^ s2) 的输出结果是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span></p>",
+      "answers": [
+        [
+          "{1,4}"
+        ]
+      ],
+      "display_answers": [
+        "{1,4}"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-137",
+      "title": "Word填空137",
+      "stem_html": "<p>执行代码 x, y, z = sorted([1, 3, 2]) 之后，变量y的值为<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "2"
+        ]
+      ],
+      "display_answers": [
+        "2"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-138",
+      "title": "Word填空138",
+      "stem_html": "<p>字典 x={i:i**2 for i in range(3)}，x[2] 的值是<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>。</p>",
+      "answers": [
+        [
+          "4"
+        ]
+      ],
+      "display_answers": [
+        "4"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-139",
+      "title": "Word填空139",
+      "stem_html": "<p>字典对象的<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>方法返回字典中的“键-值对”列表。</p>",
+      "answers": [
+        [
+          "items()"
+        ]
+      ],
+      "display_answers": [
+        "items()"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
+    },
+    {
+      "id": "docx-fill-140",
+      "title": "Word填空140",
+      "stem_html": "<p>字典中，键必须为（<span style=\"color:#b45309;font-weight:700;\">【填空1】</span><span class=\"blank-slot\" data-blank-index=\"0\"></span>）类型，而值可以是任意类型。</p>",
+      "answers": [
+        [
+          "不可变"
+        ]
+      ],
+      "display_answers": [
+        "不可变"
+      ],
+      "blank_labels": [
+        "填空1"
+      ]
     }
   ],
   "single_choice_questions": [
@@ -10747,6 +13007,11 @@
     }
   ],
   "meta": {
+    "docx_fill": {
+      "missing_source": false,
+      "source_path": "C:\\Users\\123\\Downloads\\python填空.docx",
+      "count": 140
+    },
     "single_choice": {
       "missing_source": false,
       "source_path": "C:\\Users\\123\\Downloads\\单选题题库.xlsx",
