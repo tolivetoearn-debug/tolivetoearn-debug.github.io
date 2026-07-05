@@ -301,6 +301,17 @@ textarea {
   color: #b91c1c;
 }
 
+.navigator-flag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #fff7ed;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .question-header {
   display: flex;
   justify-content: space-between;
@@ -606,6 +617,12 @@ textarea {
 
 .hidden {
   display: none !important;
+}
+
+#markQuestionButton.active {
+  border-color: #fdba74;
+  background: #fff7ed;
+  color: #c2410c;
 }
 
 @media (max-width: 1080px) {

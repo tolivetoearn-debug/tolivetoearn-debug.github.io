@@ -34,6 +34,7 @@ const programAnswer = document.getElementById("programAnswer");
 const programAnswerPanel = document.getElementById("programAnswerPanel");
 const primaryAction = document.getElementById("primaryAction");
 const prevAction = document.getElementById("prevAction");
+const markQuestionButton = document.getElementById("markQuestionButton");
 const wrongOnlyButton = document.getElementById("wrongOnlyButton");
 const unfinishedOnlyButton = document.getElementById("unfinishedOnlyButton");
 const allQuestionsButton = document.getElementById("allQuestionsButton");
@@ -63,6 +64,7 @@ async function init() {
 
   primaryAction.addEventListener("click", handlePrimaryAction);
   prevAction.addEventListener("click", () => navigateRelative(-1));
+  markQuestionButton.addEventListener("click", toggleQuestionMarked);
   wrongOnlyButton.addEventListener("click", () => switchQuestionSet("wrong"));
   unfinishedOnlyButton.addEventListener("click", () => switchQuestionSet("unfinished"));
   allQuestionsButton.addEventListener("click", () => switchQuestionSet("all"));
@@ -170,6 +172,7 @@ function renderCurrentQuestion() {
     programAnswerPanel.innerHTML = "";
     primaryAction.disabled = true;
     prevAction.disabled = true;
+    markQuestionButton.disabled = true;
     renderNavigator();
     updateToolbarButtons();
     return;
@@ -177,6 +180,7 @@ function renderCurrentQuestion() {
 
   primaryAction.disabled = false;
   prevAction.disabled = state.currentList.length <= 1;
+  markQuestionButton.disabled = false;
   feedbackPanel.classList.add("hidden");
   feedbackPanel.innerHTML = "";
   programComposer.classList.add("hidden");
@@ -218,6 +222,9 @@ function buildQuestionMetaText(question) {
     parts.push("未做题模式");
   }
   parts.push(status.label);
+  if (isQuestionMarked(state.currentMode, question.id)) {
+    parts.push("已标记");
+  }
   if (progressStore.shuffleQuestionOrder) {
     parts.push("题序已打乱");
   }
@@ -591,6 +598,7 @@ function renderNavigator() {
           <span class="navigator-title">${escapeHtml(question.title)}</span>
           <span class="navigator-status-row">
             <span class="navigator-status ${status.key}">${status.label}</span>
+            ${isQuestionMarked(state.currentMode, question.id) ? '<span class="navigator-flag">已标记</span>' : ""}
           </span>
         </span>
       </button>
@@ -610,6 +618,7 @@ function buildNavigatorSummary(list) {
   let wrong = 0;
   let correct = 0;
   let done = 0;
+  let marked = 0;
 
   allQuestions.forEach((question) => {
     const status = getQuestionStatus(state.currentMode, question);
@@ -617,13 +626,14 @@ function buildNavigatorSummary(list) {
     if (status.key === "wrong") wrong += 1;
     if (status.key === "correct") correct += 1;
     if (status.key === "done") done += 1;
+    if (isQuestionMarked(state.currentMode, question.id)) marked += 1;
   });
 
   if (state.currentMode === "program") {
-    return `未做 ${pending} · 已做 ${done} · 错题 ${wrong}`;
+    return `未做 ${pending} · 已做 ${done} · 错题 ${wrong} · 标记 ${marked}`;
   }
 
-  return `未做 ${pending} · 正确 ${correct} · 错题 ${wrong}`;
+  return `未做 ${pending} · 正确 ${correct} · 错题 ${wrong} · 标记 ${marked}`;
 }
 
 function getQuestionStatus(mode, question) {
@@ -687,6 +697,23 @@ function toggleProgramWrong() {
   renderNavigator();
 }
 
+function toggleQuestionMarked() {
+  const question = state.currentList[state.currentIndex];
+  if (!question || !state.currentMode) return;
+
+  const markedSet = getMarkedSet(state.currentMode);
+  if (markedSet.has(question.id)) {
+    markedSet.delete(question.id);
+  } else {
+    markedSet.add(question.id);
+  }
+  saveMarkedSet(state.currentMode, markedSet);
+  questionMeta.textContent = buildQuestionMetaText(question);
+  updateProgressText();
+  renderNavigator();
+  updateToolbarButtons();
+}
+
 function toggleQuestionShuffle() {
   saveCurrentQuestionState();
   const currentQuestionId = state.currentList[state.currentIndex]?.id;
@@ -727,9 +754,12 @@ function updateToolbarButtons() {
   allQuestionsButton.classList.toggle("hidden", !state.wrongOnly && !state.unfinishedOnly);
   questionShuffleWrap.classList.toggle("hidden", !state.currentMode);
   shuffleToggleWrap.classList.toggle("hidden", state.currentMode !== "single");
+  const question = state.currentList[state.currentIndex];
+  const isMarked = question && state.currentMode ? isQuestionMarked(state.currentMode, question.id) : false;
+  markQuestionButton.textContent = isMarked ? "取消标记" : "标记本题";
+  markQuestionButton.classList.toggle("active", !!isMarked);
 
   if (state.currentMode === "program") {
-    const question = state.currentList[state.currentIndex];
     const isWrong = question ? getWrongSet("program").has(question.id) : false;
     programMarkWrong.textContent = isWrong ? "取消错题" : "记为错题";
   }
@@ -741,12 +771,13 @@ function updateProgressText() {
   const pendingCount = getQuestionsByMode(state.currentMode)
     .filter((question) => getQuestionStatus(state.currentMode, question).key === "pending").length;
   const wrongCount = getWrongSet(state.currentMode).size;
+  const markedCount = getMarkedSet(state.currentMode).size;
   const current = state.currentList.length === 0 ? 0 : state.currentIndex + 1;
   if (state.unfinishedOnly) {
-    progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 未做 ${pendingCount} 题`;
+    progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 未做 ${pendingCount} 题 · 标记 ${markedCount} 题`;
     return;
   }
-  progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 错题 ${wrongCount} 题`;
+  progressText.textContent = `第 ${current} / ${state.currentList.length} 题 · 全部 ${modeCount} 题 · 错题 ${wrongCount} 题 · 标记 ${markedCount} 题`;
 }
 
 function getOrderedSingleChoiceOptions(question) {
@@ -868,6 +899,10 @@ function ensureProgressDefaults(raw) {
     singleWrongIds: Array.isArray(raw?.singleWrongIds) ? raw.singleWrongIds : [],
     judgeWrongIds: Array.isArray(raw?.judgeWrongIds) ? raw.judgeWrongIds : [],
     programWrongIds: Array.isArray(raw?.programWrongIds) ? raw.programWrongIds : [],
+    fillMarkedIds: Array.isArray(raw?.fillMarkedIds) ? raw.fillMarkedIds : [],
+    singleMarkedIds: Array.isArray(raw?.singleMarkedIds) ? raw.singleMarkedIds : [],
+    judgeMarkedIds: Array.isArray(raw?.judgeMarkedIds) ? raw.judgeMarkedIds : [],
+    programMarkedIds: Array.isArray(raw?.programMarkedIds) ? raw.programMarkedIds : [],
     fillResults: raw?.fillResults && typeof raw.fillResults === "object" ? raw.fillResults : {},
     singleResults: raw?.singleResults && typeof raw.singleResults === "object" ? raw.singleResults : {},
     judgeResults: raw?.judgeResults && typeof raw.judgeResults === "object" ? raw.judgeResults : {},
@@ -897,6 +932,13 @@ function getWrongSet(mode) {
   return new Set(progressStore.programWrongIds);
 }
 
+function getMarkedSet(mode) {
+  if (mode === "fill") return new Set(progressStore.fillMarkedIds);
+  if (mode === "single") return new Set(progressStore.singleMarkedIds);
+  if (mode === "judge") return new Set(progressStore.judgeMarkedIds);
+  return new Set(progressStore.programMarkedIds);
+}
+
 function saveWrongSet(mode, wrongSet) {
   if (mode === "fill") {
     progressStore.fillWrongIds = [...wrongSet];
@@ -908,6 +950,23 @@ function saveWrongSet(mode, wrongSet) {
     progressStore.programWrongIds = [...wrongSet];
   }
   saveProgress();
+}
+
+function saveMarkedSet(mode, markedSet) {
+  if (mode === "fill") {
+    progressStore.fillMarkedIds = [...markedSet];
+  } else if (mode === "single") {
+    progressStore.singleMarkedIds = [...markedSet];
+  } else if (mode === "judge") {
+    progressStore.judgeMarkedIds = [...markedSet];
+  } else {
+    progressStore.programMarkedIds = [...markedSet];
+  }
+  saveProgress();
+}
+
+function isQuestionMarked(mode, id) {
+  return getMarkedSet(mode).has(id);
 }
 
 function saveProgramDraft(id, value) {
