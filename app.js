@@ -41,6 +41,8 @@ const COURSE_MODE_GROUPS = {
 
 const CHOICE_DISPLAY_LABELS = ["A", "B", "C", "D", "E", "F"];
 const NUMBER_REWRITE_FACTORS = [0.8, 1.2, 1.5, 2];
+const RESOURCE_DB_NAME = "quiz-web-resources-v1";
+const RESOURCE_DB_STORE = "uploads";
 const AI_MODEL_DISPLAY = "ChatGPT 5.4";
 const LEGACY_PROGRESS_STORAGE_KEY = "quiz-web-progress-v3";
 const USER_CENTER_STORAGE_KEY = "quiz-web-user-center-v1";
@@ -132,6 +134,82 @@ JSON 结构必须是：
 }
 `;
 
+const PUBLIC_RESOURCES = [
+  {
+    id: "finance-objective-notes",
+    title: "中财客观题复习知识点",
+    originalName: "客观题复习知识点 (2).pdf",
+    fileName: "finance-objective-notes.pdf",
+    course: "中级财务",
+    description: "客观题知识点资料，适合配合模拟考试和选择判断题一起复习。",
+    type: "PDF",
+    size: 253994,
+  },
+  {
+    id: "finance-subjective-outline",
+    title: "中财期末主观题复习提纲",
+    originalName: "2025-2026中财（下）-期末主观题复习提纲.docx",
+    fileName: "finance-subjective-outline.docx",
+    course: "中级财务",
+    description: "简答题、计算题、业务核算题的主观题复习提纲。",
+    type: "DOCX",
+    size: 38564,
+  },
+  {
+    id: "python-question-bank-1",
+    title: "Python 程序类题库（1）",
+    originalName: "程序类题库（1）.pdf",
+    fileName: "python-question-bank-1.pdf",
+    course: "Python",
+    description: "程序填空与程序题训练资料第一部分。",
+    type: "PDF",
+    size: 169575,
+  },
+  {
+    id: "python-question-bank-2",
+    title: "Python 程序类题库（2）",
+    originalName: "程序类题库（2）.pdf",
+    fileName: "python-question-bank-2.pdf",
+    course: "Python",
+    description: "程序填空与程序题训练资料第二部分。",
+    type: "PDF",
+    size: 363955,
+  },
+  {
+    id: "python-fill-blank",
+    title: "Python 填空题补充资料",
+    originalName: "python填空.docx",
+    fileName: "python-fill-blank.docx",
+    course: "Python",
+    description: "补充填空资料，适合配合站内填空题反复回看。",
+    type: "DOCX",
+    size: 32249,
+  },
+  {
+    id: "python-single-choice-bank",
+    title: "Python 单选题题库",
+    originalName: "单选题题库.xlsx",
+    fileName: "python-single-choice-bank.xlsx",
+    course: "Python",
+    description: "单选题原始题库表，方便单独下载核对。",
+    type: "XLSX",
+    size: 34796,
+  },
+  {
+    id: "python-judge-bank",
+    title: "Python 判断题题库",
+    originalName: "判断题题库.xlsx",
+    fileName: "python-judge-bank.xlsx",
+    course: "Python",
+    description: "判断题原始题库表，方便单独下载核对。",
+    type: "XLSX",
+    size: 15720,
+  },
+].map((item) => ({
+  ...item,
+  href: `./assets/resources/${item.fileName}`,
+}));
+
 const AI_EXPLAIN_SYSTEM_PROMPT = `
 你是刷题网站里的中文讲题老师，负责把当前这道题讲清楚。
 
@@ -213,6 +291,9 @@ const state = {
   aiLoading: false,
   questionChatLoading: false,
   homeChatLoading: false,
+  resourceUploads: [],
+  resourceUploadsLoading: false,
+  resourceDbPromise: null,
   wrongReviewPlanLoading: false,
   wrongReviewItemLoadingKey: "",
   wrongReviewPlanHtml: "",
@@ -221,6 +302,7 @@ const state = {
 
 const homeView = document.getElementById("homeView");
 const reviewView = document.getElementById("reviewView");
+const resourcesView = document.getElementById("resourcesView");
 const practiceView = document.getElementById("practiceView");
 const modeTitle = document.getElementById("modeTitle");
 const progressText = document.getElementById("progressText");
@@ -264,6 +346,7 @@ const newExamSessionButton = document.getElementById("newExamSessionButton");
 const headerHomeLink = document.getElementById("headerHomeLink");
 const headerFinanceExamLink = document.getElementById("headerFinanceExamLink");
 const headerWrongReviewLink = document.getElementById("headerWrongReviewLink");
+const headerResourcesLink = document.getElementById("headerResourcesLink");
 const heroDoneCount = document.getElementById("heroDoneCount");
 const heroDoneMeta = document.getElementById("heroDoneMeta");
 const heroWrongCount = document.getElementById("heroWrongCount");
@@ -311,6 +394,17 @@ const practiceModeBadge = document.getElementById("practiceModeBadge");
 const practiceSessionInfo = document.getElementById("practiceSessionInfo");
 const practiceQuestionTypeChip = document.getElementById("practiceQuestionTypeChip");
 const practiceQuestionIndexChip = document.getElementById("practiceQuestionIndexChip");
+const resourceUploadTrigger = document.getElementById("resourceUploadTrigger");
+const resourceUploadInput = document.getElementById("resourceUploadInput");
+const resourceUploadStatus = document.getElementById("resourceUploadStatus");
+const publicResourceCount = document.getElementById("publicResourceCount");
+const uploadedResourceCount = document.getElementById("uploadedResourceCount");
+const financeResourceCount = document.getElementById("financeResourceCount");
+const pythonResourceCount = document.getElementById("pythonResourceCount");
+const publicResourceMeta = document.getElementById("publicResourceMeta");
+const uploadedResourceMeta = document.getElementById("uploadedResourceMeta");
+const publicResourceGrid = document.getElementById("publicResourceGrid");
+const uploadedResourceGrid = document.getElementById("uploadedResourceGrid");
 
 let userCenterStore = ensureUserCenterDefaults(loadUserCenterStore(), loadLegacyProgress());
 let progressStore = getActiveProfile().progress;
@@ -349,6 +443,11 @@ async function init() {
   renderUserCenter();
   renderHomeChatMessages();
   updateHomeChatStatus();
+  renderResourcesCenter();
+  loadUploadedResources().catch((error) => {
+    console.error(error);
+    updateResourceUploadStatus("本机上传区加载失败，刷新后再试");
+  });
 
   document.querySelectorAll("[data-mode]").forEach((button) => {
     button.addEventListener("click", () => startMode(button.dataset.mode));
@@ -401,7 +500,10 @@ async function init() {
   headerHomeLink?.addEventListener("click", goHome);
   headerFinanceExamLink?.addEventListener("click", () => startMode("financeExam"));
   headerWrongReviewLink?.addEventListener("click", showWrongReviewCenter);
+  headerResourcesLink?.addEventListener("click", showResourcesCenter);
   wrongReviewPlanButton?.addEventListener("click", handleWrongReviewPlanRequest);
+  resourceUploadTrigger?.addEventListener("click", () => resourceUploadInput?.click());
+  resourceUploadInput?.addEventListener("change", handleResourceUploadInput);
 
   shuffleQuestionOrderToggle.addEventListener("change", toggleQuestionShuffle);
   memorizeModeToggle.addEventListener("change", toggleMemorizeMode);
@@ -792,6 +894,16 @@ function showPractice() {
   updatePracticeHeader();
 }
 
+function showResourcesCenter() {
+  saveCurrentQuestionState();
+  renderResourcesCenter();
+  setActiveView("resources");
+  document.title = `学习资源｜1302学习中心`;
+  if (location.hash !== "#resources") {
+    history.replaceState(null, "", "#resources");
+  }
+}
+
 function goHome() {
   saveCurrentQuestionState();
   setActiveView("home");
@@ -818,6 +930,7 @@ function showWrongReviewCenter() {
 function setActiveView(viewKey) {
   homeView?.classList.toggle("active", viewKey === "home");
   reviewView?.classList.toggle("active", viewKey === "review");
+  resourcesView?.classList.toggle("active", viewKey === "resources");
   practiceView?.classList.toggle("active", viewKey === "practice");
   homeShortcut?.classList.toggle("hidden", viewKey === "home");
 
@@ -825,6 +938,257 @@ function setActiveView(viewKey) {
   headerHomeLink?.classList.toggle("active", homeShouldBeActive);
   headerFinanceExamLink?.classList.toggle("active", viewKey === "practice" && state.currentMode === "financeExam");
   headerWrongReviewLink?.classList.toggle("active", viewKey === "review");
+  headerResourcesLink?.classList.toggle("active", viewKey === "resources");
+}
+
+function updateResourceUploadStatus(text) {
+  if (!resourceUploadStatus) return;
+  resourceUploadStatus.textContent = text || "支持 PDF / DOCX / XLSX / TXT / MD / 图片";
+}
+
+function formatFileSize(size) {
+  const bytes = Number(size || 0);
+  if (!Number.isFinite(bytes) || bytes <= 0) return "未知大小";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1).replace(/\.0$/u, "")} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1).replace(/\.0$/u, "")} MB`;
+}
+
+function getResourceFileType(name, fallbackType = "") {
+  const source = String(name || fallbackType || "").trim();
+  const dotIndex = source.lastIndexOf(".");
+  if (dotIndex >= 0) {
+    return source.slice(dotIndex + 1).toUpperCase();
+  }
+  return String(fallbackType || "FILE").replace(/^application\//u, "").toUpperCase() || "FILE";
+}
+
+function guessResourceCourse(name) {
+  const text = String(name || "").toLowerCase();
+  if (/(python|程序|单选|判断|填空)/u.test(text)) return "Python";
+  if (/(中财|财务|主观|客观|提纲|知识点)/u.test(text)) return "中级财务";
+  return "未分类";
+}
+
+function getResourceCourseClass(course) {
+  return course === "中级财务" ? "finance" : course === "Python" ? "python" : "neutral";
+}
+
+function buildResourceCardHtml(item, options = {}) {
+  const uploaded = options.uploaded === true;
+  const courseClass = getResourceCourseClass(item.course);
+  const timeHtml = uploaded && item.uploadedAt
+    ? `<div class="resource-card-meta">上传时间：${escapeHtml(formatProfileTime(item.uploadedAt))}</div>`
+    : `<div class="resource-card-meta">原文件：${escapeHtml(item.originalName || item.name || item.title || "")}</div>`;
+  const deleteButton = uploaded
+    ? `<button class="ghost-button resource-delete-button" type="button" data-upload-delete="${escapeHtml(item.id)}">删除</button>`
+    : "";
+  return `
+    <article class="resource-card ${uploaded ? "uploaded" : "public"}">
+      <div class="resource-card-top">
+        <div class="resource-card-badges">
+          <span class="resource-course-tag ${courseClass}">${escapeHtml(item.course || "未分类")}</span>
+          <span class="resource-file-tag">${escapeHtml(item.type || getResourceFileType(item.originalName || item.name || item.title))}</span>
+        </div>
+        <span class="resource-file-size">${escapeHtml(formatFileSize(item.size))}</span>
+      </div>
+      <h4>${escapeHtml(item.title || item.name || "未命名资料")}</h4>
+      <p>${escapeHtml(item.description || "资料已上传，可以直接下载。")}</p>
+      ${timeHtml}
+      <div class="resource-card-actions">
+        <a class="primary-button resource-download-link" href="${escapeHtml(item.href)}" download="${escapeHtml(item.downloadName || item.originalName || item.name || item.title || "资料")}">下载资料</a>
+        ${deleteButton}
+      </div>
+    </article>
+  `;
+}
+
+function renderPublicResources() {
+  if (!publicResourceGrid) return;
+  publicResourceGrid.innerHTML = PUBLIC_RESOURCES.map((item) => buildResourceCardHtml(item)).join("");
+}
+
+function renderUploadedResources() {
+  if (!uploadedResourceGrid) return;
+  if (state.resourceUploadsLoading) {
+    uploadedResourceGrid.innerHTML = `
+      <article class="resource-empty-card">
+        <h4>正在读取你上传的资料</h4>
+        <p>马上就好。</p>
+      </article>
+    `;
+    return;
+  }
+
+  if (!state.resourceUploads.length) {
+    uploadedResourceGrid.innerHTML = `
+      <article class="resource-empty-card">
+        <h4>还没有本机上传资料</h4>
+        <p>点上面的“上传资料”就能把文件加进当前浏览器的学习资源区，之后可以继续下载或回看。</p>
+      </article>
+    `;
+    return;
+  }
+
+  uploadedResourceGrid.innerHTML = state.resourceUploads.map((item) => buildResourceCardHtml(item, { uploaded: true })).join("");
+  uploadedResourceGrid.querySelectorAll("[data-upload-delete]").forEach((button) => {
+    button.addEventListener("click", () => deleteUploadedResource(button.dataset.uploadDelete));
+  });
+}
+
+function updateResourceSummaryCards() {
+  const uploaded = state.resourceUploads || [];
+  const financeCount = PUBLIC_RESOURCES.filter((item) => item.course === "中级财务").length
+    + uploaded.filter((item) => item.course === "中级财务").length;
+  const pythonCount = PUBLIC_RESOURCES.filter((item) => item.course === "Python").length
+    + uploaded.filter((item) => item.course === "Python").length;
+
+  if (publicResourceCount) publicResourceCount.textContent = String(PUBLIC_RESOURCES.length);
+  if (uploadedResourceCount) uploadedResourceCount.textContent = String(uploaded.length);
+  if (financeResourceCount) financeResourceCount.textContent = String(financeCount);
+  if (pythonResourceCount) pythonResourceCount.textContent = String(pythonCount);
+  if (publicResourceMeta) publicResourceMeta.textContent = PUBLIC_RESOURCES.length ? `所有人都能下载 · 共 ${PUBLIC_RESOURCES.length} 份` : "当前还没有公共资料";
+  if (uploadedResourceMeta) uploadedResourceMeta.textContent = uploaded.length ? `当前浏览器已保存 ${uploaded.length} 份` : "你还没在当前浏览器上传资料";
+}
+
+function renderResourcesCenter() {
+  renderPublicResources();
+  renderUploadedResources();
+  updateResourceSummaryCards();
+}
+
+function openResourceDb() {
+  if (!("indexedDB" in window)) {
+    return Promise.reject(new Error("当前浏览器不支持本地上传资料库"));
+  }
+  if (state.resourceDbPromise) return state.resourceDbPromise;
+  state.resourceDbPromise = new Promise((resolve, reject) => {
+    const request = indexedDB.open(RESOURCE_DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(RESOURCE_DB_STORE)) {
+        db.createObjectStore(RESOURCE_DB_STORE, { keyPath: "id" });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("资料库初始化失败"));
+  });
+  return state.resourceDbPromise;
+}
+
+function runResourceStore(mode, handler) {
+  return openResourceDb().then((db) => new Promise((resolve, reject) => {
+    const transaction = db.transaction(RESOURCE_DB_STORE, mode);
+    const store = transaction.objectStore(RESOURCE_DB_STORE);
+    const request = handler(store);
+    transaction.oncomplete = () => resolve(request?.result);
+    transaction.onerror = () => reject(transaction.error || request?.error || new Error("资料库操作失败"));
+    transaction.onabort = () => reject(transaction.error || request?.error || new Error("资料库操作失败"));
+  }));
+}
+
+function normalizeUploadedResourceRecord(item) {
+  return {
+    id: String(item?.id || ""),
+    title: String(item?.title || item?.name || "未命名资料"),
+    name: String(item?.name || item?.originalName || item?.title || "未命名资料"),
+    originalName: String(item?.originalName || item?.name || item?.title || "未命名资料"),
+    description: String(item?.description || "当前浏览器本地上传资料").trim(),
+    course: String(item?.course || guessResourceCourse(item?.name || item?.title)).trim() || "未分类",
+    type: String(item?.type || getResourceFileType(item?.name)).trim() || "FILE",
+    size: Number(item?.size || 0),
+    uploadedAt: String(item?.uploadedAt || ""),
+    href: String(item?.dataUrl || item?.href || ""),
+    downloadName: String(item?.originalName || item?.name || item?.title || "资料"),
+  };
+}
+
+async function loadUploadedResources() {
+  state.resourceUploadsLoading = true;
+  renderResourcesCenter();
+  try {
+    const rows = await runResourceStore("readonly", (store) => store.getAll());
+    state.resourceUploads = (Array.isArray(rows) ? rows : [])
+      .map((item) => normalizeUploadedResourceRecord(item))
+      .filter((item) => item.id && item.href)
+      .sort((left, right) => String(right.uploadedAt || "").localeCompare(String(left.uploadedAt || "")));
+    renderResourcesCenter();
+  } finally {
+    state.resourceUploadsLoading = false;
+    renderResourcesCenter();
+  }
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error(`读取文件失败：${file.name}`));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleResourceUploadInput() {
+  const files = [...(resourceUploadInput?.files || [])];
+  if (resourceUploadInput) {
+    resourceUploadInput.value = "";
+  }
+  if (!files.length) return;
+
+  updateResourceUploadStatus(`正在上传 ${files.length} 份资料...`);
+  try {
+    let savedCount = 0;
+    const skipped = [];
+
+    for (const file of files) {
+      if (file.size > 12 * 1024 * 1024) {
+        skipped.push(`${file.name} 超过 12MB`);
+        continue;
+      }
+      const dataUrl = await readFileAsDataUrl(file);
+      const record = {
+        id: `upload-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        title: file.name.replace(/\.[^.]+$/u, "") || file.name,
+        name: file.name,
+        originalName: file.name,
+        description: "当前浏览器本地上传资料",
+        course: guessResourceCourse(file.name),
+        type: getResourceFileType(file.name, file.type),
+        size: file.size,
+        uploadedAt: new Date().toISOString(),
+        dataUrl,
+      };
+      await runResourceStore("readwrite", (store) => store.put(record));
+      savedCount += 1;
+    }
+
+    await loadUploadedResources();
+    if (savedCount && skipped.length) {
+      updateResourceUploadStatus(`已上传 ${savedCount} 份；${skipped.join("；")}`);
+    } else if (savedCount) {
+      updateResourceUploadStatus(`已上传 ${savedCount} 份资料`);
+    } else if (skipped.length) {
+      updateResourceUploadStatus(skipped.join("；"));
+    } else {
+      updateResourceUploadStatus("这次没有成功上传资料");
+    }
+  } catch (error) {
+    console.error(error);
+    updateResourceUploadStatus(error.message || "上传失败，等会再试一次");
+  }
+}
+
+async function deleteUploadedResource(id) {
+  if (!id) return;
+  updateResourceUploadStatus("正在删除资料...");
+  try {
+    await runResourceStore("readwrite", (store) => store.delete(id));
+    await loadUploadedResources();
+    updateResourceUploadStatus("资料已删除");
+  } catch (error) {
+    console.error(error);
+    updateResourceUploadStatus(error.message || "删除失败，等会再试一次");
+  }
 }
 
 function renderCurrentQuestion() {
@@ -4509,6 +4873,10 @@ function escapeHtml(value) {
 
 function applyRouteFromHash() {
   const rawMode = location.hash.replace("#", "");
+  if (["resources", "resource", "study-resources"].includes(rawMode)) {
+    showResourcesCenter();
+    return;
+  }
   if (["review", "wrong-review", "wrongReview"].includes(rawMode)) {
     if (!state.data) return;
     if (!reviewView?.classList.contains("active")) {
@@ -4530,6 +4898,9 @@ function applyRouteFromHash() {
     goHome();
   }
   if (reviewView?.classList.contains("active")) {
+    goHome();
+  }
+  if (resourcesView?.classList.contains("active")) {
     goHome();
   }
 }
