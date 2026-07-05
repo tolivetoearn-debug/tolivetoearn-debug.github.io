@@ -1,4 +1,5 @@
 const MODE_LABELS = {
+  codefill: "程序填空",
   fill: "填空题",
   single: "单选题",
   judge: "判断题",
@@ -131,7 +132,12 @@ function switchQuestionSet(filterMode) {
 }
 
 function getQuestionsByMode(mode) {
-  if (mode === "fill") return state.data.fill_questions || [];
+  if (mode === "codefill") {
+    return (state.data.fill_questions || []).filter((question) => isProgramFillQuestion(question));
+  }
+  if (mode === "fill") {
+    return (state.data.fill_questions || []).filter((question) => !isProgramFillQuestion(question));
+  }
   if (mode === "single") return state.data.single_choice_questions || [];
   if (mode === "judge") return state.data.judgment_questions || [];
   return state.data.program_questions || [];
@@ -194,7 +200,7 @@ function renderCurrentQuestion() {
   questionTitle.textContent = question.title;
   questionMeta.textContent = buildQuestionMetaText(question);
 
-  if (state.currentMode === "fill") {
+  if (isFillMode(state.currentMode)) {
     renderFillQuestion(question);
     primaryAction.textContent = "下一题";
   } else if (state.currentMode === "single") {
@@ -641,7 +647,7 @@ function getQuestionStatus(mode, question) {
     return { key: "pending", label: "未做" };
   }
 
-  if (mode === "fill") {
+  if (isFillMode(mode)) {
     const result = progressStore.fillResults?.[question.id];
     if (result === "correct") return { key: "correct", label: "正确" };
     if (result === "wrong" || progressStore.fillWrongIds.includes(question.id)) {
@@ -926,21 +932,21 @@ function saveProgress() {
 }
 
 function getWrongSet(mode) {
-  if (mode === "fill") return new Set(progressStore.fillWrongIds);
+  if (isFillMode(mode)) return new Set(progressStore.fillWrongIds);
   if (mode === "single") return new Set(progressStore.singleWrongIds);
   if (mode === "judge") return new Set(progressStore.judgeWrongIds);
   return new Set(progressStore.programWrongIds);
 }
 
 function getMarkedSet(mode) {
-  if (mode === "fill") return new Set(progressStore.fillMarkedIds);
+  if (isFillMode(mode)) return new Set(progressStore.fillMarkedIds);
   if (mode === "single") return new Set(progressStore.singleMarkedIds);
   if (mode === "judge") return new Set(progressStore.judgeMarkedIds);
   return new Set(progressStore.programMarkedIds);
 }
 
 function saveWrongSet(mode, wrongSet) {
-  if (mode === "fill") {
+  if (isFillMode(mode)) {
     progressStore.fillWrongIds = [...wrongSet];
   } else if (mode === "single") {
     progressStore.singleWrongIds = [...wrongSet];
@@ -953,7 +959,7 @@ function saveWrongSet(mode, wrongSet) {
 }
 
 function saveMarkedSet(mode, markedSet) {
-  if (mode === "fill") {
+  if (isFillMode(mode)) {
     progressStore.fillMarkedIds = [...markedSet];
   } else if (mode === "single") {
     progressStore.singleMarkedIds = [...markedSet];
@@ -967,6 +973,14 @@ function saveMarkedSet(mode, markedSet) {
 
 function isQuestionMarked(mode, id) {
   return getMarkedSet(mode).has(id);
+}
+
+function isFillMode(mode) {
+  return mode === "fill" || mode === "codefill";
+}
+
+function isProgramFillQuestion(question) {
+  return !String(question?.id || "").startsWith("docx-fill-");
 }
 
 function saveProgramDraft(id, value) {
@@ -986,7 +1000,7 @@ function escapeHtml(value) {
 
 function applyRouteFromHash() {
   const mode = location.hash.replace("#", "");
-  if (mode === "fill" || mode === "single" || mode === "judge" || mode === "program") {
+  if (mode === "codefill" || mode === "fill" || mode === "single" || mode === "judge" || mode === "program") {
     if (!state.data) return;
     if (state.currentMode !== mode || !practiceView.classList.contains("active")) {
       startMode(mode);
