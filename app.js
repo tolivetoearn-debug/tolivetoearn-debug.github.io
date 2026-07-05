@@ -8,12 +8,25 @@ const MODE_LABELS = {
   program: "程序题",
 };
 
+const COURSE_LABELS = {
+  codefill: "Python",
+  fill: "Python",
+  single: "Python",
+  judge: "Python",
+  program: "Python",
+  short: "中级财务",
+  calc: "中级财务",
+};
+
 const CHOICE_DISPLAY_LABELS = ["A", "B", "C", "D", "E", "F"];
 
 const AI_CONFIG = {
   enabled: true,
   baseUrl: "https://ergouzi.life/v1",
-  apiKey: "sk-CJF1cKOLFS80ovxx0CO3TRvudI7ivRVHTgTVZ7a9xUVOzDGK",
+  apiKeys: [
+    "sk-CJF1cKOLFS80ovxx0CO3TRvudI7ivRVHTgTVZ7a9xUVOzDGK",
+    "sk-jDxNNUh4iznrZpZPHhNvSqWuGU7PTU7qA2VxaFtG2saiaNrB",
+  ],
   model: "gpt-5.4",
 };
 
@@ -253,6 +266,7 @@ function goHome() {
   practiceView.classList.remove("active");
   homeView.classList.add("active");
   homeShortcut.classList.add("hidden");
+  updateDocumentTitle(null);
   if (location.hash) {
     history.replaceState(null, "", location.pathname + location.search);
   }
@@ -260,8 +274,9 @@ function goHome() {
 
 function renderCurrentQuestion() {
   const question = state.currentList[state.currentIndex];
+  updateDocumentTitle(state.currentMode);
   if (!question) {
-    modeTitle.textContent = MODE_LABELS[state.currentMode] || "刷题";
+    modeTitle.textContent = getModeHeading(state.currentMode);
     updateProgressText();
     questionTitle.textContent = state.unfinishedOnly ? "未做题已经刷完了" : "没有题目";
     questionMeta.textContent = "";
@@ -297,10 +312,10 @@ function renderCurrentQuestion() {
   state.aiLoading = false;
   state.revealState = false;
 
-  modeTitle.textContent = MODE_LABELS[state.currentMode] || "刷题";
+  modeTitle.textContent = getModeHeading(state.currentMode);
   updateProgressText();
 
-  questionTitle.textContent = question.title;
+  questionTitle.textContent = getQuestionDisplayTitle(question);
   questionMeta.textContent = buildQuestionMetaText(question);
 
   if (isFillMode(state.currentMode)) {
@@ -347,6 +362,26 @@ function buildQuestionMetaText(question) {
     parts.push("选项已打乱");
   }
   return parts.join(" · ");
+}
+
+function getModeHeading(mode) {
+  const modeLabel = MODE_LABELS[mode] || "刷题";
+  const courseLabel = COURSE_LABELS[mode];
+  return courseLabel ? `${courseLabel} · ${modeLabel}` : modeLabel;
+}
+
+function getQuestionDisplayTitle(question, fallbackIndex = state.currentIndex) {
+  const title = question?.title?.trim();
+  if (title) {
+    return title;
+  }
+  const modeLabel = MODE_LABELS[state.currentMode] || "题目";
+  const suffix = Number.isInteger(fallbackIndex) ? ` ${String(fallbackIndex + 1).padStart(3, "0")}` : "";
+  return `${modeLabel}${suffix}`;
+}
+
+function updateDocumentTitle(mode) {
+  document.title = mode ? `${getModeHeading(mode)}｜刷题中心` : "刷题中心";
 }
 
 function configureManualReviewArea(mode) {
@@ -767,26 +802,61 @@ async function requestAiReview(mode, question, userAnswer) {
 }
 
 async function postAiRequest(body) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 45000);
-  try {
-    return await fetch(`${AI_CONFIG.baseUrl.replace(/\/+$/u, "")}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${AI_CONFIG.apiKey}`,
-      },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    });
-  } catch (error) {
-    if (error.name === "AbortError") {
-      throw new Error("AI伴答超时了，等会再点一次。");
+  const errors = [];
+  const keys = AI_CONFIG.apiKeys.filter(Boolean);
+
+  for (let index = 0; index < keys.length; index += 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+    try {
+      const response = await fetch(`${AI_CONFIG.baseUrl.replace(/\/+$/u, "")}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${keys[index]}`,
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        errors.push(extractAiError(errorText) || `key-${index + 1} 请求失败`);
+        if (index < keys.length - 1 && shouldSwitchAiKey(response.status, errorText)) {
+          continue;
+        }
+        return new Response(errorText, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        });
+      }
+
+      return response;
+    } catch (error) {
+      if (error.name === "AbortError") {
+        errors.push(`key-${index + 1} 超时`);
+      } else {
+        errors.push(error.message || `key-${index + 1} 连接失败`);
+      }
+      if (index === keys.length - 1) {
+        if (error.name === "AbortError") {
+          throw new Error("AI伴答超时了，等会再点一次。");
+        }
+        throw new Error(errors.filter(Boolean).join("；") || "AI伴答请求失败");
+      }
+    } finally {
+      clearTimeout(timeoutId);
     }
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
   }
+
+  throw new Error(errors.filter(Boolean).join("；") || "AI伴答请求失败");
+}
+
+function shouldSwitchAiKey(status, errorText) {
+  if ([401, 402, 403, 408, 409, 429, 500, 502, 503, 504].includes(status)) return true;
+  const text = String(errorText || "").toLowerCase();
+  return ["quota", "余额", "insufficient", "rate limit", "exceeded", "disabled", "expired"].some((item) => text.includes(item));
 }
 
 function getAiMessageContent(data) {
@@ -1034,7 +1104,7 @@ function renderNavigator() {
       >
         <span class="navigator-index">${index + 1}</span>
         <span class="navigator-body">
-          <span class="navigator-title">${escapeHtml(question.title)}</span>
+          <span class="navigator-title">${escapeHtml(getQuestionDisplayTitle(question, index))}</span>
           <span class="navigator-status-row">
             <span class="navigator-status ${status.key}">${status.label}</span>
             ${isQuestionMarked(state.currentMode, question.id) ? '<span class="navigator-flag">已标记</span>' : ""}

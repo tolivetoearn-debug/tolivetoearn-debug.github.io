@@ -3,54 +3,132 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>程序刷题</title>
-  <link rel="stylesheet" href="./styles.css?v=20260705-1645">
+  <title>刷题中心</title>
+  <link rel="stylesheet" href="./styles.css?v=20260705-1938">
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div>
-        <h1>程序刷题</h1>
-        <p class="subtitle">程序填空、填空题、简答题、计算题、单选题、判断题、程序题，直接开刷</p>
+      <div class="brand-copy">
+        <span class="eyebrow">Smart Practice Studio</span>
+        <h1>刷题中心</h1>
+        <p class="subtitle">把题目拆成两门课：中级财务、Python。点进去就能直接刷。</p>
       </div>
       <button id="homeShortcut" class="ghost-button hidden" type="button">返回首页</button>
     </header>
 
     <main>
       <section id="homeView" class="view active">
-        <div class="hero-card">
-          <h2>选择刷题模式</h2>
-          <p>程序填空、填空题、简答题、计算题、单选题、判断题、程序题，直接开刷。</p>
-          <div class="home-grid">
-            <button class="mode-card" type="button" data-mode="codefill">
-              <span class="mode-title">程序填空</span>
-              <span class="mode-desc">代码里的空先自己填，再看对错和答案</span>
-            </button>
-            <button class="mode-card" type="button" data-mode="fill">
-              <span class="mode-title">填空题</span>
-              <span class="mode-desc">普通概念填空，先填再判对错</span>
-            </button>
-            <button class="mode-card" type="button" data-mode="short">
-              <span class="mode-title">简答题</span>
-              <span class="mode-desc">主观背题，先自己想，再看参考答案</span>
-            </button>
-            <button class="mode-card" type="button" data-mode="calc">
-              <span class="mode-title">计算题</span>
-              <span class="mode-desc">计算步骤题，支持直接背答案</span>
-            </button>
-            <button class="mode-card" type="button" data-mode="single">
-              <span class="mode-title">单选题</span>
-              <span class="mode-desc">自动判对错，支持打乱选项</span>
-            </button>
-            <button class="mode-card" type="button" data-mode="judge">
-              <span class="mode-title">判断题</span>
-              <span class="mode-desc">判断对错，自动判分</span>
-            </button>
-            <button class="mode-card" type="button" data-mode="program">
-              <span class="mode-title">程序题</span>
-              <span class="mode-desc">自己写程序，再看参考答案</span>
-            </button>
+        <div class="hero-card hero-card-home">
+          <div class="hero-copy">
+            <span class="hero-badge">课程入口</span>
+            <h2>按课程进入，界面更清楚</h2>
+            <p>中级财务集中主观题，Python 集中程序题和客观题，刷题路径更直观。</p>
+            <div class="hero-stat-row">
+              <div class="hero-stat">
+                <strong>2</strong>
+                <span>课程板块</span>
+              </div>
+              <div class="hero-stat">
+                <strong>7</strong>
+                <span>刷题入口</span>
+              </div>
+              <div class="hero-stat">
+                <strong>AI</strong>
+                <span>主观题伴答</span>
+              </div>
+            </div>
           </div>
+          <div class="hero-side">
+            <div class="feature-card">
+              <span class="feature-kicker">当前支持</span>
+              <ul class="feature-list">
+                <li>填空、单选、判断自动判对错</li>
+                <li>简答题、计算题支持 AI 伴答</li>
+                <li>错题、未做题、标记题都能反复刷</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-sections">
+          <section class="course-card course-card-finance">
+            <div class="course-header">
+              <div>
+                <span class="course-kicker">中级财务</span>
+                <h3>主观题专区</h3>
+                <p>简答题、计算题分开刷，支持背题模式和 AI 辅助点评。</p>
+              </div>
+              <span class="course-count">2 个入口</span>
+            </div>
+            <div class="course-tag-row">
+              <span class="course-tag">简答题</span>
+              <span class="course-tag">计算题</span>
+              <span class="course-tag">AI伴答</span>
+            </div>
+            <div class="course-grid course-grid-compact">
+              <button class="mode-card" type="button" data-mode="short">
+                <span class="mode-topline">中财 · 01</span>
+                <span class="mode-title">简答题</span>
+                <span class="mode-desc">回答意思到位就行，提交后让 AI 帮你判断。</span>
+                <span class="mode-link">进入刷题</span>
+              </button>
+              <button class="mode-card" type="button" data-mode="calc">
+                <span class="mode-topline">中财 · 02</span>
+                <span class="mode-title">计算题</span>
+                <span class="mode-desc">写过程即可，AI 会看公式、口径和步骤是否合理。</span>
+                <span class="mode-link">进入刷题</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="course-card course-card-python">
+            <div class="course-header">
+              <div>
+                <span class="course-kicker">Python</span>
+                <h3>程序刷题专区</h3>
+                <p>程序填空、基础填空、单选、判断、程序题，一次刷全。</p>
+              </div>
+              <span class="course-count">5 个入口</span>
+            </div>
+            <div class="course-tag-row">
+              <span class="course-tag">程序填空</span>
+              <span class="course-tag">客观题</span>
+              <span class="course-tag">程序题</span>
+            </div>
+            <div class="course-grid">
+              <button class="mode-card" type="button" data-mode="codefill">
+                <span class="mode-topline">Python · 01</span>
+                <span class="mode-title">程序填空</span>
+                <span class="mode-desc">代码里的空自己先填，再看正确答案和结果。</span>
+                <span class="mode-link">进入刷题</span>
+              </button>
+              <button class="mode-card" type="button" data-mode="fill">
+                <span class="mode-topline">Python · 02</span>
+                <span class="mode-title">填空题</span>
+                <span class="mode-desc">普通知识点填空，支持一题多种正确写法。</span>
+                <span class="mode-link">进入刷题</span>
+              </button>
+              <button class="mode-card" type="button" data-mode="single">
+                <span class="mode-topline">Python · 03</span>
+                <span class="mode-title">单选题</span>
+                <span class="mode-desc">自动判分，支持打乱选项和题目顺序。</span>
+                <span class="mode-link">进入刷题</span>
+              </button>
+              <button class="mode-card" type="button" data-mode="judge">
+                <span class="mode-topline">Python · 04</span>
+                <span class="mode-title">判断题</span>
+                <span class="mode-desc">快速判断对错，适合刷基础概念和细节。</span>
+                <span class="mode-link">进入刷题</span>
+              </button>
+              <button class="mode-card" type="button" data-mode="program">
+                <span class="mode-topline">Python · 05</span>
+                <span class="mode-title">程序题</span>
+                <span class="mode-desc">先自己完整写程序，再对照参考答案和思路。</span>
+                <span class="mode-link">进入刷题</span>
+              </button>
+            </div>
+          </section>
         </div>
       </section>
 
@@ -124,6 +202,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=20260705-1645" type="module"></script>
+  <script src="./app.js?v=20260705-1938" type="module"></script>
 </body>
 </html>
