@@ -3,21 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>学术卓越练习平台</title>
-  <link rel="stylesheet" href="./styles.css?v=20260705-1743">
+  <title>1302学习中心</title>
+  <link rel="stylesheet" href="./styles.css?v=20260705-1938">
 </head>
 <body>
   <header class="app-header">
     <div class="app-header-inner">
-      <div class="app-brand-block">
-        <div class="app-brand">学术卓越练习平台</div>
-        <div class="app-brand-sub">专项练习中心</div>
-      </div>
-
       <nav class="app-nav">
-        <a class="app-nav-link active" href="javascript:void(0)">学习仪表盘</a>
+        <a id="headerHomeLink" class="app-nav-link active" href="javascript:void(0)">学习仪表盘</a>
         <a id="headerFinanceExamLink" class="app-nav-link" href="javascript:void(0)">模拟考试</a>
-        <a class="app-nav-link" href="javascript:void(0)">错题复盘</a>
+        <a id="headerWrongReviewLink" class="app-nav-link" href="javascript:void(0)">错题复盘</a>
         <a class="app-nav-link" href="javascript:void(0)">学习资源</a>
       </nav>
 
@@ -31,9 +26,9 @@
     <main class="page-main">
       <section id="homeView" class="view active">
         <section class="academy-hero">
-          <div class="academy-hero-icon">📘</div>
-          <h1>学术卓越：专项练习中心</h1>
-          <p>按课程直接进入练习。中级财务专注主观题，Python 专注程序与客观题，所有进度都会自动记录。</p>
+          <img class="academy-hero-figure" src="./assets/hero-1302.jpg" alt="1302学习中心形象">
+          <h1>1302学习中心</h1>
+          <p>按课程直接进入练习。中级财务和 Python 都能直接开刷，模拟考试、AI 伴答和做题进度都会自动记录。</p>
         </section>
 
         <section class="academy-summary-grid">
@@ -296,7 +291,7 @@
         </section>
 
         <footer class="academy-footer">
-          <div class="academy-footer-brand">学术卓越练习平台</div>
+          <div class="academy-footer-brand">1302学习中心</div>
           <div class="academy-footer-links">
             <span>专项练习</span>
             <span>错题复盘</span>
@@ -304,6 +299,69 @@
             <span>进度记录</span>
           </div>
         </footer>
+      </section>
+
+      <section id="reviewView" class="view">
+        <section class="review-center-shell">
+          <article class="review-hero-card">
+            <div class="review-hero-copy">
+              <span class="academy-summary-label">错题中心</span>
+              <h1>GPT 错题复盘</h1>
+              <p>把做错的题集中起来复习。你可以直接回到原题继续刷，也可以让 ChatGPT 5.4 帮你讲清楚考点、失分点和下一次怎么避免再错。</p>
+            </div>
+            <div class="review-hero-actions">
+              <button id="wrongReviewPlanButton" class="primary-button" type="button">生成本轮复习方案</button>
+              <span id="wrongReviewPlanHint" class="helper-text">当前使用 ChatGPT 5.4，根据你的错题生成优先复习顺序。</span>
+            </div>
+          </article>
+
+          <section class="review-summary-grid">
+            <article class="academy-summary-card">
+              <span class="academy-summary-label">当前错题</span>
+              <strong id="wrongReviewTotalCount">0</strong>
+              <p id="wrongReviewTotalMeta">做错的题会自动沉淀到这里</p>
+            </article>
+            <article class="academy-summary-card">
+              <span class="academy-summary-label">最该先看</span>
+              <strong id="wrongReviewFocusMode">—</strong>
+              <p id="wrongReviewFocusMeta">GPT 会优先帮你抓最容易反复错的板块</p>
+            </article>
+            <article class="academy-summary-card">
+              <span class="academy-summary-label">涉及板块</span>
+              <strong id="wrongReviewModeCount">0</strong>
+              <p id="wrongReviewModeMeta">按板块回刷，效率更高</p>
+            </article>
+            <article class="academy-summary-card">
+              <span class="academy-summary-label">当前存档</span>
+              <strong id="wrongReviewProfileName">默认练习</strong>
+              <p id="wrongReviewProfileMeta">错题复盘和练习进度按存档分开记录</p>
+            </article>
+          </section>
+
+          <div id="wrongReviewPlanPanel" class="feedback-panel hidden"></div>
+
+          <section class="academy-course-panel review-mode-panel">
+            <div class="panel-head">
+              <div>
+                <span class="academy-summary-label">按板块回刷</span>
+                <h3>错题分布</h3>
+                <p id="wrongReviewModeCaption">先刷错题最多的板块，再逐个清掉。</p>
+              </div>
+            </div>
+            <div id="wrongReviewModeGrid" class="wrong-review-mode-grid"></div>
+          </section>
+
+          <section class="academy-course-panel review-list-panel">
+            <div class="panel-head">
+              <div>
+                <span class="academy-summary-label">按题复盘</span>
+                <h3>错题清单</h3>
+                <p id="wrongReviewListMeta">每道错题都可以直接回到原题，也可以交给 GPT 单独复盘。</p>
+              </div>
+            </div>
+            <div id="wrongReviewList" class="wrong-review-list"></div>
+          </section>
+        </section>
       </section>
 
       <section id="practiceView" class="view">
@@ -398,6 +456,6 @@
     </main>
   </div>
 
-  <script src="./app.js?v=20260705-1743" type="module"></script>
+  <script src="./app.js?v=20260705-1938" type="module"></script>
 </body>
 </html>

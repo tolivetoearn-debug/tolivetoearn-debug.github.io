@@ -131,6 +131,48 @@ JSON 结构必须是：
 }
 `;
 
+const AI_WRONG_REVIEW_SYSTEM_PROMPT = `
+你是一个中文错题复盘教练，任务是把学生已经做错的题讲明白，让学生下次更容易做对。
+
+复盘要求：
+1. 先说清这题真正考什么。
+2. 客观题、填空题、程序填空题：解释正确答案或正确填空为什么对，容易混淆在哪里。
+3. 程序题、简答题、计算题、业务核算题：提炼关键得分点、常见失分点、下次作答框架。
+4. 如果没有学生原作答记录，也照样基于题目和参考答案完成复盘。
+5. 用中文，短、准、能直接拿去复习。
+
+你只能返回 JSON，不要输出任何多余文字。
+JSON 结构必须是：
+{
+  "focus": "一句话说明这题考什么",
+  "answer_takeaways": ["关键点1", "关键点2", "关键点3"],
+  "pitfalls": ["易错点1", "易错点2"],
+  "next_action": "下次怎么判断或怎么作答",
+  "memory_hook": "一句短记忆点"
+}
+`;
+
+const AI_WRONG_PLAN_SYSTEM_PROMPT = `
+你是一个中文复习规划教练，要根据学生当前的错题清单生成一轮高效的错题复习方案。
+
+要求：
+1. 直接给优先级，不要空话。
+2. 先指出最该先刷的板块，再说原因。
+3. 给一个今天就能执行的复习顺序。
+4. 提醒最危险、最容易反复错的点。
+5. 用中文，短、实用、可执行。
+
+你只能返回 JSON，不要输出任何多余文字。
+JSON 结构必须是：
+{
+  "priority_mode": "最该先复习的板块",
+  "why_priority": "为什么它优先",
+  "today_plan": ["步骤1", "步骤2", "步骤3"],
+  "danger_points": ["危险点1", "危险点2"],
+  "finish_signal": "做到什么程度算这一轮过关"
+}
+`;
+
 const state = {
   data: null,
   currentMode: null,
@@ -143,9 +185,14 @@ const state = {
   questionOrders: {},
   aiLoading: false,
   homeChatLoading: false,
+  wrongReviewPlanLoading: false,
+  wrongReviewItemLoadingKey: "",
+  wrongReviewPlanHtml: "",
+  wrongReviewItemReviews: {},
 };
 
 const homeView = document.getElementById("homeView");
+const reviewView = document.getElementById("reviewView");
 const practiceView = document.getElementById("practiceView");
 const modeTitle = document.getElementById("modeTitle");
 const progressText = document.getElementById("progressText");
@@ -177,7 +224,9 @@ const shuffleOptionsToggle = document.getElementById("shuffleOptionsToggle");
 const navigatorSummary = document.getElementById("navigatorSummary");
 const questionNavigator = document.getElementById("questionNavigator");
 const newExamSessionButton = document.getElementById("newExamSessionButton");
+const headerHomeLink = document.getElementById("headerHomeLink");
 const headerFinanceExamLink = document.getElementById("headerFinanceExamLink");
+const headerWrongReviewLink = document.getElementById("headerWrongReviewLink");
 const heroDoneCount = document.getElementById("heroDoneCount");
 const heroDoneMeta = document.getElementById("heroDoneMeta");
 const heroWrongCount = document.getElementById("heroWrongCount");
@@ -202,6 +251,21 @@ const homeChatMessages = document.getElementById("homeChatMessages");
 const homeChatInput = document.getElementById("homeChatInput");
 const homeChatSendButton = document.getElementById("homeChatSendButton");
 const homeChatStatus = document.getElementById("homeChatStatus");
+const wrongReviewPlanButton = document.getElementById("wrongReviewPlanButton");
+const wrongReviewPlanHint = document.getElementById("wrongReviewPlanHint");
+const wrongReviewPlanPanel = document.getElementById("wrongReviewPlanPanel");
+const wrongReviewTotalCount = document.getElementById("wrongReviewTotalCount");
+const wrongReviewTotalMeta = document.getElementById("wrongReviewTotalMeta");
+const wrongReviewFocusMode = document.getElementById("wrongReviewFocusMode");
+const wrongReviewFocusMeta = document.getElementById("wrongReviewFocusMeta");
+const wrongReviewModeCount = document.getElementById("wrongReviewModeCount");
+const wrongReviewModeMeta = document.getElementById("wrongReviewModeMeta");
+const wrongReviewProfileName = document.getElementById("wrongReviewProfileName");
+const wrongReviewProfileMeta = document.getElementById("wrongReviewProfileMeta");
+const wrongReviewModeCaption = document.getElementById("wrongReviewModeCaption");
+const wrongReviewModeGrid = document.getElementById("wrongReviewModeGrid");
+const wrongReviewListMeta = document.getElementById("wrongReviewListMeta");
+const wrongReviewList = document.getElementById("wrongReviewList");
 const practiceCourseBadge = document.getElementById("practiceCourseBadge");
 const practiceModeBadge = document.getElementById("practiceModeBadge");
 const practiceSessionInfo = document.getElementById("practiceSessionInfo");
@@ -261,7 +325,10 @@ async function init() {
     }
   });
   newExamSessionButton?.addEventListener("click", () => startMode("financeExam", { forceNewSession: true }));
+  headerHomeLink?.addEventListener("click", goHome);
   headerFinanceExamLink?.addEventListener("click", () => startMode("financeExam"));
+  headerWrongReviewLink?.addEventListener("click", showWrongReviewCenter);
+  wrongReviewPlanButton?.addEventListener("click", handleWrongReviewPlanRequest);
 
   shuffleQuestionOrderToggle.addEventListener("change", toggleQuestionShuffle);
   memorizeModeToggle.addEventListener("change", toggleMemorizeMode);
@@ -272,6 +339,9 @@ async function init() {
 }
 
 function startMode(mode, options = {}) {
+  if (options.sessionId && mode === "financeExam") {
+    setActiveFinanceExamSession(options.sessionId);
+  }
   if (mode === "financeExam") {
     ensureFinanceExamSession(options.forceNewSession === true);
   }
@@ -279,8 +349,8 @@ function startMode(mode, options = {}) {
   state.currentMode = mode;
   progressStore.lastMode = mode;
   saveProgress();
-  state.wrongOnly = false;
-  state.unfinishedOnly = false;
+  state.wrongOnly = options.wrongOnly === true;
+  state.unfinishedOnly = options.unfinishedOnly === true;
   state.currentIndex = 0;
   state.revealState = false;
   rebuildQuestionList();
@@ -446,6 +516,14 @@ function getActiveFinanceExamSession(progressData = progressStore) {
   return matched || sessions[0];
 }
 
+function setActiveFinanceExamSession(sessionId) {
+  if (!sessionId) return;
+  const sessions = Array.isArray(progressStore?.financeExamSessions) ? progressStore.financeExamSessions : [];
+  if (!sessions.some((session) => session.id === sessionId)) return;
+  progressStore.financeExamCurrentSessionId = sessionId;
+  saveProgress();
+}
+
 function rebuildQuestionList() {
   if (!state.data || !state.currentMode) return;
   let all = getQuestionsByMode(state.currentMode);
@@ -513,17 +591,13 @@ function isObjectiveKind(kind) {
 }
 
 function showPractice() {
-  homeView.classList.remove("active");
-  practiceView.classList.add("active");
-  homeShortcut.classList.remove("hidden");
+  setActiveView("practice");
   updatePracticeHeader();
 }
 
 function goHome() {
   saveCurrentQuestionState();
-  practiceView.classList.remove("active");
-  homeView.classList.add("active");
-  homeShortcut.classList.add("hidden");
+  setActiveView("home");
   renderHomeDashboard();
   renderUserCenter();
   renderHomeChatMessages();
@@ -532,6 +606,28 @@ function goHome() {
   if (location.hash) {
     history.replaceState(null, "", location.pathname + location.search);
   }
+}
+
+function showWrongReviewCenter() {
+  saveCurrentQuestionState();
+  renderWrongReviewCenter();
+  setActiveView("review");
+  document.title = `错题复盘｜1302学习中心`;
+  if (location.hash !== "#wrong-review") {
+    history.replaceState(null, "", "#wrong-review");
+  }
+}
+
+function setActiveView(viewKey) {
+  homeView?.classList.toggle("active", viewKey === "home");
+  reviewView?.classList.toggle("active", viewKey === "review");
+  practiceView?.classList.toggle("active", viewKey === "practice");
+  homeShortcut?.classList.toggle("hidden", viewKey === "home");
+
+  const homeShouldBeActive = viewKey === "home" || (viewKey === "practice" && state.currentMode !== "financeExam");
+  headerHomeLink?.classList.toggle("active", homeShouldBeActive);
+  headerFinanceExamLink?.classList.toggle("active", viewKey === "practice" && state.currentMode === "financeExam");
+  headerWrongReviewLink?.classList.toggle("active", viewKey === "review");
 }
 
 function renderCurrentQuestion() {
@@ -660,7 +756,7 @@ function getQuestionDisplayTitle(question, fallbackIndex = state.currentIndex) {
 }
 
 function updateDocumentTitle(mode) {
-  document.title = mode ? `${getModeHeading(mode)}｜学术卓越练习平台` : "学术卓越练习平台";
+  document.title = mode ? `${getModeHeading(mode)}｜1302学习中心` : "1302学习中心";
 }
 
 function updatePracticeHeader() {
@@ -1023,6 +1119,7 @@ function createProfileFromInput(forceQuickName = false) {
   userCenterStore.profiles.unshift(profile);
   userCenterStore.activeProfileId = profile.id;
   progressStore = profile.progress;
+  resetWrongReviewState();
   profileNameInput.value = "";
   saveProgress();
   renderUserCenter();
@@ -1060,6 +1157,7 @@ function deleteProfile(profileId) {
   }
 
   progressStore = getActiveProfile().progress;
+  resetWrongReviewState();
   syncProgressToggles();
   saveUserCenterStore();
   renderHomeDashboard();
@@ -1079,6 +1177,7 @@ function continueWithProfile(profileId = userCenterStore.activeProfileId) {
     saveCurrentQuestionState();
     userCenterStore.activeProfileId = profileId;
     progressStore = nextProfile.progress;
+    resetWrongReviewState();
     syncProgressToggles();
     saveUserCenterStore();
     renderHomeDashboard();
@@ -1197,6 +1296,649 @@ function buildStudyContextForChat(profile) {
     `推荐优先板块：${MODE_LABELS[pickRecommendedMode(progressData)] || "简答题"}`,
     ...modeLines,
   ].join("\n");
+}
+
+function resetWrongReviewState() {
+  state.wrongReviewPlanLoading = false;
+  state.wrongReviewItemLoadingKey = "";
+  state.wrongReviewPlanHtml = "";
+  state.wrongReviewItemReviews = {};
+}
+
+function renderWrongReviewCenter() {
+  if (!wrongReviewList || !wrongReviewModeGrid) return;
+
+  const profile = getActiveProfile();
+  const overview = getProgressOverview(progressStore);
+  const items = buildWrongReviewItems(progressStore);
+  const modeSummaries = buildWrongReviewModeSummaries(items);
+  const focusSummary = modeSummaries[0] || null;
+
+  if (wrongReviewProfileName) {
+    wrongReviewProfileName.textContent = profile?.name || "默认练习";
+  }
+  if (wrongReviewProfileMeta) {
+    wrongReviewProfileMeta.textContent = `${overview.done}/${overview.total} 已完成 · 错题复盘跟随当前存档单独保存`;
+  }
+  if (wrongReviewTotalCount) {
+    wrongReviewTotalCount.textContent = String(items.length);
+  }
+  if (wrongReviewTotalMeta) {
+    wrongReviewTotalMeta.textContent = items.length
+      ? `当前累计 ${items.length} 道错题，覆盖 ${modeSummaries.length} 个板块`
+      : "当前还没有错题，先去任意板块刷题";
+  }
+  if (wrongReviewFocusMode) {
+    wrongReviewFocusMode.textContent = focusSummary ? focusSummary.label : "暂无";
+  }
+  if (wrongReviewFocusMeta) {
+    wrongReviewFocusMeta.textContent = focusSummary
+      ? `${focusSummary.count} 道错题，建议优先清掉这一块`
+      : "等你做出错题后，这里会自动给出优先级";
+  }
+  if (wrongReviewModeCount) {
+    wrongReviewModeCount.textContent = String(modeSummaries.length);
+  }
+  if (wrongReviewModeMeta) {
+    wrongReviewModeMeta.textContent = items.length
+      ? buildWrongReviewCourseMeta(items)
+      : "按板块回刷会更高效";
+  }
+  if (wrongReviewModeCaption) {
+    wrongReviewModeCaption.textContent = focusSummary
+      ? `先刷 ${focusSummary.label}，再按错题数量从高到低逐个清掉。`
+      : "先去做题，错题会自动沉淀到这里。";
+  }
+  if (wrongReviewListMeta) {
+    wrongReviewListMeta.textContent = items.length
+      ? `共 ${items.length} 道错题。每题都能直接回原题，也能交给 ${AI_MODEL_DISPLAY} 单独复盘。`
+      : "当前没有错题清单。";
+  }
+  if (wrongReviewPlanButton) {
+    wrongReviewPlanButton.disabled = state.wrongReviewPlanLoading || items.length === 0;
+    wrongReviewPlanButton.textContent = state.wrongReviewPlanLoading ? "正在生成复习方案..." : "生成本轮复习方案";
+  }
+  if (wrongReviewPlanHint) {
+    wrongReviewPlanHint.textContent = items.length === 0
+      ? "先去刷题，错题出来后这里会自动生成复习方案。"
+      : (state.wrongReviewPlanLoading
+        ? `${AI_MODEL_DISPLAY} 正在分析你的错题分布...`
+        : `当前使用 ${AI_MODEL_DISPLAY}，根据你的错题生成优先复习顺序。`);
+  }
+
+  if (state.wrongReviewPlanHtml) {
+    wrongReviewPlanPanel.innerHTML = state.wrongReviewPlanHtml;
+    wrongReviewPlanPanel.classList.remove("hidden");
+  } else {
+    wrongReviewPlanPanel.classList.add("hidden");
+    wrongReviewPlanPanel.innerHTML = "";
+  }
+
+  if (!items.length) {
+    wrongReviewModeGrid.innerHTML = `
+      <div class="wrong-review-empty">
+        <strong>还没有错题</strong>
+        <p>你先去刷题，做错的题会自动进入这里。</p>
+      </div>
+    `;
+    wrongReviewList.innerHTML = `
+      <div class="wrong-review-empty">
+        <strong>当前没有需要复盘的题</strong>
+        <p>等你做出错题后，可以在这里集中回看答案、回原题继续刷，或者直接让 GPT 帮你拆解。</p>
+      </div>
+    `;
+    return;
+  }
+
+  wrongReviewModeGrid.innerHTML = modeSummaries.map((summary) => `
+    <article class="wrong-review-mode-card">
+      <div class="wrong-review-mode-head">
+        <div>
+          <span class="academy-summary-label">${escapeHtml(summary.course)}</span>
+          <h4>${escapeHtml(summary.label)}</h4>
+          <p>${escapeHtml(buildWrongReviewModeSummaryText(summary))}</p>
+        </div>
+        <strong>${summary.count}</strong>
+      </div>
+      <button
+        class="ghost-button"
+        type="button"
+        data-review-mode="${summary.mode}"
+        data-review-session-id="${summary.sessionId || ""}"
+      >${summary.mode === "financeExam" ? "进入这套模拟卷错题" : "只刷这类错题"}</button>
+    </article>
+  `).join("");
+
+  wrongReviewList.innerHTML = items.map((item) => renderWrongReviewItemCard(item)).join("");
+
+  wrongReviewModeGrid.querySelectorAll("[data-review-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      openWrongModeReview(button.dataset.reviewMode, button.dataset.reviewSessionId || "");
+    });
+  });
+
+  wrongReviewList.querySelectorAll("[data-review-open]").forEach((button) => {
+    button.addEventListener("click", () => {
+      openWrongQuestionFromReview(
+        button.dataset.reviewMode,
+        button.dataset.reviewQuestionId,
+        { sessionId: button.dataset.reviewSessionId || "" },
+      );
+    });
+  });
+
+  wrongReviewList.querySelectorAll("[data-review-ai]").forEach((button) => {
+    button.addEventListener("click", () => {
+      handleWrongReviewItemRequest(
+        button.dataset.reviewMode,
+        button.dataset.reviewQuestionId,
+        button.dataset.reviewSessionId || "",
+      );
+    });
+  });
+}
+
+function buildWrongReviewItems(progressData = progressStore) {
+  if (!state.data) return [];
+  const items = [];
+
+  MODE_KEYS.forEach((mode) => {
+    const wrongSet = getWrongSet(mode, progressData);
+    if (!wrongSet.size) return;
+
+    getQuestionsByMode(mode).forEach((question, index) => {
+      if (!wrongSet.has(question.id)) return;
+      items.push({
+        reviewKey: getWrongReviewItemKey({ mode, questionId: question.id }),
+        mode,
+        questionId: question.id,
+        question,
+        course: COURSE_LABELS[mode] || "综合",
+        kind: getQuestionKind(mode, question),
+        kindLabel: getQuestionTypeLabel(mode, question),
+        title: question?.title?.trim() || `${MODE_LABELS[mode] || "题目"} ${String(index + 1).padStart(3, "0")}`,
+        promptText: buildWrongReviewPromptText(mode, question),
+        answerText: buildWrongReviewAnswerText(mode, question),
+        draftText: getWrongReviewDraftText(mode, question, progressData),
+        sessionId: "",
+        sessionTitle: "",
+      });
+    });
+  });
+
+  const financeWrongSet = new Set(progressData.financeExamWrongIds || []);
+  if (financeWrongSet.size) {
+    getAllFinanceExamQuestions(progressData).forEach(({ session, question, index }) => {
+      if (!financeWrongSet.has(question.id)) return;
+      items.push({
+        reviewKey: getWrongReviewItemKey({ mode: "financeExam", questionId: question.id, sessionId: session.id }),
+        mode: "financeExam",
+        questionId: question.id,
+        question,
+        course: COURSE_LABELS.financeExam,
+        kind: getQuestionKind("financeExam", question),
+        kindLabel: getQuestionTypeLabel("financeExam", question),
+        title: question?.title?.trim() || `模拟题 ${String(index + 1).padStart(3, "0")}`,
+        promptText: buildWrongReviewPromptText("financeExam", question),
+        answerText: buildWrongReviewAnswerText("financeExam", question),
+        draftText: getWrongReviewDraftText("financeExam", question, progressData),
+        sessionId: session.id,
+        sessionTitle: session.title || `模拟卷 ${formatFinanceExamTime(session.createdAt)}`,
+      });
+    });
+  }
+
+  const modeRank = {
+    financeExam: -1,
+    short: 0,
+    calc: 1,
+    codefill: 2,
+    fill: 3,
+    single: 4,
+    judge: 5,
+    program: 6,
+  };
+
+  return items.sort((a, b) => {
+    const rankDiff = (modeRank[a.mode] ?? 99) - (modeRank[b.mode] ?? 99);
+    if (rankDiff !== 0) return rankDiff;
+    if (a.sessionTitle !== b.sessionTitle) {
+      return String(a.sessionTitle || "").localeCompare(String(b.sessionTitle || ""), "zh-CN");
+    }
+    return a.title.localeCompare(b.title, "zh-CN");
+  });
+}
+
+function buildWrongReviewModeSummaries(items) {
+  const summaryMap = new Map();
+
+  items.forEach((item) => {
+    if (!summaryMap.has(item.mode)) {
+      summaryMap.set(item.mode, {
+        mode: item.mode,
+        label: MODE_LABELS[item.mode] || item.kindLabel,
+        course: item.course,
+        count: 0,
+        firstItem: item,
+        kindLabels: new Set(),
+        sessionCounts: new Map(),
+      });
+    }
+
+    const summary = summaryMap.get(item.mode);
+    summary.count += 1;
+    summary.kindLabels.add(item.kindLabel);
+
+    if (item.mode === "financeExam" && item.sessionId) {
+      const previous = summary.sessionCounts.get(item.sessionId) || { count: 0, title: item.sessionTitle };
+      previous.count += 1;
+      previous.title = item.sessionTitle;
+      summary.sessionCounts.set(item.sessionId, previous);
+    }
+  });
+
+  return [...summaryMap.values()].map((summary) => {
+    const sessionEntry = [...summary.sessionCounts.entries()]
+      .sort((a, b) => b[1].count - a[1].count)[0];
+    return {
+      mode: summary.mode,
+      label: summary.label,
+      course: summary.course,
+      count: summary.count,
+      kindLabels: [...summary.kindLabels],
+      sessionId: sessionEntry?.[0] || summary.firstItem?.sessionId || "",
+      sessionTitle: sessionEntry?.[1]?.title || summary.firstItem?.sessionTitle || "",
+    };
+  }).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label, "zh-CN"));
+}
+
+function buildWrongReviewCourseMeta(items) {
+  const financeCount = items.filter((item) => item.course === "中级财务").length;
+  const pythonCount = items.filter((item) => item.course === "Python").length;
+  return `中级财务 ${financeCount} 道 · Python ${pythonCount} 道`;
+}
+
+function buildWrongReviewModeSummaryText(summary) {
+  if (summary.mode === "financeExam") {
+    return summary.sessionTitle
+      ? `优先回到 ${summary.sessionTitle} 清错`
+      : "模拟卷里的错题会集中在这里";
+  }
+  const kindText = summary.kindLabels.slice(0, 3).join(" / ");
+  return kindText
+    ? `${summary.course} · ${kindText}`
+    : `${summary.course} · 错题 ${summary.count} 道`;
+}
+
+function renderWrongReviewItemCard(item) {
+  const review = state.wrongReviewItemReviews[item.reviewKey];
+  const loading = state.wrongReviewItemLoadingKey === item.reviewKey;
+  return `
+    <article class="wrong-review-item">
+      <div class="wrong-review-item-head">
+        <div class="wrong-review-item-tags">
+          <span class="practice-course-badge">${escapeHtml(item.course)}</span>
+          <span class="practice-mode-badge">${escapeHtml(MODE_LABELS[item.mode] || item.kindLabel)}</span>
+          <span class="practice-question-type-chip">${escapeHtml(item.kindLabel)}</span>
+          ${item.sessionTitle ? `<span class="practice-question-index-chip">${escapeHtml(item.sessionTitle)}</span>` : ""}
+        </div>
+        <div class="wrong-review-actions">
+          <button
+            class="ghost-button"
+            type="button"
+            data-review-open="1"
+            data-review-mode="${item.mode}"
+            data-review-question-id="${item.questionId}"
+            data-review-session-id="${item.sessionId || ""}"
+          >去原题</button>
+          <button
+            class="primary-button"
+            type="button"
+            data-review-ai="1"
+            data-review-mode="${item.mode}"
+            data-review-question-id="${item.questionId}"
+            data-review-session-id="${item.sessionId || ""}"
+            ${loading ? "disabled" : ""}
+          >${loading ? "GPT复盘中..." : "GPT复盘这题"}</button>
+        </div>
+      </div>
+
+      <h4 class="wrong-review-item-title">${escapeHtml(item.title)}</h4>
+
+      <div class="wrong-review-copy-grid">
+        <section class="wrong-review-copy-block">
+          <span class="wrong-review-copy-label">题目速看</span>
+          <div class="wrong-review-copy-text">${formatPlainTextHtml(item.promptText || "未识别到题干")}</div>
+        </section>
+        <section class="wrong-review-copy-block answer">
+          <span class="wrong-review-copy-label">参考答案</span>
+          <div class="wrong-review-copy-text">${formatPlainTextHtml(item.answerText || "去原题查看完整答案")}</div>
+        </section>
+        ${item.draftText ? `
+          <section class="wrong-review-copy-block draft">
+            <span class="wrong-review-copy-label">你上次写的</span>
+            <div class="wrong-review-copy-text">${formatPlainTextHtml(item.draftText)}</div>
+          </section>
+        ` : ""}
+      </div>
+
+      ${review ? `
+        <div class="wrong-review-ai-result">
+          ${buildWrongReviewAiHtml(item, review)}
+        </div>
+      ` : ""}
+    </article>
+  `;
+}
+
+function getAllFinanceExamQuestions(progressData = progressStore) {
+  const sessions = Array.isArray(progressData?.financeExamSessions) ? progressData.financeExamSessions : [];
+  return sessions.flatMap((session) => (session.questions || []).map((question, index) => ({
+    session,
+    question,
+    index,
+  })));
+}
+
+function getWrongReviewItemKey(item) {
+  return `${item.mode}::${item.sessionId || "default"}::${item.questionId}`;
+}
+
+function buildWrongReviewPromptText(mode, question) {
+  const kind = getQuestionKind(mode, question);
+  if (isFillMode(mode)) {
+    return buildFillReadableStem(question);
+  }
+  if (kind === "single" || kind === "multi" || kind === "judge") {
+    const optionsText = (question.options || [])
+      .map((option, index) => `${CHOICE_DISPLAY_LABELS[index] || option.key}. ${option.text}`)
+      .join("\n");
+    return `${htmlToReadableText(question.stem_html || "")}\n${optionsText}`.trim();
+  }
+  return htmlToReadableText(question.prompt_html || "");
+}
+
+function buildWrongReviewAnswerText(mode, question) {
+  const kind = getQuestionKind(mode, question);
+  if (isFillMode(mode)) {
+    return buildFillAnswerText(question);
+  }
+  if (kind === "single") {
+    const option = (question.options || []).find((item) => item.key === question.answer_key);
+    const label = getStaticChoiceLabel(question, question.answer_key);
+    return `${label}. ${option?.text || question.answer_text || ""}`.trim();
+  }
+  if (kind === "multi") {
+    return buildMultipleAnswerText(question) || (question.answer_texts || []).join("；");
+  }
+  if (kind === "judge") {
+    const option = (question.options || []).find((item) => item.key === question.answer_key);
+    return option?.text || question.answer_text || "";
+  }
+  return htmlToReadableText(question.answer_html || "");
+}
+
+function buildFillReadableStem(question) {
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = question.stem_html || "";
+  wrapper.querySelectorAll(".blank-slot").forEach((slot, index) => {
+    const label = question.blank_labels?.[index] || `填空${index + 1}`;
+    slot.replaceWith(document.createTextNode(`【${label}】`));
+  });
+  return htmlToReadableText(wrapper.innerHTML);
+}
+
+function buildFillAnswerText(question) {
+  const answerCount = Math.max(
+    Array.isArray(question.display_answers) ? question.display_answers.length : 0,
+    Array.isArray(question.answers) ? question.answers.length : 0,
+  );
+  return Array.from({ length: answerCount }, (_, index) => {
+    const label = question.blank_labels?.[index] || `填空${index + 1}`;
+    const display = question.display_answers?.[index] || "";
+    const fallback = question.answers?.[index]?.[0] || "";
+    return `${label}：${display || fallback}`;
+  }).join("；");
+}
+
+function getWrongReviewDraftText(mode, question, progressData = progressStore) {
+  if (mode === "program") {
+    return String(progressData.programAnswers?.[question.id] || "").trim();
+  }
+  if (mode === "financeExam" && ["short", "calc", "business"].includes(getQuestionKind(mode, question))) {
+    return String(progressData.financeExamAnswerDrafts?.[question.id] || "").trim();
+  }
+  return "";
+}
+
+function openWrongModeReview(mode, sessionId = "") {
+  if (mode === "financeExam") {
+    startMode("financeExam", { sessionId, wrongOnly: true });
+    return;
+  }
+  startMode(mode, { wrongOnly: true });
+}
+
+function openWrongQuestionFromReview(mode, questionId, options = {}) {
+  startMode(mode, { sessionId: options.sessionId || "" });
+  const targetIndex = state.currentList.findIndex((item) => item.id === questionId);
+  if (targetIndex >= 0) {
+    state.currentIndex = targetIndex;
+    renderCurrentQuestion();
+  }
+}
+
+async function handleWrongReviewPlanRequest() {
+  const items = buildWrongReviewItems(progressStore);
+  if (!items.length || state.wrongReviewPlanLoading) return;
+
+  state.wrongReviewPlanLoading = true;
+  renderWrongReviewCenter();
+
+  try {
+    const plan = await requestWrongReviewPlan(items);
+    state.wrongReviewPlanHtml = buildWrongReviewPlanHtml(plan);
+  } catch (error) {
+    state.wrongReviewPlanHtml = `
+      <h3>${AI_MODEL_DISPLAY} · 错题复习方案暂时没生成出来</h3>
+      <div class="feedback-list">
+        <div class="feedback-item bad">
+          <div><strong>当前状态</strong><span class="feedback-status bad">稍后再试</span></div>
+          <div>${escapeHtml(error.message || "这次请求失败了。")}</div>
+        </div>
+      </div>
+    `;
+  } finally {
+    state.wrongReviewPlanLoading = false;
+    renderWrongReviewCenter();
+  }
+}
+
+async function handleWrongReviewItemRequest(mode, questionId, sessionId = "") {
+  const item = buildWrongReviewItems(progressStore)
+    .find((entry) => entry.mode === mode && entry.questionId === questionId && (entry.sessionId || "") === sessionId);
+  if (!item || state.wrongReviewItemLoadingKey) return;
+
+  state.wrongReviewItemLoadingKey = item.reviewKey;
+  renderWrongReviewCenter();
+
+  try {
+    state.wrongReviewItemReviews[item.reviewKey] = await requestWrongQuestionReview(item);
+  } catch (error) {
+    state.wrongReviewItemReviews[item.reviewKey] = {
+      error: String(error.message || "这次请求失败了。"),
+    };
+  } finally {
+    state.wrongReviewItemLoadingKey = "";
+    renderWrongReviewCenter();
+  }
+}
+
+async function requestWrongQuestionReview(item) {
+  const payload = {
+    课程: item.course,
+    板块: MODE_LABELS[item.mode] || item.mode,
+    题型: item.kindLabel,
+    题目标题: item.title,
+    题目内容: item.promptText,
+    参考答案: item.answerText,
+    学生原作答: item.draftText || "未记录",
+    模拟卷来源: item.sessionTitle || "无",
+  };
+
+  const body = {
+    model: AI_CONFIG.model,
+    temperature: 0.3,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: AI_WRONG_REVIEW_SYSTEM_PROMPT },
+      { role: "user", content: JSON.stringify(payload, null, 2) },
+    ],
+  };
+
+  let response = await postAiRequest(body);
+  if (!response.ok) {
+    const firstErrorText = await response.text();
+    const fallbackBody = { ...body };
+    delete fallbackBody.response_format;
+    response = await postAiRequest(fallbackBody);
+    if (!response.ok) {
+      const secondErrorText = await response.text();
+      throw new Error(extractAiError(secondErrorText) || extractAiError(firstErrorText) || "错题复盘请求失败");
+    }
+  }
+
+  const data = await response.json();
+  const rawContent = getAiMessageContent(data);
+  return normalizeWrongReviewResult(parseAiJson(rawContent));
+}
+
+async function requestWrongReviewPlan(items) {
+  const modeSummaries = buildWrongReviewModeSummaries(items).map((summary) => ({
+    板块: summary.label,
+    课程: summary.course,
+    错题数量: summary.count,
+    覆盖题型: summary.kindLabels.join(" / "),
+    优先会话: summary.sessionTitle || "",
+  }));
+
+  const itemSamples = items.slice(0, 24).map((item) => ({
+    课程: item.course,
+    板块: MODE_LABELS[item.mode] || item.mode,
+    题型: item.kindLabel,
+    标题: item.title,
+    题干摘要: truncateText(item.promptText, 90),
+  }));
+
+  const payload = {
+    当前存档: getActiveProfile()?.name || "默认练习",
+    总错题数: items.length,
+    板块分布: modeSummaries,
+    错题样本: itemSamples,
+  };
+
+  const body = {
+    model: AI_CONFIG.model,
+    temperature: 0.4,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: AI_WRONG_PLAN_SYSTEM_PROMPT },
+      { role: "user", content: JSON.stringify(payload, null, 2) },
+    ],
+  };
+
+  let response = await postAiRequest(body);
+  if (!response.ok) {
+    const firstErrorText = await response.text();
+    const fallbackBody = { ...body };
+    delete fallbackBody.response_format;
+    response = await postAiRequest(fallbackBody);
+    if (!response.ok) {
+      const secondErrorText = await response.text();
+      throw new Error(extractAiError(secondErrorText) || extractAiError(firstErrorText) || "复习方案请求失败");
+    }
+  }
+
+  const data = await response.json();
+  const rawContent = getAiMessageContent(data);
+  return normalizeWrongReviewPlan(parseAiJson(rawContent));
+}
+
+function normalizeWrongReviewResult(raw) {
+  if (raw?.error) {
+    return { error: String(raw.error).trim() };
+  }
+  return {
+    focus: String(raw?.focus || "").trim() || "这题主要在考关键概念和判断口径。",
+    answerTakeaways: normalizeStringList(raw?.answer_takeaways),
+    pitfalls: normalizeStringList(raw?.pitfalls),
+    nextAction: String(raw?.next_action || "").trim() || "再做一遍原题，把关键点按顺序复述出来。",
+    memoryHook: String(raw?.memory_hook || "").trim(),
+  };
+}
+
+function normalizeWrongReviewPlan(raw) {
+  return {
+    priorityMode: String(raw?.priority_mode || "").trim() || "先清错题最多的板块",
+    whyPriority: String(raw?.why_priority || "").trim() || "这个板块当前最容易反复丢分。",
+    todayPlan: normalizeStringList(raw?.today_plan),
+    dangerPoints: normalizeStringList(raw?.danger_points),
+    finishSignal: String(raw?.finish_signal || "").trim() || "做到同类题能独立说出关键点，就算这一轮过关。",
+  };
+}
+
+function buildWrongReviewAiHtml(item, review) {
+  if (review?.error) {
+    return `
+      <h3>${AI_MODEL_DISPLAY} · 错题复盘暂时失败</h3>
+      <div class="feedback-list">
+        <div class="feedback-item bad">
+          <div><strong>当前状态</strong><span class="feedback-status bad">稍后再试</span></div>
+          <div>${escapeHtml(review.error)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <h3>${AI_MODEL_DISPLAY} · ${escapeHtml(item.title)} 复盘</h3>
+    <div class="feedback-list">
+      <div class="feedback-item">
+        <div><strong>这题在考</strong></div>
+        <div>${escapeHtml(review.focus)}</div>
+      </div>
+      ${renderAiListBlock("这题要抓住", review.answerTakeaways, "ok")}
+      ${renderAiListBlock("最容易错在", review.pitfalls, "bad")}
+      <div class="feedback-item partial">
+        <div><strong>下次怎么做</strong></div>
+        <div>${escapeHtml(review.nextAction)}</div>
+      </div>
+      ${review.memoryHook ? `
+        <div class="feedback-item ok">
+          <div><strong>一句记忆点</strong></div>
+          <div>${escapeHtml(review.memoryHook)}</div>
+        </div>
+      ` : ""}
+    </div>
+  `;
+}
+
+function buildWrongReviewPlanHtml(plan) {
+  return `
+    <h3>${AI_MODEL_DISPLAY} · 本轮错题复习方案</h3>
+    <div class="feedback-list">
+      <div class="feedback-item ok">
+        <div><strong>最该先刷</strong><span class="feedback-status ok">${escapeHtml(plan.priorityMode)}</span></div>
+        <div>${escapeHtml(plan.whyPriority)}</div>
+      </div>
+      ${renderAiListBlock("今天直接这样刷", plan.todayPlan, "partial")}
+      ${renderAiListBlock("最危险的地方", plan.dangerPoints, "bad")}
+      <div class="feedback-item">
+        <div><strong>这一轮做到什么程度算过关</strong></div>
+        <div>${escapeHtml(plan.finishSignal)}</div>
+      </div>
+    </div>
+  `;
 }
 
 function appendHomeChatMessage(role, content) {
@@ -2615,6 +3357,9 @@ function saveProgress() {
     if (homeView.classList.contains("active")) {
       renderHomeChatMessages();
     }
+    if (reviewView?.classList.contains("active")) {
+      renderWrongReviewCenter();
+    }
   }
 }
 
@@ -2762,6 +3507,16 @@ function htmlToReadableText(html) {
   return lines.join("\n").replace(/\n{3,}/gu, "\n\n").trim();
 }
 
+function formatPlainTextHtml(value) {
+  return escapeHtml(String(value || "").trim() || "暂无内容").replace(/\n/gu, "<br>");
+}
+
+function truncateText(value, maxLength = 120) {
+  const text = String(value || "").replace(/\s+/gu, " ").trim();
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, Math.max(1, maxLength - 1)).trim()}…`;
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -2773,6 +3528,15 @@ function escapeHtml(value) {
 
 function applyRouteFromHash() {
   const rawMode = location.hash.replace("#", "");
+  if (["review", "wrong-review", "wrongReview"].includes(rawMode)) {
+    if (!state.data) return;
+    if (!reviewView?.classList.contains("active")) {
+      showWrongReviewCenter();
+    } else {
+      renderWrongReviewCenter();
+    }
+    return;
+  }
   const mode = rawMode === "finance-exam" ? "financeExam" : rawMode;
   if (ROUTABLE_MODES.includes(mode)) {
     if (!state.data) return;
@@ -2782,6 +3546,9 @@ function applyRouteFromHash() {
     return;
   }
   if (practiceView.classList.contains("active")) {
+    goHome();
+  }
+  if (reviewView?.classList.contains("active")) {
     goHome();
   }
 }
