@@ -596,8 +596,13 @@ function buildFinanceExamSession() {
   const sessionId = `finance-exam-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const createdAt = new Date().toISOString();
   const questions = [];
+  const previousSession = getActiveFinanceExamSession();
 
-  const singleBank = sampleQuestions(state.data?.finance_exam?.single_choice_bank || [], paper.single_count);
+  const singleBank = sampleQuestions(
+    state.data?.finance_exam?.single_choice_bank || [],
+    paper.single_count,
+    getFinanceExamRecentSourceIds(previousSession, "single"),
+  );
   singleBank.forEach((source, index) => {
     questions.push({
       id: `${sessionId}-single-${String(index + 1).padStart(2, "0")}`,
@@ -614,7 +619,11 @@ function buildFinanceExamSession() {
     });
   });
 
-  const multiBank = sampleQuestions(state.data?.finance_exam?.multiple_choice_bank || [], paper.multiple_count);
+  const multiBank = sampleQuestions(
+    state.data?.finance_exam?.multiple_choice_bank || [],
+    paper.multiple_count,
+    getFinanceExamRecentSourceIds(previousSession, "multi"),
+  );
   multiBank.forEach((source, index) => {
     questions.push({
       id: `${sessionId}-multi-${String(index + 1).padStart(2, "0")}`,
@@ -631,7 +640,11 @@ function buildFinanceExamSession() {
     });
   });
 
-  const judgeBank = sampleQuestions(state.data?.finance_exam?.judgment_bank || [], paper.judgment_count);
+  const judgeBank = sampleQuestions(
+    state.data?.finance_exam?.judgment_bank || [],
+    paper.judgment_count,
+    getFinanceExamRecentSourceIds(previousSession, "judge"),
+  );
   judgeBank.forEach((source, index) => {
     questions.push({
       id: `${sessionId}-judge-${String(index + 1).padStart(2, "0")}`,
@@ -648,7 +661,11 @@ function buildFinanceExamSession() {
     });
   });
 
-  const shortBank = sampleQuestions(state.data?.short_answer_questions || [], paper.short_count);
+  const shortBank = sampleQuestions(
+    state.data?.short_answer_questions || [],
+    paper.short_count,
+    getFinanceExamRecentSourceIds(previousSession, "short"),
+  );
   shortBank.forEach((source, index) => {
     questions.push({
       id: `${sessionId}-short-${String(index + 1).padStart(2, "0")}`,
@@ -662,7 +679,11 @@ function buildFinanceExamSession() {
     });
   });
 
-  const calcBank = sampleQuestions(state.data?.calculation_questions || [], paper.calc_count);
+  const calcBank = sampleQuestions(
+    state.data?.calculation_questions || [],
+    paper.calc_count,
+    getFinanceExamRecentSourceIds(previousSession, "calc"),
+  );
   calcBank.forEach((source, index) => {
     questions.push({
       id: `${sessionId}-calc-${String(index + 1).padStart(2, "0")}`,
@@ -676,7 +697,11 @@ function buildFinanceExamSession() {
     });
   });
 
-  const businessBank = sampleQuestions(state.data?.business_case_questions || [], paper.business_count);
+  const businessBank = sampleQuestions(
+    state.data?.business_case_questions || [],
+    paper.business_count,
+    getFinanceExamRecentSourceIds(previousSession, "business"),
+  );
   businessBank.forEach((source, index) => {
     questions.push({
       id: `${sessionId}-business-${String(index + 1).padStart(2, "0")}`,
@@ -700,9 +725,20 @@ function buildFinanceExamSession() {
   };
 }
 
-function sampleQuestions(list, count) {
+function getFinanceExamRecentSourceIds(session, examType) {
+  if (!session?.questions?.length) return [];
+  return session.questions
+    .filter((question) => question?.examType === examType && question?.sourceId)
+    .map((question) => question.sourceId);
+}
+
+function sampleQuestions(list, count, recentSourceIds = []) {
   if (!Array.isArray(list) || list.length === 0 || count <= 0) return [];
-  return shuffleArray(list).slice(0, Math.min(count, list.length));
+  const targetCount = Math.min(count, list.length);
+  const recentIdSet = new Set(recentSourceIds);
+  const freshPool = list.filter((item) => !recentIdSet.has(item?.id));
+  const repeatPool = list.filter((item) => recentIdSet.has(item?.id));
+  return [...shuffleArray(freshPool), ...shuffleArray(repeatPool)].slice(0, targetCount);
 }
 
 function simplifyExamSourceTitle(title) {
