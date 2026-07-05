@@ -134,6 +134,38 @@ JSON 结构必须是：
 }
 `;
 
+const AI_UPLOAD_REVIEW_SYSTEM_PROMPT = `
+你是学习网站的中文资料上传审核员，只负责判断文件能不能作为正常学习资料保存。
+
+优先拦截这些情况：
+1. 可执行文件、脚本、安装包、系统文件、压缩包、链接文件、宏风险文件。
+2. 伪装成文档或图片的双扩展名文件。
+3. 与学习资料明显无关，或者预览里出现脚本、命令、下载器、混淆代码、诱导执行内容。
+4. 文件头、扩展名、MIME 类型明显对不上。
+5. 信息不足但风险很明显时，也直接判 block。
+
+如果看起来像正常学习资料，就判 allow。
+
+你只能返回 JSON，不要输出任何多余文字。
+JSON 结构必须是：
+{
+  "verdict": "allow" | "block",
+  "reason": "一句话原因",
+  "risk_points": ["风险点1", "风险点2"]
+}
+`;
+
+const RESOURCE_ALLOWED_UPLOAD_EXTENSIONS = new Set(["pdf", "docx", "xlsx", "txt", "md", "png", "jpg", "jpeg", "webp"]);
+const RESOURCE_DANGEROUS_UPLOAD_EXTENSIONS = new Set([
+  "7z", "apk", "app", "bat", "bin", "cmd", "com", "cpl", "crt", "csv", "dll", "doc", "docm", "exe", "gif",
+  "gz", "hta", "htm", "html", "iso", "jar", "js", "json", "lnk", "msi", "odt", "pdfa", "php", "pkg", "ppt",
+  "pptx", "ps1", "py", "rar", "reg", "rtf", "scr", "sh", "svg", "tar", "ts", "url", "vb", "vbe", "vbs",
+  "xls", "xlsb", "xlsm", "xml", "xps", "zip",
+]);
+const RESOURCE_TEXT_PREVIEW_EXTENSIONS = new Set(["txt", "md"]);
+const RESOURCE_SIGNATURE_BYTES = 24;
+const RESOURCE_PREVIEW_CHAR_LIMIT = 1400;
+
 const PUBLIC_RESOURCES = [
   {
     id: "finance-objective-notes",
@@ -943,7 +975,7 @@ function setActiveView(viewKey) {
 
 function updateResourceUploadStatus(text) {
   if (!resourceUploadStatus) return;
-  resourceUploadStatus.textContent = text || "支持 PDF / DOCX / XLSX / TXT / MD / 图片";
+  resourceUploadStatus.textContent = text || "支持 PDF / DOCX / XLSX / TXT / MD / PNG / JPG / WEBP，上传前会先过 AI 审核";
 }
 
 function formatFileSize(size) {
@@ -961,6 +993,173 @@ function getResourceFileType(name, fallbackType = "") {
     return source.slice(dotIndex + 1).toUpperCase();
   }
   return String(fallbackType || "FILE").replace(/^application\//u, "").toUpperCase() || "FILE";
+}
+
+function getResourceFileExtension(name) {
+  const source = String(name || "").trim().toLowerCase();
+  const dotIndex = source.lastIndexOf(".");
+  if (dotIndex < 0) return "";
+  return source.slice(dotIndex + 1).trim();
+}
+
+function isAllowedUploadExtension(fileName) {
+  return RESOURCE_ALLOWED_UPLOAD_EXTENSIONS.has(getResourceFileExtension(fileName));
+}
+
+function hasSuspiciousDoubleExtension(fileName) {
+  const normalized = String(fileName || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/gu, "");
+  const parts = normalized.split(".").filter(Boolean);
+  if (parts.length <= 2) return false;
+  return parts.slice(1, -1).some((part) => RESOURCE_DANGEROUS_UPLOAD_EXTENSIONS.has(part));
+}
+
+function sanitizeUploadPreviewText(value) {
+  return truncateText(
+    String(value || "")
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/gu, " ")
+      .replace(/\s+/gu, " ")
+      .trim(),
+    RESOURCE_PREVIEW_CHAR_LIMIT,
+  );
+}
+
+function bytesToHex(bytes) {
+  return Array.from(bytes || [])
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function bytesToAscii(bytes) {
+  return Array.from(bytes || [])
+    .map((value) => (value >= 32 && value <= 126 ? String.fromCharCode(value) : "."))
+    .join("");
+}
+
+async function readUploadFileHeader(file, byteLength = RESOURCE_SIGNATURE_BYTES) {
+  const buffer = await file.slice(0, byteLength).arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  return {
+    bytes,
+    hex: bytesToHex(bytes),
+    ascii: bytesToAscii(bytes),
+  };
+}
+
+function matchesUploadSignature(extension, header) {
+  const bytes = header?.bytes;
+  if (!(bytes instanceof Uint8Array) || !bytes.length) {
+    return { ok: false, reason: "文件头为空" };
+  }
+
+  const startsWithHex = (hex) => header.hex.startsWith(hex.toLowerCase());
+  const asciiHead = header.ascii;
+
+  if (extension === "pdf") {
+    return startsWithHex("25504446")
+      ? { ok: true, reason: "PDF 文件头正常" }
+      : { ok: false, reason: "文件头不像 PDF" };
+  }
+
+  if (["docx", "xlsx"].includes(extension)) {
+    return ["504b0304", "504b0506", "504b0708"].some((hex) => startsWithHex(hex))
+      ? { ok: true, reason: "Office Open XML 文件头正常" }
+      : { ok: false, reason: "文件头不像 DOCX / XLSX" };
+  }
+
+  if (extension === "png") {
+    return startsWithHex("89504e470d0a1a0a")
+      ? { ok: true, reason: "PNG 文件头正常" }
+      : { ok: false, reason: "文件头不像 PNG" };
+  }
+
+  if (["jpg", "jpeg"].includes(extension)) {
+    return startsWithHex("ffd8ff")
+      ? { ok: true, reason: "JPG 文件头正常" }
+      : { ok: false, reason: "文件头不像 JPG" };
+  }
+
+  if (extension === "webp") {
+    const isWebp = asciiHead.startsWith("RIFF") && asciiHead.slice(8, 12) === "WEBP";
+    return isWebp
+      ? { ok: true, reason: "WEBP 文件头正常" }
+      : { ok: false, reason: "文件头不像 WEBP" };
+  }
+
+  if (["txt", "md"].includes(extension)) {
+    return { ok: true, reason: "文本文件允许进入内容审核" };
+  }
+
+  return { ok: false, reason: "暂不支持该文件类型" };
+}
+
+async function extractUploadPreview(file, extension) {
+  if (!RESOURCE_TEXT_PREVIEW_EXTENSIONS.has(extension)) {
+    return "";
+  }
+  const rawText = await file.slice(0, 6000).text();
+  return sanitizeUploadPreviewText(rawText);
+}
+
+function normalizeUploadAiReview(raw) {
+  const verdict = raw?.verdict === "block" ? "block" : "allow";
+  return {
+    verdict,
+    reason: String(raw?.reason || "").trim() || (verdict === "allow" ? "资料看起来像正常学习资料。" : "资料存在明显风险。"),
+    riskPoints: normalizeStringList(raw?.risk_points),
+  };
+}
+
+async function requestUploadAiReview(file, options = {}) {
+  if (!AI_CONFIG.enabled) {
+    return {
+      verdict: "allow",
+      reason: "AI 审核未启用，已通过本地规则检查。",
+      riskPoints: [],
+    };
+  }
+
+  const extension = options.extension || getResourceFileExtension(file.name);
+  const payload = {
+    文件名: file.name,
+    扩展名: extension || "未知",
+    MIME类型: file.type || "未知",
+    文件大小: formatFileSize(file.size),
+    字节数: file.size,
+    课程猜测: guessResourceCourse(file.name),
+    是否双扩展名可疑: options.doubleExtensionRisk ? "是" : "否",
+    文件头十六进制: options.header?.hex || "",
+    文件头可读字符: options.header?.ascii || "",
+    文件头校验: options.signatureCheck?.reason || "未检查",
+    文本预览: options.previewText || "当前文件不是纯文本，未提供正文预览",
+  };
+
+  const body = {
+    model: AI_CONFIG.model,
+    temperature: 0.1,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: AI_UPLOAD_REVIEW_SYSTEM_PROMPT },
+      { role: "user", content: JSON.stringify(payload, null, 2) },
+    ],
+  };
+
+  let response = await postAiRequest(body);
+  if (!response.ok) {
+    const firstErrorText = await response.text();
+    const fallbackBody = { ...body };
+    delete fallbackBody.response_format;
+    response = await postAiRequest(fallbackBody);
+    if (!response.ok) {
+      const secondErrorText = await response.text();
+      throw new Error(extractAiError(secondErrorText) || extractAiError(firstErrorText) || "AI 上传审核失败");
+    }
+  }
+
+  const data = await response.json();
+  return normalizeUploadAiReview(parseAiJson(getAiMessageContent(data)));
 }
 
 function guessResourceCourse(name) {
@@ -1135,23 +1334,63 @@ async function handleResourceUploadInput() {
   }
   if (!files.length) return;
 
-  updateResourceUploadStatus(`正在上传 ${files.length} 份资料...`);
+  updateResourceUploadStatus(`准备审核 ${files.length} 份资料...`);
   try {
     let savedCount = 0;
     const skipped = [];
 
     for (const file of files) {
+      const extension = getResourceFileExtension(file.name);
       if (file.size > 12 * 1024 * 1024) {
         skipped.push(`${file.name} 超过 12MB`);
         continue;
       }
+      if (!isAllowedUploadExtension(file.name)) {
+        skipped.push(`${file.name} 类型不支持，仅允许 PDF / DOCX / XLSX / TXT / MD / PNG / JPG / WEBP`);
+        continue;
+      }
+      if (hasSuspiciousDoubleExtension(file.name)) {
+        skipped.push(`${file.name} 文件名可疑，疑似双扩展名伪装`);
+        continue;
+      }
+
+      updateResourceUploadStatus(`正在校验文件头：${file.name}`);
+      const header = await readUploadFileHeader(file);
+      const signatureCheck = matchesUploadSignature(extension, header);
+      if (!signatureCheck.ok) {
+        skipped.push(`${file.name} 已拦截：${signatureCheck.reason}`);
+        continue;
+      }
+
+      updateResourceUploadStatus(`AI 正在审核：${file.name}`);
+      const previewText = await extractUploadPreview(file, extension);
+      let review;
+      try {
+        review = await requestUploadAiReview(file, {
+          extension,
+          header,
+          previewText,
+          signatureCheck,
+          doubleExtensionRisk: false,
+        });
+      } catch (error) {
+        skipped.push(`${file.name} 审核失败：${error.message || "AI 暂时没返回结果"}`);
+        continue;
+      }
+      if (review.verdict !== "allow") {
+        const riskText = review.riskPoints.length ? `（${review.riskPoints.join("、")}）` : "";
+        skipped.push(`${file.name} 审核未通过：${review.reason}${riskText}`);
+        continue;
+      }
+
+      updateResourceUploadStatus(`审核通过，正在上传：${file.name}`);
       const dataUrl = await readFileAsDataUrl(file);
       const record = {
         id: `upload-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         title: file.name.replace(/\.[^.]+$/u, "") || file.name,
         name: file.name,
         originalName: file.name,
-        description: "当前浏览器本地上传资料",
+        description: truncateText(`AI审核通过：${review.reason}`, 72),
         course: guessResourceCourse(file.name),
         type: getResourceFileType(file.name, file.type),
         size: file.size,
@@ -4344,7 +4583,7 @@ function updateToolbarButtons() {
   questionShuffleWrap.classList.toggle("hidden", !state.currentMode || inFinanceExam);
   memorizeModeWrap.classList.toggle("hidden", !state.currentMode || inFinanceExam);
   shuffleToggleWrap.classList.toggle("hidden", state.currentMode !== "single" || inFinanceExam);
-  nextAction.classList.toggle("hidden", !state.currentMode || isMemorizeMode());
+  nextAction.classList.toggle("hidden", !state.currentMode || isMemorizeMode() || state.revealState);
   newExamSessionButton?.classList.toggle("hidden", !inFinanceExam);
   primaryAction.disabled = busy || !hasQuestion;
   prevAction.disabled = busy || state.currentList.length <= 1 || (inFinanceExam && state.currentIndex === 0);
