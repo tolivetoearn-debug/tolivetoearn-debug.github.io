@@ -40,6 +40,7 @@ const COURSE_MODE_GROUPS = {
 };
 
 const CHOICE_DISPLAY_LABELS = ["A", "B", "C", "D", "E", "F"];
+const NUMBER_REWRITE_FACTORS = [0.8, 1.2, 1.5, 2];
 const AI_MODEL_DISPLAY = "ChatGPT 5.4";
 const LEGACY_PROGRESS_STORAGE_KEY = "quiz-web-progress-v3";
 const USER_CENTER_STORAGE_KEY = "quiz-web-user-center-v1";
@@ -208,6 +209,7 @@ const state = {
   unfinishedOnly: false,
   singleChoiceOrders: {},
   questionOrders: {},
+  questionNumberVariants: {},
   aiLoading: false,
   questionChatLoading: false,
   homeChatLoading: false,
@@ -224,6 +226,7 @@ const modeTitle = document.getElementById("modeTitle");
 const progressText = document.getElementById("progressText");
 const questionTitle = document.getElementById("questionTitle");
 const questionMeta = document.getElementById("questionMeta");
+const rewriteNumbersButton = document.getElementById("rewriteNumbersButton");
 const aiExplainButton = document.getElementById("aiExplainButton");
 const questionBody = document.getElementById("questionBody");
 const feedbackPanel = document.getElementById("feedbackPanel");
@@ -355,6 +358,7 @@ async function init() {
   prevAction.addEventListener("click", () => navigateRelative(-1));
   nextAction?.addEventListener("click", () => navigateRelative(1));
   markQuestionButton.addEventListener("click", toggleQuestionMarked);
+  rewriteNumbersButton?.addEventListener("click", rewriteCurrentQuestionNumbers);
   aiExplainButton?.addEventListener("click", handleAiExplain);
   questionAiChatSendButton?.addEventListener("click", () => submitQuestionAiChat());
   questionAiChatClearButton?.addEventListener("click", clearQuestionAiChatHistory);
@@ -653,6 +657,130 @@ function getQuestionKind(mode, question) {
 function getQuestionTypeLabel(mode, question) {
   const kind = getQuestionKind(mode, question);
   return QUESTION_KIND_LABELS[kind] || MODE_LABELS[mode] || "题目";
+}
+
+function supportsQuestionNumberRewrite(mode, question = state.currentList[state.currentIndex]) {
+  const kind = getQuestionKind(mode, question);
+  if (!question || !["calc", "business"].includes(kind)) return false;
+  return countRewritableNumbersInHtml(question.prompt_html || "") > 0;
+}
+
+function getQuestionVariantKey(mode, question = state.currentList[state.currentIndex]) {
+  return getQuestionChatKey(mode, question);
+}
+
+function getQuestionNumberVariant(mode, question = state.currentList[state.currentIndex]) {
+  const key = getQuestionVariantKey(mode, question);
+  return key ? state.questionNumberVariants[key] || null : null;
+}
+
+function getRenderedPromptHtml(question, mode = state.currentMode) {
+  const variant = getQuestionNumberVariant(mode, question);
+  return variant?.prompt_html || question?.prompt_html || "";
+}
+
+function getRenderedAnswerHtml(question, mode = state.currentMode) {
+  const variant = getQuestionNumberVariant(mode, question);
+  return variant?.answer_html || question?.answer_html || "";
+}
+
+function countRewritableNumbersInHtml(html) {
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html || "";
+  let count = 0;
+  const walker = document.createTreeWalker(wrapper, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node) {
+    const matches = String(node.nodeValue || "").match(/-?\d[\d ]*(?:\.\d+)?/gu) || [];
+    count += matches.filter((token) => shouldRewriteNumericToken(token)).length;
+    node = walker.nextNode();
+  }
+  return count;
+}
+
+function shouldRewriteNumericToken(token) {
+  const digits = String(token || "").replace(/[^\d]/gu, "");
+  return digits.length >= 3;
+}
+
+function pickNumberRewriteFactor(previousFactor = null) {
+  const pool = NUMBER_REWRITE_FACTORS.filter((factor) => factor !== previousFactor);
+  return pool[Math.floor(Math.random() * pool.length)] || NUMBER_REWRITE_FACTORS[0];
+}
+
+function formatNumberRewriteFactor(factor) {
+  return Number.isInteger(factor) ? String(factor) : String(factor).replace(/0+$/u, "").replace(/\.$/u, "");
+}
+
+function formatScaledNumber(value, originalToken) {
+  const raw = String(originalToken || "");
+  const hasDecimal = raw.includes(".");
+  const decimals = hasDecimal ? (raw.split(".")[1] || "").length : 0;
+  const scaledValue = hasDecimal
+    ? Number(value).toFixed(decimals)
+    : String(Math.round(Number(value)));
+  if (!/\d \d/u.test(raw)) {
+    return scaledValue;
+  }
+  const negative = scaledValue.startsWith("-") ? "-" : "";
+  const [integerPart, decimalPart] = scaledValue.replace(/^-/, "").split(".");
+  const grouped = integerPart.replace(/\B(?=(\d{3})+(?!\d))/gu, " ");
+  return decimalPart ? `${negative}${grouped}.${decimalPart}` : `${negative}${grouped}`;
+}
+
+function rewriteNumericText(text, factor) {
+  return String(text || "").replace(/-?\d[\d ]*(?:\.\d+)?/gu, (token) => {
+    if (!shouldRewriteNumericToken(token)) return token;
+    const numeric = Number(token.replace(/\s+/gu, ""));
+    if (!Number.isFinite(numeric)) return token;
+    return formatScaledNumber(numeric * factor, token);
+  });
+}
+
+function rewriteNumbersInHtml(html, factor) {
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html || "";
+  const walker = document.createTreeWalker(wrapper, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node) {
+    node.nodeValue = rewriteNumericText(node.nodeValue, factor);
+    node = walker.nextNode();
+  }
+  return wrapper.innerHTML;
+}
+
+function buildQuestionNumberVariant(question, mode = state.currentMode) {
+  const current = getQuestionNumberVariant(mode, question);
+  const factor = pickNumberRewriteFactor(current?.factor || null);
+  return {
+    factor,
+    prompt_html: rewriteNumbersInHtml(question.prompt_html || "", factor),
+    answer_html: rewriteNumbersInHtml(question.answer_html || "", factor),
+  };
+}
+
+function rewriteCurrentQuestionNumbers() {
+  const question = state.currentList[state.currentIndex];
+  if (!question || !state.currentMode || !supportsQuestionNumberRewrite(state.currentMode, question)) return;
+
+  const key = getQuestionVariantKey(state.currentMode, question);
+  if (!key) return;
+  state.questionNumberVariants[key] = buildQuestionNumberVariant(question, state.currentMode);
+
+  feedbackPanel.classList.add("hidden");
+  feedbackPanel.innerHTML = "";
+  clearQuestionAiChatHistory();
+
+  const kind = getQuestionKind(state.currentMode, question);
+  if (["calc", "business"].includes(kind)) {
+    programAnswer.value = "";
+    if (state.currentMode === "financeExam") {
+      saveFinanceExamDraft(question.id, "");
+    }
+  }
+
+  state.revealState = false;
+  renderCurrentQuestion();
 }
 
 function isObjectiveKind(kind) {
@@ -2651,13 +2779,13 @@ function renderJudgeQuestion(question) {
 }
 
 function renderProgramQuestion(question) {
-  questionBody.innerHTML = question.prompt_html;
+  questionBody.innerHTML = getRenderedPromptHtml(question);
   manualReviewRow.classList.remove("hidden");
   configureManualReviewArea("program");
   if (isMemorizeMode()) {
     programAnswer.value = "";
     programAnswerPanel.classList.add("memory-answer-surface");
-    programAnswerPanel.innerHTML = question.answer_html;
+    programAnswerPanel.innerHTML = getRenderedAnswerHtml(question);
     programAnswerPanel.classList.remove("hidden");
     markManualReviewDone("program", question.id);
     questionMeta.textContent = buildQuestionMetaText(question);
@@ -2670,7 +2798,7 @@ function renderProgramQuestion(question) {
 }
 
 function renderStudyQuestion(question, kind = getQuestionKind(state.currentMode, question)) {
-  questionBody.innerHTML = question.prompt_html;
+  questionBody.innerHTML = getRenderedPromptHtml(question);
   manualReviewRow.classList.remove("hidden");
   programComposer.classList.remove("hidden");
   configureManualReviewArea(kind);
@@ -2678,7 +2806,7 @@ function renderStudyQuestion(question, kind = getQuestionKind(state.currentMode,
   if (isMemorizeMode()) {
     programComposer.classList.add("hidden");
     programAnswerPanel.classList.add("memory-answer-surface");
-    programAnswerPanel.innerHTML = question.answer_html;
+    programAnswerPanel.innerHTML = getRenderedAnswerHtml(question);
     programAnswerPanel.classList.remove("hidden");
     markManualReviewDone(state.currentMode, question.id);
     questionMeta.textContent = buildQuestionMetaText(question);
@@ -2687,10 +2815,16 @@ function renderStudyQuestion(question, kind = getQuestionKind(state.currentMode,
 }
 
 function getQuestionPromptText(question, kind) {
+  if (supportsQuestionNumberRewrite(state.currentMode, question)) {
+    return htmlToReadableText(getRenderedPromptHtml(question));
+  }
   return buildWrongReviewPromptText(state.currentMode, question);
 }
 
 function buildQuestionReferenceAnswerText(question, kind) {
+  if (supportsQuestionNumberRewrite(state.currentMode, question)) {
+    return htmlToReadableText(getRenderedAnswerHtml(question)).replace(/^参考答案\s*/u, "").trim();
+  }
   return buildWrongReviewAnswerText(state.currentMode, question).replace(/^参考答案\s*/u, "").trim();
 }
 
@@ -3003,7 +3137,7 @@ function handleManualReviewAction() {
   }
 
   if (!state.revealState) {
-    programAnswerPanel.innerHTML = question.answer_html;
+    programAnswerPanel.innerHTML = getRenderedAnswerHtml(question);
     programAnswerPanel.classList.remove("hidden");
     markManualReviewDone(state.currentMode, question.id);
     questionMeta.textContent = buildQuestionMetaText(question);
@@ -3046,8 +3180,8 @@ async function requestAiReview(mode, question, userAnswer) {
   const payload = {
     题型: mode === "short" ? "简答题" : "计算题",
     题目标题: question.title,
-    题目内容: htmlToReadableText(question.prompt_html),
-    参考答案: htmlToReadableText(question.answer_html).replace(/^参考答案\s*/u, "").trim(),
+    题目内容: htmlToReadableText(getRenderedPromptHtml(question)),
+    参考答案: htmlToReadableText(getRenderedAnswerHtml(question)).replace(/^参考答案\s*/u, "").trim(),
     学生作答: userAnswer,
   };
 
@@ -3852,6 +3986,16 @@ function updateToolbarButtons() {
   prevAction.disabled = busy || state.currentList.length <= 1 || (inFinanceExam && state.currentIndex === 0);
   nextAction.disabled = busy || !hasQuestion || (!inFinanceExam && state.currentList.length <= 1);
   markQuestionButton.disabled = busy || !hasQuestion;
+  const question = state.currentList[state.currentIndex];
+  if (rewriteNumbersButton) {
+    const canRewriteNumbers = !!question && supportsQuestionNumberRewrite(state.currentMode, question);
+    const activeVariant = canRewriteNumbers ? getQuestionNumberVariant(state.currentMode, question) : null;
+    rewriteNumbersButton.classList.toggle("hidden", !canRewriteNumbers);
+    rewriteNumbersButton.disabled = busy || !canRewriteNumbers;
+    rewriteNumbersButton.textContent = activeVariant
+      ? `再换一组数字 ×${formatNumberRewriteFactor(activeVariant.factor)}`
+      : "改题目数字";
+  }
   if (aiExplainButton) {
     aiExplainButton.classList.toggle("hidden", !state.currentMode || !AI_CONFIG.enabled);
     aiExplainButton.disabled = busy || !hasQuestion;
@@ -3867,7 +4011,6 @@ function updateToolbarButtons() {
   if (questionAiChatInput) {
     questionAiChatInput.disabled = busy || !hasQuestion;
   }
-  const question = state.currentList[state.currentIndex];
   const isMarked = question && state.currentMode ? isQuestionMarked(state.currentMode, question.id) : false;
   markQuestionButton.textContent = isMarked ? "取消标记" : "标记本题";
   markQuestionButton.classList.toggle("active", !!isMarked);
