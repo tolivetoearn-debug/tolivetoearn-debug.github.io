@@ -143,6 +143,18 @@ const AI_EXPLAIN_SYSTEM_PROMPT = `
 6. 只围绕当前这道题讲，不要扯到别的题。
 `;
 
+const AI_QUESTION_CHAT_SYSTEM_PROMPT = `
+你是刷题网站里的单题讲解老师。
+
+你的任务：
+1. 只围绕当前这一道题回答。
+2. 结合题目、参考答案、学生已有作答、前面的讲解或伴答结果来回答。
+3. 用户继续追问哪里不懂，你就针对那个点解释，不要泛泛而谈。
+4. 尽量讲清“为什么”，必要时分步骤拆开。
+5. 中文，直接，短段落或短列表，不要空话。
+6. 不要跳到别的题，不要脱离当前题目。
+`;
+
 const AI_WRONG_REVIEW_SYSTEM_PROMPT = `
 你是一个中文错题复盘教练，任务是把学生已经做错的题讲明白，让学生下次更容易做对。
 
@@ -197,6 +209,7 @@ const state = {
   singleChoiceOrders: {},
   questionOrders: {},
   aiLoading: false,
+  questionChatLoading: false,
   homeChatLoading: false,
   wrongReviewPlanLoading: false,
   wrongReviewItemLoadingKey: "",
@@ -214,6 +227,12 @@ const questionMeta = document.getElementById("questionMeta");
 const aiExplainButton = document.getElementById("aiExplainButton");
 const questionBody = document.getElementById("questionBody");
 const feedbackPanel = document.getElementById("feedbackPanel");
+const questionAiChatPanel = document.getElementById("questionAiChatPanel");
+const questionAiChatStatus = document.getElementById("questionAiChatStatus");
+const questionAiChatMessages = document.getElementById("questionAiChatMessages");
+const questionAiChatInput = document.getElementById("questionAiChatInput");
+const questionAiChatSendButton = document.getElementById("questionAiChatSendButton");
+const questionAiChatClearButton = document.getElementById("questionAiChatClearButton");
 const programComposer = document.getElementById("programComposer");
 const composerLabel = document.getElementById("composerLabel");
 const programAnswer = document.getElementById("programAnswer");
@@ -337,6 +356,15 @@ async function init() {
   nextAction?.addEventListener("click", () => navigateRelative(1));
   markQuestionButton.addEventListener("click", toggleQuestionMarked);
   aiExplainButton?.addEventListener("click", handleAiExplain);
+  questionAiChatSendButton?.addEventListener("click", () => submitQuestionAiChat());
+  questionAiChatClearButton?.addEventListener("click", clearQuestionAiChatHistory);
+  questionAiChatInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      submitQuestionAiChat();
+    }
+  });
+  questionAiChatInput?.addEventListener("input", () => updateToolbarButtons());
   wrongOnlyButton.addEventListener("click", () => switchQuestionSet("wrong"));
   unfinishedOnlyButton.addEventListener("click", () => switchQuestionSet("unfinished"));
   allQuestionsButton.addEventListener("click", () => switchQuestionSet("all"));
@@ -687,6 +715,10 @@ function renderCurrentQuestion() {
     }</p>`;
     feedbackPanel.classList.add("hidden");
     feedbackPanel.innerHTML = "";
+    if (questionAiChatInput) {
+      questionAiChatInput.value = "";
+    }
+    renderQuestionAiChat();
     programComposer.classList.add("hidden");
     programAnswerPanel.classList.add("hidden");
     manualReviewRow.classList.add("hidden");
@@ -706,6 +738,10 @@ function renderCurrentQuestion() {
   markQuestionButton.disabled = false;
   feedbackPanel.classList.add("hidden");
   feedbackPanel.innerHTML = "";
+  if (questionAiChatInput) {
+    questionAiChatInput.value = "";
+  }
+  renderQuestionAiChat();
   programComposer.classList.add("hidden");
   programAnswerPanel.classList.add("hidden");
   programAnswerPanel.classList.remove("memory-answer-surface");
@@ -750,6 +786,7 @@ function renderCurrentQuestion() {
   }
 
   renderNavigator();
+  renderQuestionAiChat();
   updateToolbarButtons();
 }
 
@@ -1162,6 +1199,117 @@ function formatChatMessageHtml(value) {
   return escaped
     .replace(/(https?:\/\/[^\s<]+)/gu, (url) => `<a href="${url}" target="_blank" rel="noreferrer">${url}</a>`)
     .replace(/\n/gu, "<br>");
+}
+
+function normalizeQuestionChatMessages(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => ({
+    role: item?.role === "user" ? "user" : "assistant",
+    content: String(item?.content || "").trim(),
+    createdAt: item?.createdAt || "",
+    tag: String(item?.tag || "").trim(),
+  })).filter((item) => item.content);
+}
+
+function normalizeQuestionChatHistories(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const result = {};
+  Object.entries(value).forEach(([key, items]) => {
+    const normalized = normalizeQuestionChatMessages(items);
+    if (normalized.length) {
+      result[String(key)] = normalized.slice(-24);
+    }
+  });
+  return result;
+}
+
+function getQuestionChatKey(mode, question, progressData = progressStore) {
+  if (!mode || !question?.id) return "";
+  if (mode === "financeExam") {
+    const sessionId = String(progressData?.financeExamCurrentSessionId || getActiveFinanceExamSession(progressData)?.id || "default");
+    return `${mode}::${sessionId}::${question.id}`;
+  }
+  return `${mode}::${question.id}`;
+}
+
+function getQuestionChatHistory(mode, question, progressData = progressStore) {
+  const key = getQuestionChatKey(mode, question, progressData);
+  return normalizeQuestionChatMessages(progressData?.questionChatHistories?.[key]);
+}
+
+function setQuestionChatHistory(mode, question, history, progressData = progressStore) {
+  const key = getQuestionChatKey(mode, question, progressData);
+  if (!key) return;
+  progressData.questionChatHistories ||= {};
+  progressData.questionChatHistories[key] = normalizeQuestionChatMessages(history).slice(-24);
+  saveProgress();
+}
+
+function appendQuestionChatMessage(mode, question, role, content, extras = {}) {
+  const history = getQuestionChatHistory(mode, question);
+  history.push({
+    role: role === "user" ? "user" : "assistant",
+    content: String(content || "").trim(),
+    createdAt: new Date().toISOString(),
+    tag: String(extras.tag || "").trim(),
+  });
+  setQuestionChatHistory(mode, question, history);
+}
+
+function buildQuestionChatStatusText(question, history) {
+  const count = history.length;
+  const kindLabel = getQuestionTypeLabel(state.currentMode, question);
+  if (!count) {
+    return `围绕这道${kindLabel}继续和 ${AI_MODEL_DISPLAY} 对话`;
+  }
+  return `当前题型：${kindLabel} · 已保留 ${count} 条本题对话`;
+}
+
+function renderQuestionAiChatMessageMetaHtml(message) {
+  const parts = [];
+  const timeText = message?.createdAt ? formatProfileTime(message.createdAt) : "";
+  if (timeText) {
+    parts.push(`<span class="home-chat-message-time">${escapeHtml(timeText)}</span>`);
+  }
+  if (message?.tag) {
+    parts.push(`<span class="home-chat-capability">${escapeHtml(message.tag)}</span>`);
+  }
+  if (!parts.length) return "";
+  return `<div class="home-chat-message-meta">${parts.join("")}</div>`;
+}
+
+function renderQuestionAiChat() {
+  if (!questionAiChatPanel || !questionAiChatMessages || !questionAiChatStatus) return;
+  const question = state.currentList[state.currentIndex];
+  if (!question || !state.currentMode) {
+    questionAiChatPanel.classList.add("hidden");
+    questionAiChatMessages.innerHTML = "";
+    questionAiChatStatus.textContent = "围绕当前题目继续和 AI 对话";
+    if (questionAiChatInput) {
+      questionAiChatInput.value = "";
+    }
+    return;
+  }
+
+  const history = getQuestionChatHistory(state.currentMode, question);
+  const shouldShow = history.length > 0;
+  questionAiChatPanel.classList.toggle("hidden", !shouldShow);
+  questionAiChatStatus.textContent = state.questionChatLoading
+    ? `${AI_MODEL_DISPLAY} 正在继续讲这道题...`
+    : buildQuestionChatStatusText(question, history);
+  if (!shouldShow) {
+    questionAiChatMessages.innerHTML = "";
+    return;
+  }
+
+  questionAiChatMessages.innerHTML = history.map((message) => `
+    <div class="home-chat-message ${message.role === "user" ? "user" : "assistant"}">
+      <div class="home-chat-message-role">${message.role === "user" ? "你" : AI_MODEL_DISPLAY}</div>
+      <div class="home-chat-message-body">${formatChatMessageHtml(message.content)}</div>
+      ${renderQuestionAiChatMessageMetaHtml(message)}
+    </div>
+  `).join("");
+  questionAiChatMessages.scrollTop = questionAiChatMessages.scrollHeight;
 }
 
 function updateHomeChatStatus(text) {
@@ -2317,6 +2465,55 @@ function clearHomeChatHistory() {
   updateHomeChatStatus("聊天已清空");
 }
 
+function clearQuestionAiChatHistory() {
+  const question = state.currentList[state.currentIndex];
+  if (!question || !state.currentMode) return;
+  setQuestionChatHistory(state.currentMode, question, []);
+  if (questionAiChatInput) {
+    questionAiChatInput.value = "";
+  }
+  renderQuestionAiChat();
+}
+
+async function submitQuestionAiChat() {
+  if (state.aiLoading || state.questionChatLoading) return;
+  const question = state.currentList[state.currentIndex];
+  if (!question || !state.currentMode) return;
+
+  const message = String(questionAiChatInput?.value || "").trim();
+  if (!message) {
+    questionAiChatInput?.focus();
+    return;
+  }
+
+  const kind = getQuestionKind(state.currentMode, question);
+  appendQuestionChatMessage(state.currentMode, question, "user", message);
+  if (questionAiChatInput) {
+    questionAiChatInput.value = "";
+  }
+  state.questionChatLoading = true;
+  renderQuestionAiChat();
+  updateToolbarButtons();
+
+  try {
+    const reply = await requestQuestionAiChatReply(question, kind);
+    appendQuestionChatMessage(state.currentMode, question, "assistant", reply, { tag: "继续讲解" });
+  } catch (error) {
+    console.error(error);
+    appendQuestionChatMessage(
+      state.currentMode,
+      question,
+      "assistant",
+      `这次没连上，你可以直接再问一次。\n\n${error.message || "请求失败"}`,
+      { tag: "连接失败" },
+    );
+  } finally {
+    state.questionChatLoading = false;
+    renderQuestionAiChat();
+    updateToolbarButtons();
+  }
+}
+
 function formatProfileTime(isoString) {
   if (!isoString) return "刚刚";
   const date = new Date(isoString);
@@ -2511,6 +2708,9 @@ async function handleAiExplain() {
     const explanation = await requestAiExplanation(question, kind);
     feedbackPanel.innerHTML = buildAiExplanationHtml(kind, explanation);
     feedbackPanel.classList.remove("hidden");
+    appendQuestionChatMessage(state.currentMode, question, "assistant", explanation, { tag: "AI讲解" });
+    renderQuestionAiChat();
+    questionAiChatInput?.focus();
   } catch (error) {
     console.error(error);
     feedbackPanel.innerHTML = `
@@ -2552,6 +2752,9 @@ async function handleAiAssist() {
     applyAiReviewResult(state.currentMode, question.id, result.verdict);
     feedbackPanel.innerHTML = buildAiFeedbackHtml(kind, result);
     feedbackPanel.classList.remove("hidden");
+    appendQuestionChatMessage(state.currentMode, question, "assistant", buildAiReviewChatSeedText(kind, result), { tag: "AI伴答" });
+    renderQuestionAiChat();
+    questionAiChatInput?.focus();
     questionMeta.textContent = buildQuestionMetaText(question);
     updateProgressText();
     renderNavigator();
@@ -2898,12 +3101,60 @@ async function requestAiExplanation(question, kind) {
     ],
   };
 
-  const response = await postAiRequest(body);
+  const response = await postAiApiRequest("/chat/completions", body, 45000, "本题追问超时了，等会再问一次。");
   if (!response.ok) {
     throw new Error(extractAiError(await response.text()) || "AI讲解请求失败");
   }
 
   return getAiMessageContent(await response.json()).trim() || "这题可以先看考点，再按参考答案去对照关键步骤。";
+}
+
+function getQuestionUserWorkText(question, kind) {
+  if (!question) return "";
+  if (kind === "program") {
+    return String(progressStore.programAnswers?.[question.id] || "").trim();
+  }
+  if (["short", "calc", "business"].includes(kind) || state.currentMode === "financeExam") {
+    return String(getManualDraftValue(question, kind) || "").trim();
+  }
+  return "";
+}
+
+function buildQuestionChatContextText(question, kind) {
+  const userWork = getQuestionUserWorkText(question, kind);
+  return [
+    `课程：${COURSE_LABELS[state.currentMode] || "未分类"}`,
+    `题型：${QUESTION_KIND_LABELS[kind] || MODE_LABELS[state.currentMode] || "题目"}`,
+    `题目标题：${question.title || getQuestionDisplayTitle(question)}`,
+    `题目当前状态：${buildQuestionMetaText(question) || "未做"}`,
+    `题目内容：\n${getQuestionPromptText(question, kind) || "暂无题目内容"}`,
+    `参考答案：\n${buildQuestionReferenceAnswerText(question, kind) || "当前题目未提供参考答案"}`,
+    `学生当前作答：\n${userWork || "当前还没有额外作答内容"}`,
+  ].join("\n\n");
+}
+
+async function requestQuestionAiChatReply(question, kind) {
+  const history = getQuestionChatHistory(state.currentMode, question).slice(-12).map((item) => ({
+    role: item.role,
+    content: item.content,
+  }));
+
+  const body = {
+    model: AI_CONFIG.model,
+    temperature: 0.35,
+    messages: [
+      { role: "system", content: AI_QUESTION_CHAT_SYSTEM_PROMPT },
+      { role: "system", content: buildQuestionChatContextText(question, kind) },
+      ...history,
+    ],
+  };
+
+  const response = await postAiRequest(body);
+  if (!response.ok) {
+    throw new Error(extractAiError(await response.text()) || "本题追问请求失败");
+  }
+
+  return getAiMessageContent(await response.json()).trim() || "我再换个更直接的说法给你讲：先盯住这道题的考点，再对应参考答案的关键步骤去看。";
 }
 
 async function postAiApiRequest(endpointPath, body, timeoutMs = 45000, timeoutText = "AI伴答超时了，等会再点一次。") {
@@ -3112,6 +3363,31 @@ function buildAiFeedbackHtml(mode, result) {
       ` : ""}
     </div>
   `;
+}
+
+function buildAiReviewChatSeedText(mode, result) {
+  const verdictLabel = {
+    correct: "答得很到位",
+    partial: "方向基本对，但还可以更完整",
+    wrong: "这次没有答准",
+  }[result.verdict] || "已完成点评";
+  const lines = [
+    `AI伴答结论：${verdictLabel}`,
+    `总评：${result.summary}`,
+  ];
+  if (result.goodPoints?.length) {
+    lines.push(`你答到的点：${result.goodPoints.join("；")}`);
+  }
+  if (result.missingPoints?.length) {
+    lines.push(`${mode === "short" ? "漏掉的要点" : "需要补的步骤"}：${result.missingPoints.join("；")}`);
+  }
+  if (result.wrongPoints?.length) {
+    lines.push(`${mode === "short" ? "明显偏差" : "出错的位置"}：${result.wrongPoints.join("；")}`);
+  }
+  if (result.suggestedFix) {
+    lines.push(`下次怎么补：${result.suggestedFix}`);
+  }
+  return lines.join("\n");
 }
 
 function buildAiExplanationHtml(kind, explanation) {
@@ -3561,6 +3837,7 @@ function toggleOptionShuffle() {
 function updateToolbarButtons() {
   const inFinanceExam = state.currentMode === "financeExam";
   const hasQuestion = !!state.currentList[state.currentIndex];
+  const busy = state.aiLoading || state.questionChatLoading;
   wrongOnlyButton.textContent = state.wrongOnly ? "当前：错题模式" : "错题再练";
   unfinishedOnlyButton.textContent = state.unfinishedOnly ? "当前：未做题模式" : "只看未做题";
   wrongOnlyButton.classList.toggle("hidden", inFinanceExam || !state.currentMode);
@@ -3571,14 +3848,24 @@ function updateToolbarButtons() {
   shuffleToggleWrap.classList.toggle("hidden", state.currentMode !== "single" || inFinanceExam);
   nextAction.classList.toggle("hidden", !state.currentMode || isMemorizeMode());
   newExamSessionButton?.classList.toggle("hidden", !inFinanceExam);
-  primaryAction.disabled = state.aiLoading || !hasQuestion;
-  prevAction.disabled = state.aiLoading || state.currentList.length <= 1 || (inFinanceExam && state.currentIndex === 0);
-  nextAction.disabled = state.aiLoading || !hasQuestion || (!inFinanceExam && state.currentList.length <= 1);
-  markQuestionButton.disabled = state.aiLoading || !hasQuestion;
+  primaryAction.disabled = busy || !hasQuestion;
+  prevAction.disabled = busy || state.currentList.length <= 1 || (inFinanceExam && state.currentIndex === 0);
+  nextAction.disabled = busy || !hasQuestion || (!inFinanceExam && state.currentList.length <= 1);
+  markQuestionButton.disabled = busy || !hasQuestion;
   if (aiExplainButton) {
     aiExplainButton.classList.toggle("hidden", !state.currentMode || !AI_CONFIG.enabled);
-    aiExplainButton.disabled = state.aiLoading || !hasQuestion;
+    aiExplainButton.disabled = busy || !hasQuestion;
     aiExplainButton.textContent = state.aiLoading ? "AI讲解中..." : "AI讲解";
+  }
+  if (questionAiChatSendButton) {
+    questionAiChatSendButton.disabled = busy || !hasQuestion || !String(questionAiChatInput?.value || "").trim();
+    questionAiChatSendButton.textContent = state.questionChatLoading ? "发送中..." : "发送追问";
+  }
+  if (questionAiChatClearButton) {
+    questionAiChatClearButton.disabled = busy || !hasQuestion;
+  }
+  if (questionAiChatInput) {
+    questionAiChatInput.disabled = busy || !hasQuestion;
   }
   const question = state.currentList[state.currentIndex];
   const isMarked = question && state.currentMode ? isQuestionMarked(state.currentMode, question.id) : false;
@@ -3588,13 +3875,13 @@ function updateToolbarButtons() {
   if (isManualReviewMode(state.currentMode)) {
     const isWrong = question ? getWrongSet(state.currentMode).has(question.id) : false;
     programMarkWrong.textContent = isWrong ? "取消错题" : "记为错题";
-    programMarkWrong.disabled = state.aiLoading;
+    programMarkWrong.disabled = busy;
   } else {
     programMarkWrong.disabled = false;
   }
 
   if (supportsAiCompanion(state.currentMode)) {
-    aiAssistButton.disabled = state.aiLoading;
+    aiAssistButton.disabled = busy;
   }
 }
 
@@ -3821,6 +4108,7 @@ function ensureProgressDefaults(raw) {
     chatKnowledgeEnabled: typeof raw?.chatKnowledgeEnabled === "boolean" ? raw.chatKnowledgeEnabled : true,
     chatWebSearchEnabled: typeof raw?.chatWebSearchEnabled === "boolean" ? raw.chatWebSearchEnabled : true,
     chatUrlReadEnabled: typeof raw?.chatUrlReadEnabled === "boolean" ? raw.chatUrlReadEnabled : true,
+    questionChatHistories: normalizeQuestionChatHistories(raw?.questionChatHistories),
     lastAiPraise: raw?.lastAiPraise && typeof raw.lastAiPraise === "object" ? raw.lastAiPraise : {},
     homeChatHistory: Array.isArray(raw?.homeChatHistory)
       ? raw.homeChatHistory
