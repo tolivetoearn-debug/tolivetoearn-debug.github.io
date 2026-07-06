@@ -249,6 +249,16 @@ const PUBLIC_RESOURCES = [
     size: 38564,
   },
   {
+    id: "basic-accounting-single-choice-bank",
+    title: "基础会计复习题（一）",
+    originalName: "Untitled (1).docx",
+    fileName: "basic-accounting-review-1.docx",
+    course: "中级财务",
+    description: "基础会计单选复习资料，已加入站内资料库和知识库检索。",
+    type: "DOCX",
+    size: 19659,
+  },
+  {
     id: "python-question-bank-1",
     title: "Python 程序类题库（1）",
     originalName: "程序类题库（1）.pdf",
