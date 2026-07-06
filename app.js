@@ -1,5 +1,8 @@
 const MODE_LABELS = {
   financeExam: "模拟考试",
+  financeSingle: "中财单选",
+  financeMulti: "中财多选",
+  financeJudge: "中财判断",
   codefill: "程序填空",
   fill: "填空题",
   short: "简答题",
@@ -23,6 +26,9 @@ const QUESTION_KIND_LABELS = {
 
 const COURSE_LABELS = {
   financeExam: "中级财务",
+  financeSingle: "中级财务",
+  financeMulti: "中级财务",
+  financeJudge: "中级财务",
   codefill: "Python",
   fill: "Python",
   single: "Python",
@@ -32,10 +38,10 @@ const COURSE_LABELS = {
   calc: "中级财务",
 };
 
-const MODE_KEYS = ["codefill", "fill", "single", "judge", "program", "short", "calc"];
+const MODE_KEYS = ["financeSingle", "financeMulti", "financeJudge", "codefill", "fill", "single", "judge", "program", "short", "calc"];
 const ROUTABLE_MODES = [...MODE_KEYS, "financeExam"];
 const COURSE_MODE_GROUPS = {
-  finance: ["short", "calc"],
+  finance: ["financeSingle", "financeMulti", "financeJudge", "short", "calc"],
   python: ["codefill", "fill", "single", "judge", "program"],
 };
 
@@ -313,6 +319,20 @@ const PUBLIC_RESOURCES = [
   href: `./assets/resources/${item.fileName}`,
 }));
 
+const FINANCE_OBJECTIVE_MODE_KEYS = ["financeSingle", "financeMulti", "financeJudge"];
+const FINANCE_OBJECTIVE_BANK_LABELS = PUBLIC_RESOURCES.reduce((acc, item) => {
+  const title = String(item?.title || "").trim();
+  if (!title) return acc;
+  if (item.id) {
+    acc[item.id] = title;
+  }
+  const stem = String(item?.fileName || "").replace(/\.[^.]+$/u, "").trim();
+  if (stem) {
+    acc[stem] = title;
+  }
+  return acc;
+}, {});
+
 const AI_EXPLAIN_SYSTEM_PROMPT = `
 你是刷题网站里的中文讲题老师，负责把当前这道题讲清楚。
 
@@ -459,6 +479,7 @@ const heroCompletionRate = document.getElementById("heroCompletionRate");
 const heroSuggestion = document.getElementById("heroSuggestion");
 const courseFinanceProgress = document.getElementById("courseFinanceProgress");
 const coursePythonProgress = document.getElementById("coursePythonProgress");
+const financeBankPicker = document.getElementById("financeBankPicker");
 const aiModelDisplay = document.getElementById("aiModelDisplay");
 const activeProfileName = document.getElementById("activeProfileName");
 const activeProfileMeta = document.getElementById("activeProfileMeta");
@@ -857,7 +878,7 @@ function setActiveFinanceExamSession(sessionId) {
 
 function rebuildQuestionList() {
   if (!state.data || !state.currentMode) return;
-  let all = getQuestionsByMode(state.currentMode);
+  let all = getQuestionsByMode(state.currentMode, { useSelectedFinanceObjectiveBank: true });
   if (progressStore.shuffleQuestionOrder) {
     all = applyQuestionOrder(state.currentMode, all);
   }
@@ -888,11 +909,139 @@ function switchQuestionSet(filterMode) {
   renderCurrentQuestion();
 }
 
-function getQuestionsByMode(mode) {
+function isFinanceObjectiveMode(mode) {
+  return FINANCE_OBJECTIVE_MODE_KEYS.includes(mode);
+}
+
+function getFinanceObjectiveQuestionSourceId(question) {
+  if (!question) return "";
+  if (typeof question.source === "string") return question.source;
+  if (question.source && typeof question.source === "object") {
+    const rawId = question.source.id || question.source.importId || question.source.fileName || question.source.slug || "";
+    return String(rawId).replace(/\.[^.]+$/u, "").trim();
+  }
+  return "";
+}
+
+function getFinanceObjectiveBankLabel(bankId) {
+  const normalizedId = String(bankId || "").trim();
+  if (!normalizedId || normalizedId === "all") return "全部题库";
+  return FINANCE_OBJECTIVE_BANK_LABELS[normalizedId] || normalizedId;
+}
+
+function createFinanceObjectiveBankCounts() {
+  return {
+    financeSingle: 0,
+    financeMulti: 0,
+    financeJudge: 0,
+    total: 0,
+  };
+}
+
+function getFinanceObjectiveBankOptions() {
+  const optionsMap = new Map();
+
+  FINANCE_OBJECTIVE_MODE_KEYS.forEach((mode) => {
+    getQuestionsByMode(mode).forEach((question) => {
+      const bankId = getFinanceObjectiveQuestionSourceId(question);
+      if (!bankId) return;
+      if (!optionsMap.has(bankId)) {
+        optionsMap.set(bankId, {
+          id: bankId,
+          label: getFinanceObjectiveBankLabel(bankId),
+          counts: createFinanceObjectiveBankCounts(),
+        });
+      }
+      const option = optionsMap.get(bankId);
+      option.counts[mode] += 1;
+      option.counts.total += 1;
+    });
+  });
+
+  const bankOptions = [...optionsMap.values()].sort((a, b) => a.label.localeCompare(b.label, "zh-CN"));
+  const totalCounts = createFinanceObjectiveBankCounts();
+  bankOptions.forEach((option) => {
+    totalCounts.financeSingle += option.counts.financeSingle;
+    totalCounts.financeMulti += option.counts.financeMulti;
+    totalCounts.financeJudge += option.counts.financeJudge;
+    totalCounts.total += option.counts.total;
+  });
+
+  return [{ id: "all", label: "全部题库", counts: totalCounts }, ...bankOptions];
+}
+
+function getSelectedFinanceObjectiveBank(progressData = progressStore) {
+  const requested = String(progressData?.selectedFinanceObjectiveBank || "all").trim() || "all";
+  const validBankIds = new Set(getFinanceObjectiveBankOptions().map((item) => item.id));
+  return validBankIds.has(requested) ? requested : "all";
+}
+
+function getSelectedFinanceObjectiveBankLabel(progressData = progressStore) {
+  return getFinanceObjectiveBankLabel(getSelectedFinanceObjectiveBank(progressData));
+}
+
+function formatFinanceObjectiveBankCounts(counts) {
+  const normalized = counts || createFinanceObjectiveBankCounts();
+  const parts = [];
+  if (normalized.financeSingle) parts.push(`单选 ${normalized.financeSingle}`);
+  if (normalized.financeMulti) parts.push(`多选 ${normalized.financeMulti}`);
+  if (normalized.financeJudge) parts.push(`判断 ${normalized.financeJudge}`);
+  return parts.length ? parts.join(" · ") : "暂无题目";
+}
+
+function renderFinanceObjectiveBankPicker() {
+  if (!financeBankPicker || !state.data) return;
+  const options = getFinanceObjectiveBankOptions();
+  const activeBankId = getSelectedFinanceObjectiveBank();
+  financeBankPicker.innerHTML = options.map((option) => `
+    <button
+      class="bank-chip ${option.id === activeBankId ? "active" : ""}"
+      type="button"
+      data-finance-bank="${escapeHtml(option.id)}"
+      aria-pressed="${option.id === activeBankId ? "true" : "false"}"
+    >
+      <span class="bank-chip-title">${escapeHtml(option.label)}</span>
+      <span class="bank-chip-meta">${escapeHtml(formatFinanceObjectiveBankCounts(option.counts))}</span>
+    </button>
+  `).join("");
+
+  financeBankPicker.querySelectorAll("[data-finance-bank]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectFinanceObjectiveBank(button.dataset.financeBank || "all");
+    });
+  });
+}
+
+function selectFinanceObjectiveBank(bankId) {
+  const normalizedId = String(bankId || "all").trim() || "all";
+  const validBankIds = new Set(getFinanceObjectiveBankOptions().map((item) => item.id));
+  const nextBankId = validBankIds.has(normalizedId) ? normalizedId : "all";
+  if (progressStore.selectedFinanceObjectiveBank === nextBankId) return;
+  progressStore.selectedFinanceObjectiveBank = nextBankId;
+  saveProgress();
+
+  if (isFinanceObjectiveMode(state.currentMode)) {
+    state.currentIndex = 0;
+    state.revealState = false;
+    rebuildQuestionList();
+    renderCurrentQuestion();
+  }
+}
+
+function filterFinanceObjectiveQuestionsByBank(questions, options = {}) {
+  const bankId = options.financeObjectiveBankId || getSelectedFinanceObjectiveBank(options.progressData);
+  if (!bankId || bankId === "all") return questions;
+  return questions.filter((question) => getFinanceObjectiveQuestionSourceId(question) === bankId);
+}
+
+function getModeQuestionPool(mode) {
   const custom = getCustomQuestionsByMode(mode);
   if (mode === "financeExam") {
     return getActiveFinanceExamSession()?.questions || [];
   }
+  if (mode === "financeSingle") return [...(state.data.finance_single_choice_questions || []), ...custom];
+  if (mode === "financeMulti") return [...(state.data.finance_multiple_choice_questions || []), ...custom];
+  if (mode === "financeJudge") return [...(state.data.finance_judgment_questions || []), ...custom];
   if (mode === "codefill") {
     return [
       ...(state.data.fill_questions || []).filter((question) => isProgramFillQuestion(question)),
@@ -912,10 +1061,21 @@ function getQuestionsByMode(mode) {
   return [...(state.data.program_questions || []), ...custom];
 }
 
+function getQuestionsByMode(mode, options = {}) {
+  const questions = getModeQuestionPool(mode);
+  if (!isFinanceObjectiveMode(mode) || !options.useSelectedFinanceObjectiveBank) {
+    return questions;
+  }
+  return filterFinanceObjectiveQuestionsByBank(questions, options);
+}
+
 function getQuestionKind(mode, question) {
   if (mode === "financeExam") {
     return question?.examType || "financeExam";
   }
+  if (mode === "financeSingle") return "single";
+  if (mode === "financeMulti") return "multi";
+  if (mode === "financeJudge") return "judge";
   return mode;
 }
 
@@ -2371,6 +2531,9 @@ function buildQuestionMetaText(question) {
   if (state.currentMode === "financeExam" && question?.score) {
     parts.push(`${question.score}分`);
   }
+  if (isFinanceObjectiveMode(state.currentMode)) {
+    parts.push(getSelectedFinanceObjectiveBankLabel());
+  }
   if (state.currentMode !== "financeExam" && progressStore.shuffleQuestionOrder) {
     parts.push("题序已打乱");
   }
@@ -2417,6 +2580,8 @@ function updatePracticeHeader() {
     if (state.currentMode === "financeExam") {
       const session = getActiveFinanceExamSession();
       practiceSessionInfo.textContent = `${session?.title || "中财模拟卷"} · ${current}/${state.currentList.length || 0}`;
+    } else if (isFinanceObjectiveMode(state.currentMode)) {
+      practiceSessionInfo.textContent = `${getSelectedFinanceObjectiveBankLabel()} · 当前进度 ${current}/${state.currentList.length || 0}`;
     } else {
       practiceSessionInfo.textContent = `当前进度 ${current}/${state.currentList.length || 0}`;
     }
@@ -2436,12 +2601,14 @@ function updatePracticeHeader() {
 function renderHomeDashboard() {
   if (!state.data) return;
 
+  renderFinanceObjectiveBankPicker();
+
   let totalQuestions = 0;
   let totalDone = 0;
   let totalWrong = 0;
 
   MODE_KEYS.forEach((mode) => {
-    const stats = getModeDashboardStats(mode, progressStore);
+    const stats = getModeDashboardStats(mode, progressStore, { useSelectedFinanceObjectiveBank: true });
     totalQuestions += stats.total;
     totalDone += stats.done;
     totalWrong += stats.wrong;
@@ -2471,7 +2638,7 @@ function renderHomeDashboard() {
   if (financeExamBarNode) financeExamBarNode.style.width = `${financeExamStats.percent}%`;
   if (financeExamActionNode) financeExamActionNode.textContent = financeExamStats.actionText;
 
-  const financeStats = getCourseDashboardStats("finance", progressStore);
+  const financeStats = getCourseDashboardStats("finance", progressStore, { useSelectedFinanceObjectiveBank: true });
   const pythonStats = getCourseDashboardStats("python", progressStore);
   const financeCombinedDone = financeStats.done + financeExamStats.done;
   const financeCombinedTotal = financeStats.total + financeExamStats.total;
@@ -2485,10 +2652,10 @@ function renderHomeDashboard() {
 
   const completionRate = totalQuestions ? Math.round((totalDone / totalQuestions) * 100) : 0;
   const hardestMode = MODE_KEYS
-    .map((mode) => ({ mode, wrong: getModeDashboardStats(mode, progressStore).wrong }))
+    .map((mode) => ({ mode, wrong: getModeDashboardStats(mode, progressStore, { useSelectedFinanceObjectiveBank: true }).wrong }))
     .sort((a, b) => b.wrong - a.wrong)[0];
   const mostPendingMode = MODE_KEYS
-    .map((mode) => ({ mode, pending: getModeDashboardStats(mode, progressStore).pending }))
+    .map((mode) => ({ mode, pending: getModeDashboardStats(mode, progressStore, { useSelectedFinanceObjectiveBank: true }).pending }))
     .sort((a, b) => b.pending - a.pending)[0];
 
   if (heroDoneCount) heroDoneCount.textContent = String(totalDone);
@@ -2595,8 +2762,12 @@ function renderFinanceExamCompletionSummary() {
   primaryAction.disabled = true;
 }
 
-function getModeDashboardStats(mode, progressData = progressStore) {
-  const questions = getQuestionsByMode(mode);
+function getModeDashboardStats(mode, progressData = progressStore, options = {}) {
+  const questions = getQuestionsByMode(mode, {
+    useSelectedFinanceObjectiveBank: options.useSelectedFinanceObjectiveBank === true,
+    financeObjectiveBankId: options.financeObjectiveBankId,
+    progressData,
+  });
   const total = questions.length;
   const wrong = questions.filter((question) => getQuestionStatus(mode, question, progressData).key === "wrong").length;
   const done = questions.filter((question) => getQuestionStatus(mode, question, progressData).key !== "pending").length;
@@ -2624,10 +2795,10 @@ function getModeDashboardStats(mode, progressData = progressStore) {
   return { total, done, pending, wrong, percent, statusText, actionText };
 }
 
-function getCourseDashboardStats(courseKey, progressData = progressStore) {
+function getCourseDashboardStats(courseKey, progressData = progressStore, options = {}) {
   const modes = COURSE_MODE_GROUPS[courseKey] || [];
   return modes.reduce((acc, mode) => {
-    const stats = getModeDashboardStats(mode, progressData);
+    const stats = getModeDashboardStats(mode, progressData, options);
     acc.total += stats.total;
     acc.done += stats.done;
     acc.wrong += stats.wrong;
@@ -3726,13 +3897,16 @@ function buildWrongReviewItems(progressData = progressStore) {
 
   const modeRank = {
     financeExam: -1,
-    short: 0,
-    calc: 1,
-    codefill: 2,
-    fill: 3,
-    single: 4,
-    judge: 5,
-    program: 6,
+    financeSingle: 0,
+    financeMulti: 1,
+    financeJudge: 2,
+    short: 3,
+    calc: 4,
+    codefill: 5,
+    fill: 6,
+    single: 7,
+    judge: 8,
+    program: 9,
   };
 
   return items.sort((a, b) => {
@@ -4600,7 +4774,7 @@ function handleFillAction() {
 function handleSingleChoiceAction() {
   const question = state.currentList[state.currentIndex];
   const selectedInput = questionBody.querySelector('input[name="singleChoice"]:checked');
-  const gradingMode = state.currentMode === "financeExam" ? "financeExam" : "single";
+  const gradingMode = ["financeExam", "financeSingle"].includes(state.currentMode) ? state.currentMode : "single";
 
   if (!state.revealState) {
     if (!selectedInput) {
@@ -4690,7 +4864,7 @@ function handleMultipleChoiceAction() {
 function handleJudgeAction() {
   const question = state.currentList[state.currentIndex];
   const selectedInput = questionBody.querySelector('input[name="judgeChoice"]:checked');
-  const gradingMode = state.currentMode === "financeExam" ? "financeExam" : "judge";
+  const gradingMode = ["financeExam", "financeJudge"].includes(state.currentMode) ? state.currentMode : "judge";
 
   if (!state.revealState) {
     if (!selectedInput) {
@@ -5401,7 +5575,7 @@ function buildNavigatorSummary(list) {
     return `客观 ${stats.objectiveScore}/${stats.objectiveTotal} · 主观已做 ${stats.subjectiveDone}/${stats.subjectiveTotal} · 标记 ${stats.marked}`;
   }
 
-  const allQuestions = getQuestionsByMode(state.currentMode);
+  const allQuestions = getQuestionsByMode(state.currentMode, { useSelectedFinanceObjectiveBank: true });
   const doneLabel = getDoneDisplayLabel(state.currentMode);
   let pending = 0;
   let wrong = 0;
@@ -5450,6 +5624,42 @@ function getQuestionStatus(mode, question, progressData = progressStore) {
     }
     if (progressData.financeExamDoneIds.includes(question.id)) {
       return { key: "done", label: "已做" };
+    }
+    return { key: "pending", label: "未做" };
+  }
+
+  if (mode === "financeSingle") {
+    const result = progressData.financeSingleResults?.[question.id];
+    if (result === "correct") return { key: "correct", label: "正确" };
+    if (result === "wrong" || progressData.financeSingleWrongIds.includes(question.id)) {
+      return { key: "wrong", label: "错题" };
+    }
+    if (progressData.financeSingleDoneIds.includes(question.id)) {
+      return { key: "done", label: getDoneDisplayLabel(mode, progressData) };
+    }
+    return { key: "pending", label: "未做" };
+  }
+
+  if (mode === "financeMulti") {
+    const result = progressData.financeMultiResults?.[question.id];
+    if (result === "correct") return { key: "correct", label: "正确" };
+    if (result === "wrong" || progressData.financeMultiWrongIds.includes(question.id)) {
+      return { key: "wrong", label: "错题" };
+    }
+    if (progressData.financeMultiDoneIds.includes(question.id)) {
+      return { key: "done", label: getDoneDisplayLabel(mode, progressData) };
+    }
+    return { key: "pending", label: "未做" };
+  }
+
+  if (mode === "financeJudge") {
+    const result = progressData.financeJudgeResults?.[question.id];
+    if (result === "correct") return { key: "correct", label: "正确" };
+    if (result === "wrong" || progressData.financeJudgeWrongIds.includes(question.id)) {
+      return { key: "wrong", label: "错题" };
+    }
+    if (progressData.financeJudgeDoneIds.includes(question.id)) {
+      return { key: "done", label: getDoneDisplayLabel(mode, progressData) };
     }
     return { key: "pending", label: "未做" };
   }
@@ -5745,6 +5955,21 @@ function markAutoGradedProgress(mode, id, allCorrect) {
     if (!progressStore.financeExamDoneIds.includes(id)) {
       progressStore.financeExamDoneIds.push(id);
     }
+  } else if (mode === "financeSingle") {
+    progressStore.financeSingleResults[id] = allCorrect ? "correct" : "wrong";
+    if (!progressStore.financeSingleDoneIds.includes(id)) {
+      progressStore.financeSingleDoneIds.push(id);
+    }
+  } else if (mode === "financeMulti") {
+    progressStore.financeMultiResults[id] = allCorrect ? "correct" : "wrong";
+    if (!progressStore.financeMultiDoneIds.includes(id)) {
+      progressStore.financeMultiDoneIds.push(id);
+    }
+  } else if (mode === "financeJudge") {
+    progressStore.financeJudgeResults[id] = allCorrect ? "correct" : "wrong";
+    if (!progressStore.financeJudgeDoneIds.includes(id)) {
+      progressStore.financeJudgeDoneIds.push(id);
+    }
   } else if (mode === "fill") {
     progressStore.fillResults[id] = allCorrect ? "correct" : "wrong";
   } else if (mode === "single") {
@@ -5766,6 +5991,9 @@ function markManualReviewDone(mode, id) {
 
 function getDoneStorageKey(mode) {
   if (mode === "financeExam") return "financeExamDoneIds";
+  if (mode === "financeSingle") return "financeSingleDoneIds";
+  if (mode === "financeMulti") return "financeMultiDoneIds";
+  if (mode === "financeJudge") return "financeJudgeDoneIds";
   if (isFillMode(mode)) return "fillDoneIds";
   if (mode === "single") return "singleDoneIds";
   if (mode === "judge") return "judgeDoneIds";
@@ -5831,12 +6059,18 @@ function normalizeAnswer(value) {
 
 function ensureProgressDefaults(raw) {
   return {
+    financeSingleWrongIds: Array.isArray(raw?.financeSingleWrongIds) ? raw.financeSingleWrongIds : [],
+    financeMultiWrongIds: Array.isArray(raw?.financeMultiWrongIds) ? raw.financeMultiWrongIds : [],
+    financeJudgeWrongIds: Array.isArray(raw?.financeJudgeWrongIds) ? raw.financeJudgeWrongIds : [],
     fillWrongIds: Array.isArray(raw?.fillWrongIds) ? raw.fillWrongIds : [],
     shortWrongIds: Array.isArray(raw?.shortWrongIds) ? raw.shortWrongIds : [],
     calcWrongIds: Array.isArray(raw?.calcWrongIds) ? raw.calcWrongIds : [],
     singleWrongIds: Array.isArray(raw?.singleWrongIds) ? raw.singleWrongIds : [],
     judgeWrongIds: Array.isArray(raw?.judgeWrongIds) ? raw.judgeWrongIds : [],
     programWrongIds: Array.isArray(raw?.programWrongIds) ? raw.programWrongIds : [],
+    financeSingleMarkedIds: Array.isArray(raw?.financeSingleMarkedIds) ? raw.financeSingleMarkedIds : [],
+    financeMultiMarkedIds: Array.isArray(raw?.financeMultiMarkedIds) ? raw.financeMultiMarkedIds : [],
+    financeJudgeMarkedIds: Array.isArray(raw?.financeJudgeMarkedIds) ? raw.financeJudgeMarkedIds : [],
     fillMarkedIds: Array.isArray(raw?.fillMarkedIds) ? raw.fillMarkedIds : [],
     shortMarkedIds: Array.isArray(raw?.shortMarkedIds) ? raw.shortMarkedIds : [],
     calcMarkedIds: Array.isArray(raw?.calcMarkedIds) ? raw.calcMarkedIds : [],
@@ -5845,6 +6079,12 @@ function ensureProgressDefaults(raw) {
     programMarkedIds: Array.isArray(raw?.programMarkedIds) ? raw.programMarkedIds : [],
     financeExamWrongIds: Array.isArray(raw?.financeExamWrongIds) ? raw.financeExamWrongIds : [],
     financeExamMarkedIds: Array.isArray(raw?.financeExamMarkedIds) ? raw.financeExamMarkedIds : [],
+    financeSingleDoneIds: Array.isArray(raw?.financeSingleDoneIds) ? raw.financeSingleDoneIds : [],
+    financeSingleResults: raw?.financeSingleResults && typeof raw.financeSingleResults === "object" ? raw.financeSingleResults : {},
+    financeMultiDoneIds: Array.isArray(raw?.financeMultiDoneIds) ? raw.financeMultiDoneIds : [],
+    financeMultiResults: raw?.financeMultiResults && typeof raw.financeMultiResults === "object" ? raw.financeMultiResults : {},
+    financeJudgeDoneIds: Array.isArray(raw?.financeJudgeDoneIds) ? raw.financeJudgeDoneIds : [],
+    financeJudgeResults: raw?.financeJudgeResults && typeof raw.financeJudgeResults === "object" ? raw.financeJudgeResults : {},
     fillDoneIds: Array.isArray(raw?.fillDoneIds) ? raw.fillDoneIds : [],
     fillResults: raw?.fillResults && typeof raw.fillResults === "object" ? raw.fillResults : {},
     singleDoneIds: Array.isArray(raw?.singleDoneIds) ? raw.singleDoneIds : [],
@@ -5867,6 +6107,7 @@ function ensureProgressDefaults(raw) {
     shuffleQuestionOrder: typeof raw?.shuffleQuestionOrder === "boolean" ? raw.shuffleQuestionOrder : false,
     shuffleChoiceOptions: typeof raw?.shuffleChoiceOptions === "boolean" ? raw.shuffleChoiceOptions : false,
     memorizeMode: typeof raw?.memorizeMode === "boolean" ? raw.memorizeMode : false,
+    selectedFinanceObjectiveBank: String(raw?.selectedFinanceObjectiveBank || "all") || "all",
     chatKnowledgeEnabled: typeof raw?.chatKnowledgeEnabled === "boolean" ? raw.chatKnowledgeEnabled : true,
     chatWebSearchEnabled: typeof raw?.chatWebSearchEnabled === "boolean" ? raw.chatWebSearchEnabled : true,
     chatUrlReadEnabled: typeof raw?.chatUrlReadEnabled === "boolean" ? raw.chatUrlReadEnabled : true,
@@ -5970,6 +6211,9 @@ function saveProgress() {
 
 function getWrongSet(mode, progressData = progressStore) {
   if (mode === "financeExam") return new Set(progressData.financeExamWrongIds);
+  if (mode === "financeSingle") return new Set(progressData.financeSingleWrongIds);
+  if (mode === "financeMulti") return new Set(progressData.financeMultiWrongIds);
+  if (mode === "financeJudge") return new Set(progressData.financeJudgeWrongIds);
   if (isFillMode(mode)) return new Set(progressData.fillWrongIds);
   if (mode === "short") return new Set(progressData.shortWrongIds);
   if (mode === "calc") return new Set(progressData.calcWrongIds);
@@ -5980,6 +6224,9 @@ function getWrongSet(mode, progressData = progressStore) {
 
 function getMarkedSet(mode, progressData = progressStore) {
   if (mode === "financeExam") return new Set(progressData.financeExamMarkedIds);
+  if (mode === "financeSingle") return new Set(progressData.financeSingleMarkedIds);
+  if (mode === "financeMulti") return new Set(progressData.financeMultiMarkedIds);
+  if (mode === "financeJudge") return new Set(progressData.financeJudgeMarkedIds);
   if (isFillMode(mode)) return new Set(progressData.fillMarkedIds);
   if (mode === "short") return new Set(progressData.shortMarkedIds);
   if (mode === "calc") return new Set(progressData.calcMarkedIds);
@@ -5997,6 +6244,12 @@ function getDoneSet(mode, progressData = progressStore) {
 function saveWrongSet(mode, wrongSet) {
   if (mode === "financeExam") {
     progressStore.financeExamWrongIds = [...wrongSet];
+  } else if (mode === "financeSingle") {
+    progressStore.financeSingleWrongIds = [...wrongSet];
+  } else if (mode === "financeMulti") {
+    progressStore.financeMultiWrongIds = [...wrongSet];
+  } else if (mode === "financeJudge") {
+    progressStore.financeJudgeWrongIds = [...wrongSet];
   } else if (isFillMode(mode)) {
     progressStore.fillWrongIds = [...wrongSet];
   } else if (mode === "short") {
@@ -6016,6 +6269,12 @@ function saveWrongSet(mode, wrongSet) {
 function saveMarkedSet(mode, markedSet) {
   if (mode === "financeExam") {
     progressStore.financeExamMarkedIds = [...markedSet];
+  } else if (mode === "financeSingle") {
+    progressStore.financeSingleMarkedIds = [...markedSet];
+  } else if (mode === "financeMulti") {
+    progressStore.financeMultiMarkedIds = [...markedSet];
+  } else if (mode === "financeJudge") {
+    progressStore.financeJudgeMarkedIds = [...markedSet];
   } else if (isFillMode(mode)) {
     progressStore.fillMarkedIds = [...markedSet];
   } else if (mode === "short") {

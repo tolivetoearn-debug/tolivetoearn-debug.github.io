@@ -14653,5 +14653,3916 @@
       ],
       "skipped": []
     }
-  }
+  },
+  "finance_single_choice_questions": [
+    {
+      "id": "finance-basic-single-001",
+      "title": "基础会计单选001",
+      "stem_text": "下列选项中能引起资产和权益同时减少的业务是",
+      "stem_html": "<p>下列选项中能引起资产和权益同时减少的业务是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "工资计入产品成本但暂未支付"
+        },
+        {
+          "key": "B",
+          "text": "向银行借款直接偿还应付账款"
+        },
+        {
+          "key": "C",
+          "text": "用银行存款偿还应付账款"
+        },
+        {
+          "key": "D",
+          "text": "购买材料货款暂未支付"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "用银行存款偿还应付账款",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-002",
+      "title": "基础会计单选002",
+      "stem_text": "会计的反映职能不具有",
+      "stem_html": "<p>会计的反映职能不具有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "连续性"
+        },
+        {
+          "key": "B",
+          "text": "主观性"
+        },
+        {
+          "key": "C",
+          "text": "系统性"
+        },
+        {
+          "key": "D",
+          "text": "全面性"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "主观性",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-003",
+      "title": "基础会计单选003",
+      "stem_text": "下列选项中属于会计的基本职能的是",
+      "stem_html": "<p>下列选项中属于会计的基本职能的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "控制与监督"
+        },
+        {
+          "key": "B",
+          "text": "反映与分析"
+        },
+        {
+          "key": "C",
+          "text": "反映与核算"
+        },
+        {
+          "key": "D",
+          "text": "反映与监督"
+        }
+      ],
+      "answer_key": "D",
+      "answer_text": "反映与监督",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-004",
+      "title": "基础会计单选004",
+      "stem_text": "会计的主要计量单位是",
+      "stem_html": "<p>会计的主要计量单位是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "实物量度"
+        },
+        {
+          "key": "B",
+          "text": "劳动量度"
+        },
+        {
+          "key": "C",
+          "text": "货币量度"
+        },
+        {
+          "key": "D",
+          "text": "时间量度"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "货币量度",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-005",
+      "title": "基础会计单选005",
+      "stem_text": "对应收账款在会计期末提取坏账准备金这一做法体现的原则是",
+      "stem_html": "<p>对应收账款在会计期末提取坏账准备金这一做法体现的原则是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "配比原则"
+        },
+        {
+          "key": "B",
+          "text": "重要性原则"
+        },
+        {
+          "key": "C",
+          "text": "谨慎性原则"
+        },
+        {
+          "key": "D",
+          "text": "可靠性原则"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "谨慎性原则",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-006",
+      "title": "基础会计单选006",
+      "stem_text": "下列各项会计信息质量要求中，对相关性和可靠性起着制约作用的是",
+      "stem_html": "<p>下列各项会计信息质量要求中，对相关性和可靠性起着制约作用的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "及时性"
+        },
+        {
+          "key": "B",
+          "text": "谨慎性"
+        },
+        {
+          "key": "C",
+          "text": "重要性"
+        },
+        {
+          "key": "D",
+          "text": "实质重于形式"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "及时性",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-007",
+      "title": "基础会计单选007",
+      "stem_text": "各企业单位处理会计业务的方法和程序在不同会计期间要保持前后一致，不得随意变更，这符合",
+      "stem_html": "<p>各企业单位处理会计业务的方法和程序在不同会计期间要保持前后一致，不得随意变更，这符合</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "相关性"
+        },
+        {
+          "key": "B",
+          "text": "谨慎性"
+        },
+        {
+          "key": "C",
+          "text": "可比性"
+        },
+        {
+          "key": "D",
+          "text": "实质重于形式"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "可比性",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-008",
+      "title": "基础会计单选008",
+      "stem_text": "在利润表中，对主营业务和其他业务合并列示，而将各项利润单独列示，这一做法体现的是",
+      "stem_html": "<p>在利润表中，对主营业务和其他业务合并列示，而将各项利润单独列示，这一做法体现的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "真实性原则"
+        },
+        {
+          "key": "B",
+          "text": "重要性原则"
+        },
+        {
+          "key": "C",
+          "text": "配比原则"
+        },
+        {
+          "key": "D",
+          "text": "权责发生制原则"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "重要性原则",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-009",
+      "title": "基础会计单选009",
+      "stem_text": "下列说法中，正确的是",
+      "stem_html": "<p>下列说法中，正确的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "企业对外出售固定资产时，获得的出售收入应记入“其他业务收入”账户。"
+        },
+        {
+          "key": "B",
+          "text": "账簿即会计账户。"
+        },
+        {
+          "key": "C",
+          "text": "管理费用、财务费用、销售费用均属于企业的期间费用。"
+        },
+        {
+          "key": "D",
+          "text": "定期汇总的全部账户发生额的借贷方合计数平衡说明账户记录完全正确。"
+        },
+        {
+          "key": "E",
+          "text": "同一企业不同时期发生的相同或相似交易，应当采用一致的会计政策，不得随意变更，这体现了可比性中的横向可比。"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "管理费用、财务费用、销售费用均属于企业的期间费用。",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-010",
+      "title": "基础会计单选010",
+      "stem_text": "企业的原材料是",
+      "stem_html": "<p>企业的原材料是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "权益"
+        },
+        {
+          "key": "B",
+          "text": "资产"
+        },
+        {
+          "key": "C",
+          "text": "负债"
+        },
+        {
+          "key": "D",
+          "text": "所有者权益"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "资产",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-011",
+      "title": "基础会计单选011",
+      "stem_text": "某企业负债总额 100 万元，所有者权益 50 万元，用银行存款归还短期借款 30 万元后，权益总额为",
+      "stem_html": "<p>某企业负债总额 100 万元，所有者权益 50 万元，用银行存款归还短期借款 30 万元后，权益总额为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "100万元"
+        },
+        {
+          "key": "B",
+          "text": "70万元"
+        },
+        {
+          "key": "C",
+          "text": "120万元"
+        },
+        {
+          "key": "D",
+          "text": "160万元"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "120万元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-012",
+      "title": "基础会计单选012",
+      "stem_text": "强调经营成果计算的企业适合采用",
+      "stem_html": "<p>强调经营成果计算的企业适合采用</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "收付实现制"
+        },
+        {
+          "key": "B",
+          "text": "权责发生制"
+        },
+        {
+          "key": "C",
+          "text": "永续盘存制"
+        },
+        {
+          "key": "D",
+          "text": "实地盘存制"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "权责发生制",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-013",
+      "title": "基础会计单选013",
+      "stem_text": "企业于4月初用银行存款1200元支付第二季度房租，4月末仅将其中的400元计入本月费用，这符合",
+      "stem_html": "<p>企业于4月初用银行存款1200元支付第二季度房租，4月末仅将其中的400元计入本月费用，这符合</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "配比原则"
+        },
+        {
+          "key": "B",
+          "text": "权责发生制原则"
+        },
+        {
+          "key": "C",
+          "text": "收付实现制原则"
+        },
+        {
+          "key": "D",
+          "text": "历史成本计价原则"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "权责发生制原则",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-014",
+      "title": "基础会计单选014",
+      "stem_text": "按照收付实现制的要求，确定各项收入和费用归属期的标准是",
+      "stem_html": "<p>按照收付实现制的要求，确定各项收入和费用归属期的标准是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "实际发生的收支"
+        },
+        {
+          "key": "B",
+          "text": "实际收付的业务"
+        },
+        {
+          "key": "C",
+          "text": "实际款项的收付"
+        },
+        {
+          "key": "D",
+          "text": "实现的经营成果"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "实际款项的收付",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-015",
+      "title": "基础会计单选015",
+      "stem_text": "对会计对象的具体划分称为",
+      "stem_html": "<p>对会计对象的具体划分称为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "会计科目"
+        },
+        {
+          "key": "B",
+          "text": "会计原则"
+        },
+        {
+          "key": "C",
+          "text": "会计要素"
+        },
+        {
+          "key": "D",
+          "text": "会计方法"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "会计要素",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-016",
+      "title": "基础会计单选016",
+      "stem_text": "下列关于会计科目说法错误的是",
+      "stem_html": "<p>下列关于会计科目说法错误的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "会计科目是对会计要素分类所形成的项目"
+        },
+        {
+          "key": "B",
+          "text": "设置会计科目应遵循统一性和灵活性相结合的原则"
+        },
+        {
+          "key": "C",
+          "text": "会计科目只有总分类科目一个级次"
+        },
+        {
+          "key": "D",
+          "text": "会计科目是会计账户设置的依据"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "会计科目只有总分类科目一个级次",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-017",
+      "title": "基础会计单选017",
+      "stem_text": "下列各项中属于流动负债的是",
+      "stem_html": "<p>下列各项中属于流动负债的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "应付债券（1年以上到期）"
+        },
+        {
+          "key": "B",
+          "text": "预收账款"
+        },
+        {
+          "key": "C",
+          "text": "应收及预付款"
+        },
+        {
+          "key": "D",
+          "text": "存货"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "预收账款",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-018",
+      "title": "基础会计单选018",
+      "stem_text": "下列选项中属于反映企业财务状况的会计要素是",
+      "stem_html": "<p>下列选项中属于反映企业财务状况的会计要素是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "收入"
+        },
+        {
+          "key": "B",
+          "text": "所有者权益"
+        },
+        {
+          "key": "C",
+          "text": "费用"
+        },
+        {
+          "key": "D",
+          "text": "利润"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "所有者权益",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-019",
+      "title": "基础会计单选019",
+      "stem_text": "下列选项中投资者按照企业章程等实际投入企业的是",
+      "stem_html": "<p>下列选项中投资者按照企业章程等实际投入企业的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "盈余公积"
+        },
+        {
+          "key": "B",
+          "text": "资本公积"
+        },
+        {
+          "key": "C",
+          "text": "实收资本"
+        },
+        {
+          "key": "D",
+          "text": "未分配利润"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "实收资本",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-020",
+      "title": "基础会计单选020",
+      "stem_text": "《企业会计准则第14号——收入》规定，企业的日常经营收入不包括",
+      "stem_html": "<p>《企业会计准则第14号——收入》规定，企业的日常经营收入不包括</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "销售商品的收入"
+        },
+        {
+          "key": "B",
+          "text": "提供劳务的收入"
+        },
+        {
+          "key": "C",
+          "text": "他人使用本企业资产取得的收入"
+        },
+        {
+          "key": "D",
+          "text": "捐赠获得的收入"
+        }
+      ],
+      "answer_key": "D",
+      "answer_text": "捐赠获得的收入",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-021",
+      "title": "基础会计单选021",
+      "stem_text": "经济业务发生仅涉及资产这一会计要素时，只引起该要素中某些项目发生",
+      "stem_html": "<p>经济业务发生仅涉及资产这一会计要素时，只引起该要素中某些项目发生</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "同增变动"
+        },
+        {
+          "key": "B",
+          "text": "同减变动"
+        },
+        {
+          "key": "C",
+          "text": "一增一减变动"
+        },
+        {
+          "key": "D",
+          "text": "不变动"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "一增一减变动",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-022",
+      "title": "基础会计单选022",
+      "stem_text": "下列会计业务中会使企业月末资产总额发生变化的是",
+      "stem_html": "<p>下列会计业务中会使企业月末资产总额发生变化的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "从银行提取现金"
+        },
+        {
+          "key": "B",
+          "text": "购买原材料，货款未支付"
+        },
+        {
+          "key": "C",
+          "text": "购买原材料，货款已支付"
+        },
+        {
+          "key": "D",
+          "text": "现金存入银行"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "购买原材料，货款未支付",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-023",
+      "title": "基础会计单选023",
+      "stem_text": "下列属于企业流动负债的是",
+      "stem_html": "<p>下列属于企业流动负债的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "应付债券"
+        },
+        {
+          "key": "B",
+          "text": "预付账款"
+        },
+        {
+          "key": "C",
+          "text": "应付票据"
+        },
+        {
+          "key": "D",
+          "text": "交易性金融资产"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "应付票据",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-024",
+      "title": "基础会计单选024",
+      "stem_text": "“预付账款”属于的会计要素是",
+      "stem_html": "<p>“预付账款”属于的会计要素是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "负债"
+        },
+        {
+          "key": "B",
+          "text": "费用"
+        },
+        {
+          "key": "C",
+          "text": "收入"
+        },
+        {
+          "key": "D",
+          "text": "资产"
+        }
+      ],
+      "answer_key": "D",
+      "answer_text": "资产",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-025",
+      "title": "基础会计单选025",
+      "stem_text": "某企业刚刚建立时，权益总额为100万元，现发生一笔以银行存款10万元偿还银行借款的经济业务，此时，该企业的资产总额为",
+      "stem_html": "<p>某企业刚刚建立时，权益总额为100万元，现发生一笔以银行存款10万元偿还银行借款的经济业务，此时，该企业的资产总额为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "70万元"
+        },
+        {
+          "key": "B",
+          "text": "80万元"
+        },
+        {
+          "key": "C",
+          "text": "90万元"
+        },
+        {
+          "key": "D",
+          "text": "100万元"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "90万元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-026",
+      "title": "基础会计单选026",
+      "stem_text": "会计科目是对",
+      "stem_html": "<p>会计科目是对</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "会计对象分类所形成的项目"
+        },
+        {
+          "key": "B",
+          "text": "会计要素分类所形成的项目"
+        },
+        {
+          "key": "C",
+          "text": "会计方法分类所形成的项目"
+        },
+        {
+          "key": "D",
+          "text": "会计账户分类所形成的项目"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "会计要素分类所形成的项目",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-027",
+      "title": "基础会计单选027",
+      "stem_text": "会计账户的设置依据是",
+      "stem_html": "<p>会计账户的设置依据是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "会计对象"
+        },
+        {
+          "key": "B",
+          "text": "会计要素"
+        },
+        {
+          "key": "C",
+          "text": "会计方法"
+        },
+        {
+          "key": "D",
+          "text": "会计科目"
+        }
+      ],
+      "answer_key": "D",
+      "answer_text": "会计科目",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-028",
+      "title": "基础会计单选028",
+      "stem_text": "某企业资产总额为400万元，如果发生以下经济业务：（1）收到外单位投资50万元存入银行；（2）以银行存款支付购入材料款12万元；（3）以银行存款偿还银行借款10万元。这时企业资产总额为",
+      "stem_html": "<p>某企业资产总额为400万元，如果发生以下经济业务：（1）收到外单位投资50万元存入银行；（2）以银行存款支付购入材料款12万元；（3）以银行存款偿还银行借款10万元。这时企业资产总额为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "450万元"
+        },
+        {
+          "key": "B",
+          "text": "428万元"
+        },
+        {
+          "key": "C",
+          "text": "438万元"
+        },
+        {
+          "key": "D",
+          "text": "440万元"
+        }
+      ],
+      "answer_key": "D",
+      "answer_text": "440万元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-029",
+      "title": "基础会计单选029",
+      "stem_text": "某企业为增值税一般纳税人，增值税税率为13%，该企业购入一台需要安装的生产经营设备，取得的增值税专用发票中注明的设备买价为500 000元，增值税税额为65 000元，支付的包装费等35 000元，设备安装时，领用生产用材料的实际成本为40 000元，支付的职工薪酬为30 000元。则该设备安装完毕交付使用时确定的固定资产入账价值是",
+      "stem_html": "<p>某企业为增值税一般纳税人，增值税税率为13%，该企业购入一台需要安装的生产经营设备，取得的增值税专用发票中注明的设备买价为500 000元，增值税税额为65 000元，支付的包装费等35 000元，设备安装时，领用生产用材料的实际成本为40 000元，支付的职工薪酬为30 000元。则该设备安装完毕交付使用时确定的固定资产入账价值是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "605 000元"
+        },
+        {
+          "key": "B",
+          "text": "700 000元"
+        },
+        {
+          "key": "C",
+          "text": "600 000元"
+        },
+        {
+          "key": "D",
+          "text": "665 000元"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "605 000元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-030",
+      "title": "基础会计单选030",
+      "stem_text": "在借贷记账法下，负债权益类账户的期末余额等于",
+      "stem_html": "<p>在借贷记账法下，负债权益类账户的期末余额等于</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "期初借方余额+本期贷方发生额-本期借方发生额"
+        },
+        {
+          "key": "B",
+          "text": "期初借方余额+本期借方发生额-本期贷方发生额"
+        },
+        {
+          "key": "C",
+          "text": "期初贷方余额+本期贷方发生额-本期借方发生额"
+        },
+        {
+          "key": "D",
+          "text": "期初贷方余额+本期借方发生额-本期贷方发生额"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "期初贷方余额+本期贷方发生额-本期借方发生额",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-031",
+      "title": "基础会计单选031",
+      "stem_text": "借贷记账法的余额试算平衡的公式是",
+      "stem_html": "<p>借贷记账法的余额试算平衡的公式是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "每个账户的借方发生额=每个账户的贷方发生额"
+        },
+        {
+          "key": "B",
+          "text": "全部账户本期借方发生额合计=全部账户本期贷方发生额合计"
+        },
+        {
+          "key": "C",
+          "text": "全部账户期末借方余额合计=全部账户期末贷方余额合计"
+        },
+        {
+          "key": "D",
+          "text": "全部账户期末借方余额合计=部分账户期末贷方余额合计"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "全部账户期末借方余额合计=全部账户期末贷方余额合计",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-032",
+      "title": "基础会计单选032",
+      "stem_text": "我们一般将企业所有者权益中的盈余公积和未分配利润合称为",
+      "stem_html": "<p>我们一般将企业所有者权益中的盈余公积和未分配利润合称为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "实收资本"
+        },
+        {
+          "key": "B",
+          "text": "资本公积"
+        },
+        {
+          "key": "C",
+          "text": "留存收益"
+        },
+        {
+          "key": "D",
+          "text": "所有者权益"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "留存收益",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-033",
+      "title": "基础会计单选033",
+      "stem_text": "下列交易事项中，能引起“资本公积”账户借方发生变动的是",
+      "stem_html": "<p>下列交易事项中，能引起“资本公积”账户借方发生变动的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "向某灾区捐款"
+        },
+        {
+          "key": "B",
+          "text": "资本公积转增资本"
+        },
+        {
+          "key": "C",
+          "text": "向投资人分派股利"
+        },
+        {
+          "key": "D",
+          "text": "溢价发行股票"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "资本公积转增资本",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-034",
+      "title": "基础会计单选034",
+      "stem_text": "有限责任公司增资扩股时，如果有新的投资者加入，则新加入的投资者缴纳的出资额大于按约定比例计算的其在注册资本中所占份额部分，应计入的贷方账户是",
+      "stem_html": "<p>有限责任公司增资扩股时，如果有新的投资者加入，则新加入的投资者缴纳的出资额大于按约定比例计算的其在注册资本中所占份额部分，应计入的贷方账户是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "实收资本账户"
+        },
+        {
+          "key": "B",
+          "text": "股本账户"
+        },
+        {
+          "key": "C",
+          "text": "资本公积账户"
+        },
+        {
+          "key": "D",
+          "text": "盈余公积账户"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "资本公积账户",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-035",
+      "title": "基础会计单选035",
+      "stem_text": "企业为维持正常的生产经营所需资金而向银行等金融机构临时借入的款项为",
+      "stem_html": "<p>企业为维持正常的生产经营所需资金而向银行等金融机构临时借入的款项为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "长期借款"
+        },
+        {
+          "key": "B",
+          "text": "短期借款"
+        },
+        {
+          "key": "C",
+          "text": "长期负债"
+        },
+        {
+          "key": "D",
+          "text": "流动负债"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "短期借款",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-036",
+      "title": "基础会计单选036",
+      "stem_text": "企业为建造工程借入的长期借款在工程完工达到预定可使用状态之后发生的利息支出应计入",
+      "stem_html": "<p>企业为建造工程借入的长期借款在工程完工达到预定可使用状态之后发生的利息支出应计入</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "管理费用"
+        },
+        {
+          "key": "B",
+          "text": "固定资产"
+        },
+        {
+          "key": "C",
+          "text": "财务费用"
+        },
+        {
+          "key": "D",
+          "text": "在建工程"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "财务费用",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-037",
+      "title": "基础会计单选037",
+      "stem_text": "企业计提短期借款的利息支出时应借记的账户是",
+      "stem_html": "<p>企业计提短期借款的利息支出时应借记的账户是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "“财务费用”账户"
+        },
+        {
+          "key": "B",
+          "text": "“短期借款”账户"
+        },
+        {
+          "key": "C",
+          "text": "“应付利息”账户"
+        },
+        {
+          "key": "D",
+          "text": "“在建工程”账户"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "“财务费用”账户",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-038",
+      "title": "基础会计单选038",
+      "stem_text": "企业设置“固定资产”账户是用来反映固定资产的",
+      "stem_html": "<p>企业设置“固定资产”账户是用来反映固定资产的</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "磨损价值"
+        },
+        {
+          "key": "B",
+          "text": "累计折旧"
+        },
+        {
+          "key": "C",
+          "text": "原始价值"
+        },
+        {
+          "key": "D",
+          "text": "净值"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "原始价值",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-039",
+      "title": "基础会计单选039",
+      "stem_text": "某制造业企业为增值税一般纳税人，本期外购原材料一批，发票注明买价20 000元，增值税税额为2 600元，入库前发生的挑选整理费用为1 000元，则该批原材料的入账价值为",
+      "stem_html": "<p>某制造业企业为增值税一般纳税人，本期外购原材料一批，发票注明买价20 000元，增值税税额为2 600元，入库前发生的挑选整理费用为1 000元，则该批原材料的入账价值为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "20 000元"
+        },
+        {
+          "key": "B",
+          "text": "22 600元"
+        },
+        {
+          "key": "C",
+          "text": "21 000元"
+        },
+        {
+          "key": "D",
+          "text": "23 600元"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "21 000元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-040",
+      "title": "基础会计单选040",
+      "stem_text": "下列账户中与“制造费用”账户不可能发生对应关系的是",
+      "stem_html": "<p>下列账户中与“制造费用”账户不可能发生对应关系的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "“库存现金”账户"
+        },
+        {
+          "key": "B",
+          "text": "“银行存款”账户"
+        },
+        {
+          "key": "C",
+          "text": "“应付职工薪酬”账户"
+        },
+        {
+          "key": "D",
+          "text": "“库存商品”账户"
+        }
+      ],
+      "answer_key": "D",
+      "answer_text": "“库存商品”账户",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-041",
+      "title": "基础会计单选041",
+      "stem_text": "下列费用中，不构成产品成本，而应直接计入当期损益的是",
+      "stem_html": "<p>下列费用中，不构成产品成本，而应直接计入当期损益的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "直接材料费"
+        },
+        {
+          "key": "B",
+          "text": "直接人工费"
+        },
+        {
+          "key": "C",
+          "text": "期间费用"
+        },
+        {
+          "key": "D",
+          "text": "制造费用"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "期间费用",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-042",
+      "title": "基础会计单选042",
+      "stem_text": "企业按月计提固定资产折旧时，应贷记",
+      "stem_html": "<p>企业按月计提固定资产折旧时，应贷记</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "“固定资产”账户"
+        },
+        {
+          "key": "B",
+          "text": "“制造费用”账户"
+        },
+        {
+          "key": "C",
+          "text": "“累计折旧”账户"
+        },
+        {
+          "key": "D",
+          "text": "“管理费用”账户"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "“累计折旧”账户",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-043",
+      "title": "基础会计单选043",
+      "stem_text": "某企业“生产成本”账户的期初余额为80万元，本期为生产产品发生直接材料费用640万元，直接人工费用120万元、制造费用160万元、企业行政管理费用80万元，本期结转完工产品成本640万元，假定该企业只生产一种产品。则企业期末“生产成本”账户的余额为",
+      "stem_html": "<p>某企业“生产成本”账户的期初余额为80万元，本期为生产产品发生直接材料费用640万元，直接人工费用120万元、制造费用160万元、企业行政管理费用80万元，本期结转完工产品成本640万元，假定该企业只生产一种产品。则企业期末“生产成本”账户的余额为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "200万元"
+        },
+        {
+          "key": "B",
+          "text": "280万元"
+        },
+        {
+          "key": "C",
+          "text": "360万元"
+        },
+        {
+          "key": "D",
+          "text": "440万元"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "360万元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-044",
+      "title": "基础会计单选044",
+      "stem_text": "某企业只生产和销售A产品，2X21年8月1日在产品成本为17.5万元，8月份发生如下费用：产品领用材料30万元，产品生产工人工资10万元，负担的制造费用5万元，行政管理费用物料消耗7.5万元，专设销售机构固定资产折旧费4万元。月末在产品成本15万元。则该企业8月份完工A产品的生产成本为",
+      "stem_html": "<p>某企业只生产和销售A产品，2X21年8月1日在产品成本为17.5万元，8月份发生如下费用：产品领用材料30万元，产品生产工人工资10万元，负担的制造费用5万元，行政管理费用物料消耗7.5万元，专设销售机构固定资产折旧费4万元。月末在产品成本15万元。则该企业8月份完工A产品的生产成本为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "45万元"
+        },
+        {
+          "key": "B",
+          "text": "47.5万元"
+        },
+        {
+          "key": "C",
+          "text": "41.5万元"
+        },
+        {
+          "key": "D",
+          "text": "59万元"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "47.5万元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-045",
+      "title": "基础会计单选045",
+      "stem_text": "某企业本月生产A产品耗用生产工时240小时，生产B产品耗用生产工时360小时。本月发生车间制造费用管理人员工资6万元，产品生产人员工资60万元。该企业按生产工时分配制造费用，假设不考虑其他项目，则本月B产品应负担的制造费用为",
+      "stem_html": "<p>某企业本月生产A产品耗用生产工时240小时，生产B产品耗用生产工时360小时。本月发生车间制造费用管理人员工资6万元，产品生产人员工资60万元。该企业按生产工时分配制造费用，假设不考虑其他项目，则本月B产品应负担的制造费用为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "2.4万元"
+        },
+        {
+          "key": "B",
+          "text": "2.64万元"
+        },
+        {
+          "key": "C",
+          "text": "3.6万元"
+        },
+        {
+          "key": "D",
+          "text": "3.96万元"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "3.6万元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-046",
+      "title": "基础会计单选046",
+      "stem_text": "企业出租固定资产所取得的租金收入，属于",
+      "stem_html": "<p>企业出租固定资产所取得的租金收入，属于</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "主营业务收入"
+        },
+        {
+          "key": "B",
+          "text": "其他业务收入"
+        },
+        {
+          "key": "C",
+          "text": "投资收益"
+        },
+        {
+          "key": "D",
+          "text": "营业外收入"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "其他业务收入",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-047",
+      "title": "基础会计单选047",
+      "stem_text": "下列内容不属于企业营业外支出的是",
+      "stem_html": "<p>下列内容不属于企业营业外支出的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "非常损失"
+        },
+        {
+          "key": "B",
+          "text": "坏账损失"
+        },
+        {
+          "key": "C",
+          "text": "公益性捐赠支出"
+        },
+        {
+          "key": "D",
+          "text": "固定资产盘亏损失"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "坏账损失",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-048",
+      "title": "基础会计单选048",
+      "stem_text": "某企业为增值税一般纳税人，2X21年应交的各种税费分别为：增值税700万元，消费税300万元，城市维护建设费70万元，房产税20万元，车船税10万元，所得税500万元，上述各种税金应计入“税金及附加”账户的金额为",
+      "stem_html": "<p>某企业为增值税一般纳税人，2X21年应交的各种税费分别为：增值税700万元，消费税300万元，城市维护建设费70万元，房产税20万元，车船税10万元，所得税500万元，上述各种税金应计入“税金及附加”账户的金额为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "1 070万元"
+        },
+        {
+          "key": "B",
+          "text": "400万元"
+        },
+        {
+          "key": "C",
+          "text": "1 100万元"
+        },
+        {
+          "key": "D",
+          "text": "370万元"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "1 070万元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-049",
+      "title": "基础会计单选049",
+      "stem_text": "对于一般纳税人企业，下列各项内容中，符合收入要素确认要求、应确认为企业其他业务收入的是",
+      "stem_html": "<p>对于一般纳税人企业，下列各项内容中，符合收入要素确认要求、应确认为企业其他业务收入的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "出售材料收入"
+        },
+        {
+          "key": "B",
+          "text": "接受捐赠收入"
+        },
+        {
+          "key": "C",
+          "text": "出售商品收入"
+        },
+        {
+          "key": "D",
+          "text": "向购货方收取的增值税税额"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "出售材料收入",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-050",
+      "title": "基础会计单选050",
+      "stem_text": "一般纳税人企业本月销售一批产品，开出发票注明的含税价款为2 779 800元，增值税税率为13%，本企业代顾客垫付运杂费5 000元，则企业应确认的主营业务收入金额为",
+      "stem_html": "<p>一般纳税人企业本月销售一批产品，开出发票注明的含税价款为2 779 800元，增值税税率为13%，本企业代顾客垫付运杂费5 000元，则企业应确认的主营业务收入金额为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "2 779 800元"
+        },
+        {
+          "key": "B",
+          "text": "2 465 000元"
+        },
+        {
+          "key": "C",
+          "text": "2 460 000元"
+        },
+        {
+          "key": "D",
+          "text": "2 784 800元"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "2 465 000元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-051",
+      "title": "基础会计单选051",
+      "stem_text": "某企业2X21年主营业务收入为2 000万元，主营业务成本为1 200万元，税金及附加为100万元，其他业务收入为500万元，其他业务成本为300万元，期间费用为150万元，投资收益为250万元，营业外收入为180万元，营业外支出为230万元，所得税费用为300万元。则该企业的营业利润为",
+      "stem_html": "<p>某企业2X21年主营业务收入为2 000万元，主营业务成本为1 200万元，税金及附加为100万元，其他业务收入为500万元，其他业务成本为300万元，期间费用为150万元，投资收益为250万元，营业外收入为180万元，营业外支出为230万元，所得税费用为300万元。则该企业的营业利润为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "650万元"
+        },
+        {
+          "key": "B",
+          "text": "1 200万元"
+        },
+        {
+          "key": "C",
+          "text": "1 000万元"
+        },
+        {
+          "key": "D",
+          "text": "950万元"
+        }
+      ],
+      "answer_key": "D",
+      "answer_text": "950万元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-052",
+      "title": "基础会计单选052",
+      "stem_text": "为筹集生产经营所需资金而发生的费用称为",
+      "stem_html": "<p>为筹集生产经营所需资金而发生的费用称为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "借入资本"
+        },
+        {
+          "key": "B",
+          "text": "投入资本"
+        },
+        {
+          "key": "C",
+          "text": "管理费用"
+        },
+        {
+          "key": "D",
+          "text": "财务费用"
+        }
+      ],
+      "answer_key": "D",
+      "answer_text": "财务费用",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-053",
+      "title": "基础会计单选053",
+      "stem_text": "某企业年初未分配利润为 200 万元，本年实现净利润 200 万元。按 10%提取法定盈余公积，按 5%提取任意盈余公积，宣告发放现金股利 160 万元。则该企业年末未分配利润为。",
+      "stem_html": "<p>某企业年初未分配利润为 200 万元，本年实现净利润 200 万元。按 10%提取法定盈余公积，按 5%提取任意盈余公积，宣告发放现金股利 160 万元。则该企业年末未分配利润为。</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "210 万元"
+        },
+        {
+          "key": "B",
+          "text": "200 万元"
+        },
+        {
+          "key": "C",
+          "text": "180 万元"
+        },
+        {
+          "key": "D",
+          "text": "170 万元"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "210 万元",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-054",
+      "title": "基础会计单选054",
+      "stem_text": "增值税一般纳税人企业发生的下列税费中，不应通过“税金及附加”账户核算的是",
+      "stem_html": "<p>增值税一般纳税人企业发生的下列税费中，不应通过“税金及附加”账户核算的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "增值税"
+        },
+        {
+          "key": "B",
+          "text": "印花税"
+        },
+        {
+          "key": "C",
+          "text": "房产税"
+        },
+        {
+          "key": "D",
+          "text": "城市维护建设费"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "增值税",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-055",
+      "title": "基础会计单选055",
+      "stem_text": "原始凭证按填制手续和内容不同可以分为",
+      "stem_html": "<p>原始凭证按填制手续和内容不同可以分为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "自制原始凭证和外来原始凭证"
+        },
+        {
+          "key": "B",
+          "text": "一次凭证和汇总凭证"
+        },
+        {
+          "key": "C",
+          "text": "单式凭证和复式凭证"
+        },
+        {
+          "key": "D",
+          "text": "一次凭证、累计凭证和汇总凭证"
+        }
+      ],
+      "answer_key": "D",
+      "answer_text": "一次凭证、累计凭证和汇总凭证",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-056",
+      "title": "基础会计单选056",
+      "stem_text": "领料汇总表属于会计凭证中的",
+      "stem_html": "<p>领料汇总表属于会计凭证中的</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "一次凭证"
+        },
+        {
+          "key": "B",
+          "text": "累计凭证"
+        },
+        {
+          "key": "C",
+          "text": "汇总原始凭证"
+        },
+        {
+          "key": "D",
+          "text": "单式凭证"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "汇总原始凭证",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-057",
+      "title": "基础会计单选057",
+      "stem_text": "下列属于外来原始凭证的是",
+      "stem_html": "<p>下列属于外来原始凭证的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "入库单"
+        },
+        {
+          "key": "B",
+          "text": "增值税专用发票（购货方取得）"
+        },
+        {
+          "key": "C",
+          "text": "发料汇总表"
+        },
+        {
+          "key": "D",
+          "text": "出库单"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "增值税专用发票（购货方取得）",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-058",
+      "title": "基础会计单选058",
+      "stem_text": "原始凭证的基本内容中不包括",
+      "stem_html": "<p>原始凭证的基本内容中不包括</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "会计科目"
+        },
+        {
+          "key": "B",
+          "text": "内容摘要"
+        },
+        {
+          "key": "C",
+          "text": "日期及编号"
+        },
+        {
+          "key": "D",
+          "text": "实物数量及金额"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "会计科目",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-059",
+      "title": "基础会计单选059",
+      "stem_text": "将会计凭证划分为原始凭证和记账凭证的依据是",
+      "stem_html": "<p>将会计凭证划分为原始凭证和记账凭证的依据是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "填制时间"
+        },
+        {
+          "key": "B",
+          "text": "取得来源"
+        },
+        {
+          "key": "C",
+          "text": "填制的程序和用途"
+        },
+        {
+          "key": "D",
+          "text": "反映的经济内容"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "填制的程序和用途",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-060",
+      "title": "基础会计单选060",
+      "stem_text": "根据一定期间的全部记账凭证汇总填制的凭证是",
+      "stem_html": "<p>根据一定期间的全部记账凭证汇总填制的凭证是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "科目汇总表"
+        },
+        {
+          "key": "B",
+          "text": "汇总原始凭证"
+        },
+        {
+          "key": "C",
+          "text": "复式凭证"
+        },
+        {
+          "key": "D",
+          "text": "累计凭证"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "科目汇总表",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-061",
+      "title": "基础会计单选061",
+      "stem_text": "填制原始凭证时应做到大小写数字符合规范，填写正确。如大写金额“壹仟零壹元五角整”，其小写应为",
+      "stem_html": "<p>填制原始凭证时应做到大小写数字符合规范，填写正确。如大写金额“壹仟零壹元五角整”，其小写应为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "¥1001.5"
+        },
+        {
+          "key": "B",
+          "text": "¥1001.50"
+        },
+        {
+          "key": "C",
+          "text": "1001.50元"
+        },
+        {
+          "key": "D",
+          "text": "¥1001.50元"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "¥1001.50",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-062",
+      "title": "基础会计单选062",
+      "stem_text": "下列选项中适用于总分类账的外表形式的是",
+      "stem_html": "<p>下列选项中适用于总分类账的外表形式的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "多栏式"
+        },
+        {
+          "key": "B",
+          "text": "订本式"
+        },
+        {
+          "key": "C",
+          "text": "活页式"
+        },
+        {
+          "key": "D",
+          "text": "数量金额式"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "订本式",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-063",
+      "title": "基础会计单选063",
+      "stem_text": "将账簿划分为序时账、分类账、备查账的依据是",
+      "stem_html": "<p>将账簿划分为序时账、分类账、备查账的依据是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "账簿的登记方式"
+        },
+        {
+          "key": "B",
+          "text": "账簿的用途"
+        },
+        {
+          "key": "C",
+          "text": "账簿登记的内容"
+        },
+        {
+          "key": "D",
+          "text": "账簿的外表形式"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "账簿的用途",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-064",
+      "title": "基础会计单选064",
+      "stem_text": "下列说法中正确的是",
+      "stem_html": "<p>下列说法中正确的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "现金日记账必须采用订本式账簿"
+        },
+        {
+          "key": "B",
+          "text": "卡片式账簿的优点是能够避免账页散失，防止不合法的抽换账页。"
+        },
+        {
+          "key": "C",
+          "text": "订本式账簿的优点是方便灵活，可根据需要增添账页；便于分工记账；便于计算机记账。"
+        },
+        {
+          "key": "D",
+          "text": "活页式账簿是指在记完账后，把记过账的账页装订成册的账簿。"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "现金日记账必须采用订本式账簿",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-065",
+      "title": "基础会计单选065",
+      "stem_text": "记账后如果发现记账错误是由于记账凭证所列示的会计科目和金额错误引起的，可采用的更正错账的方法是",
+      "stem_html": "<p>记账后如果发现记账错误是由于记账凭证所列示的会计科目和金额错误引起的，可采用的更正错账的方法是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "划线更正法"
+        },
+        {
+          "key": "B",
+          "text": "红字更正法"
+        },
+        {
+          "key": "C",
+          "text": "补充登记法"
+        },
+        {
+          "key": "D",
+          "text": "AB均可"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "红字更正法",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-066",
+      "title": "基础会计单选066",
+      "stem_text": "对财产物资的收发都有严密的手续，且在账簿中有连续的记载便于确定结存的制度是",
+      "stem_html": "<p>对财产物资的收发都有严密的手续，且在账簿中有连续的记载便于确定结存的制度是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "永续盘存制"
+        },
+        {
+          "key": "B",
+          "text": "实地盘存制"
+        },
+        {
+          "key": "C",
+          "text": "权责发生制"
+        },
+        {
+          "key": "D",
+          "text": "收付实现制"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "永续盘存制",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-067",
+      "title": "基础会计单选067",
+      "stem_text": "在记账无误的情况下，导致银行对账单和银行存款日记账不一致的原因是",
+      "stem_html": "<p>在记账无误的情况下，导致银行对账单和银行存款日记账不一致的原因是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "应付账款"
+        },
+        {
+          "key": "B",
+          "text": "应收账款"
+        },
+        {
+          "key": "C",
+          "text": "未达账项"
+        },
+        {
+          "key": "D",
+          "text": "外埠存款"
+        }
+      ],
+      "answer_key": "C",
+      "answer_text": "未达账项",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-068",
+      "title": "基础会计单选068",
+      "stem_text": "下列关于永续盘存制和实地盘存制的表述中，正确的是。",
+      "stem_html": "<p>下列关于永续盘存制和实地盘存制的表述中，正确的是。</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "永续盘存制下，期末不需要对存货进行实地盘点"
+        },
+        {
+          "key": "B",
+          "text": "实地盘存制下，平时不登记存货的增加数量，期末通过盘点倒挤出减少数量"
+        },
+        {
+          "key": "C",
+          "text": "永续盘存制下，可以随时反映存货的减少情况，但无法及时发现存货的盘盈盘亏"
+        },
+        {
+          "key": "D",
+          "text": "实地盘存制下，通过账面记录可以直接计算出当期发出存货的成本，无需盘点"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "实地盘存制下，平时不登记存货的增加数量，期末通过盘点倒挤出减少数量",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-069",
+      "title": "基础会计单选069",
+      "stem_text": "现金清查的方法是",
+      "stem_html": "<p>现金清查的方法是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "技术推算法"
+        },
+        {
+          "key": "B",
+          "text": "实地盘点法"
+        },
+        {
+          "key": "C",
+          "text": "外调核对法"
+        },
+        {
+          "key": "D",
+          "text": "与银行对账单相核对"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "实地盘点法",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-070",
+      "title": "基础会计单选070",
+      "stem_text": "核销现金的盘亏，出纳人员无法说明原因，经管理层批准后，该笔损失应借的会计科目是",
+      "stem_html": "<p>核销现金的盘亏，出纳人员无法说明原因，经管理层批准后，该笔损失应借的会计科目是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "“管理费用”"
+        },
+        {
+          "key": "B",
+          "text": "“营业外支出”"
+        },
+        {
+          "key": "C",
+          "text": "“待处理财产损溢”"
+        },
+        {
+          "key": "D",
+          "text": "“其他应收款”"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "“管理费用”",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-071",
+      "title": "基础会计单选071",
+      "stem_text": "反映企业在某一特定日期财务状况的财务报表是",
+      "stem_html": "<p>反映企业在某一特定日期财务状况的财务报表是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "利润表"
+        },
+        {
+          "key": "B",
+          "text": "资产负债表"
+        },
+        {
+          "key": "C",
+          "text": "现金流量表"
+        },
+        {
+          "key": "D",
+          "text": "所有者权益变动表"
+        }
+      ],
+      "answer_key": "B",
+      "answer_text": "资产负债表",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-single-072",
+      "title": "基础会计单选072",
+      "stem_text": "下列项目中，不应计入企业销售费用的有",
+      "stem_html": "<p>下列项目中，不应计入企业销售费用的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "代买方垫付的运杂费"
+        },
+        {
+          "key": "B",
+          "text": "专设销售机构人员的工资"
+        },
+        {
+          "key": "C",
+          "text": "销售产品的广告费"
+        },
+        {
+          "key": "D",
+          "text": "专设销售机构设备折旧费"
+        }
+      ],
+      "answer_key": "A",
+      "answer_text": "代买方垫付的运杂费",
+      "source": "basic-accounting-review-1"
+    }
+  ],
+  "finance_multiple_choice_questions": [
+    {
+      "id": "finance-basic-multi-001",
+      "title": "基础会计多选001",
+      "stem_text": "下列选项中属于会计反映职能一般特征的有",
+      "stem_html": "<p>下列选项中属于会计反映职能一般特征的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "反映过去已经发生的经济活动"
+        },
+        {
+          "key": "B",
+          "text": "以货币为主要计量单位"
+        },
+        {
+          "key": "C",
+          "text": "具有连续性、系统性、全面性"
+        },
+        {
+          "key": "D",
+          "text": "包括事前反映、事中反映、事后反映"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer_texts": [
+        "反映过去已经发生的经济活动",
+        "以货币为主要计量单位",
+        "具有连续性、系统性、全面性"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-002",
+      "title": "基础会计多选002",
+      "stem_text": "会计各方面的作用综合起来说，包括",
+      "stem_html": "<p>会计各方面的作用综合起来说，包括</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "为投资者提供财务报告"
+        },
+        {
+          "key": "B",
+          "text": "保证企业投入资产的安全和完整"
+        },
+        {
+          "key": "C",
+          "text": "为国家进行宏观调控、制定经济政策提供信息"
+        },
+        {
+          "key": "D",
+          "text": "加强经济核算，为企业经营管理提供数据"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer_texts": [
+        "为投资者提供财务报告",
+        "保证企业投入资产的安全和完整",
+        "为国家进行宏观调控、制定经济政策提供信息",
+        "加强经济核算，为企业经营管理提供数据"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-003",
+      "title": "基础会计多选003",
+      "stem_text": "下列属于复式记账法内容的有",
+      "stem_html": "<p>下列属于复式记账法内容的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "记账平衡原理"
+        },
+        {
+          "key": "B",
+          "text": "记账符号"
+        },
+        {
+          "key": "C",
+          "text": "试算平衡"
+        },
+        {
+          "key": "D",
+          "text": "记账规则"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer_texts": [
+        "记账平衡原理",
+        "记账符号",
+        "试算平衡",
+        "记账规则"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-004",
+      "title": "基础会计多选004",
+      "stem_text": "下列有关说法，正确的是",
+      "stem_html": "<p>下列有关说法，正确的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "会计可反映过去已经发生的经济活动，也可反映未来可能发生的经济活动。"
+        },
+        {
+          "key": "B",
+          "text": "会计科目是对会计要素分类所形成的项目。"
+        },
+        {
+          "key": "C",
+          "text": "“有借必有贷，借贷必相等”是借贷记账法的记账规则。"
+        },
+        {
+          "key": "D",
+          "text": "会计主体是企业法人。"
+        },
+        {
+          "key": "E",
+          "text": "法律主体一定是会计主体，会计主体一定是法律主体。"
+        },
+        {
+          "key": "F",
+          "text": "平行登记要求总账与明细账的登记方向必须相同，金额必须相等。"
+        }
+      ],
+      "answer_keys": [
+        "B",
+        "C",
+        "F"
+      ],
+      "answer_texts": [
+        "会计科目是对会计要素分类所形成的项目。",
+        "“有借必有贷，借贷必相等”是借贷记账法的记账规则。",
+        "平行登记要求总账与明细账的登记方向必须相同，金额必须相等。"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-005",
+      "title": "基础会计多选005",
+      "stem_text": "关于会计基本假设，下列各项表述中正确的有",
+      "stem_html": "<p>关于会计基本假设，下列各项表述中正确的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "会计主体确定了会计核算的空间范围"
+        },
+        {
+          "key": "B",
+          "text": "货币计量是指会计主体在财务会计确认、计量和报告时以货币作为计量尺度，反映会计主体的生产经营活动"
+        },
+        {
+          "key": "C",
+          "text": "会计分期假设是权责发生制的产生依据"
+        },
+        {
+          "key": "D",
+          "text": "持续经营是会计分期的前提"
+        },
+        {
+          "key": "E",
+          "text": "会计主体是企业法人"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer_texts": [
+        "会计主体确定了会计核算的空间范围",
+        "货币计量是指会计主体在财务会计确认、计量和报告时以货币作为计量尺度，反映会计主体的生产经营活动",
+        "会计分期假设是权责发生制的产生依据",
+        "持续经营是会计分期的前提"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-006",
+      "title": "基础会计多选006",
+      "stem_text": "可靠性要求",
+      "stem_html": "<p>可靠性要求</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "企业应当以实际发生的交易或事项为依据进行会计确认、计量和报告"
+        },
+        {
+          "key": "B",
+          "text": "如实反映符合确认和计量要求的各项会计要素及其他相关信息"
+        },
+        {
+          "key": "C",
+          "text": "保证会计信息真实可靠、内容完整"
+        },
+        {
+          "key": "D",
+          "text": "企业提供的会计信息应当清晰明了，便于财务报告使用者理解和使用"
+        },
+        {
+          "key": "E",
+          "text": "包括在财务报告中的会计信息应当是中立的，具备无偏性的。"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "answer_texts": [
+        "企业应当以实际发生的交易或事项为依据进行会计确认、计量和报告",
+        "如实反映符合确认和计量要求的各项会计要素及其他相关信息",
+        "保证会计信息真实可靠、内容完整",
+        "包括在财务报告中的会计信息应当是中立的，具备无偏性的。"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-007",
+      "title": "基础会计多选007",
+      "stem_text": "下列属于会计确认与计量方面的原则有",
+      "stem_html": "<p>下列属于会计确认与计量方面的原则有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "配比原则"
+        },
+        {
+          "key": "B",
+          "text": "历史成本计价原则"
+        },
+        {
+          "key": "C",
+          "text": "可比性原则"
+        },
+        {
+          "key": "D",
+          "text": "权责发生制原则"
+        },
+        {
+          "key": "E",
+          "text": "划分收益性支出和资本性支出的原则"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "配比原则",
+        "历史成本计价原则",
+        "权责发生制原则",
+        "划分收益性支出和资本性支出的原则"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-008",
+      "title": "基础会计多选008",
+      "stem_text": "可以用于负债计量的计量属性有",
+      "stem_html": "<p>可以用于负债计量的计量属性有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "历史成本"
+        },
+        {
+          "key": "B",
+          "text": "公允价值"
+        },
+        {
+          "key": "C",
+          "text": "可变现净值"
+        },
+        {
+          "key": "D",
+          "text": "现值"
+        },
+        {
+          "key": "E",
+          "text": "重置成本"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "历史成本",
+        "公允价值",
+        "现值",
+        "重置成本"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-009",
+      "title": "基础会计多选009",
+      "stem_text": "按权责发生制原则要求，下列项目中关于收入确认正确的是",
+      "stem_html": "<p>按权责发生制原则要求，下列项目中关于收入确认正确的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "本月确认产品一批，价值2万元，货款尚未收到，已确认为收入"
+        },
+        {
+          "key": "B",
+          "text": "本月初收到上月利息收入3000元，确认为本月财务费用贷方3000元"
+        },
+        {
+          "key": "C",
+          "text": "本月收到上月产品销售收入3万元，已存入银行，确认为本月收入"
+        },
+        {
+          "key": "D",
+          "text": "本月签订一份销售合同，规定下月销售货物一批，价值5万元，确认为本月收入"
+        },
+        {
+          "key": "E",
+          "text": "本月预售了下个月发货的产品销售定金3万元，未确认收入"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "E"
+      ],
+      "answer_texts": [
+        "本月确认产品一批，价值2万元，货款尚未收到，已确认为收入",
+        "本月预售了下个月发货的产品销售定金3万元，未确认收入"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-010",
+      "title": "基础会计多选010",
+      "stem_text": "某企业月初资产总额为 200 万元，负债总额为 80 万元。本月发生以下业务：①用银行存款偿还短期借款 20 万元；②收到投资者投入货币资金 50 万元存入银行。则月末所有者权益总额为",
+      "stem_html": "<p>某企业月初资产总额为 200 万元，负债总额为 80 万元。本月发生以下业务：①用银行存款偿还短期借款 20 万元；②收到投资者投入货币资金 50 万元存入银行。则月末所有者权益总额为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "130 万元"
+        },
+        {
+          "key": "B",
+          "text": "150 万元"
+        },
+        {
+          "key": "C",
+          "text": "170 万元"
+        },
+        {
+          "key": "D",
+          "text": "200 万元"
+        }
+      ],
+      "answer_keys": [
+        "B"
+      ],
+      "answer_texts": [
+        "150 万元"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-011",
+      "title": "基础会计多选011",
+      "stem_text": "下列选项中，属于无形资产的有",
+      "stem_html": "<p>下列选项中，属于无形资产的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "期权"
+        },
+        {
+          "key": "B",
+          "text": "专利权"
+        },
+        {
+          "key": "C",
+          "text": "商标权"
+        },
+        {
+          "key": "D",
+          "text": "土地使用权"
+        },
+        {
+          "key": "E",
+          "text": "著作权"
+        }
+      ],
+      "answer_keys": [
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "专利权",
+        "商标权",
+        "土地使用权",
+        "著作权"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-012",
+      "title": "基础会计多选012",
+      "stem_text": "下列关于会计等式的表述中，正确的有",
+      "stem_html": "<p>下列关于会计等式的表述中，正确的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "资产＝负债＋所有者权益"
+        },
+        {
+          "key": "B",
+          "text": "收入－费用＝利润"
+        },
+        {
+          "key": "C",
+          "text": "资产－费用＝负债＋所有者权益＋收入"
+        },
+        {
+          "key": "D",
+          "text": "资产＝负债＋所有者权益＋（收入＋费用）"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B"
+      ],
+      "answer_texts": [
+        "资产＝负债＋所有者权益",
+        "收入－费用＝利润"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-013",
+      "title": "基础会计多选013",
+      "stem_text": "会计计量的属性主要有",
+      "stem_html": "<p>会计计量的属性主要有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "历史成本"
+        },
+        {
+          "key": "B",
+          "text": "公允价值"
+        },
+        {
+          "key": "C",
+          "text": "可变现净值"
+        },
+        {
+          "key": "D",
+          "text": "现值和重置成本"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer_texts": [
+        "历史成本",
+        "公允价值",
+        "可变现净值",
+        "现值和重置成本"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-014",
+      "title": "基础会计多选014",
+      "stem_text": "下列选项中属于只引起会计等式左边会计要素变动的经济业务有",
+      "stem_html": "<p>下列选项中属于只引起会计等式左边会计要素变动的经济业务有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "购买材料800元，货款暂欠"
+        },
+        {
+          "key": "B",
+          "text": "去银行提取现金500元"
+        },
+        {
+          "key": "C",
+          "text": "接受国家投资200万元"
+        },
+        {
+          "key": "D",
+          "text": "购买机器一台，以银行存款支付10万元货款"
+        },
+        {
+          "key": "E",
+          "text": "收到某外商捐赠货物一批，价值80万元"
+        }
+      ],
+      "answer_keys": [
+        "B",
+        "D"
+      ],
+      "answer_texts": [
+        "去银行提取现金500元",
+        "购买机器一台，以银行存款支付10万元货款"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-015",
+      "title": "基础会计多选015",
+      "stem_text": "企业用银行存款偿还应付账款，引起会计要素变化的有",
+      "stem_html": "<p>企业用银行存款偿还应付账款，引起会计要素变化的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "资产减少"
+        },
+        {
+          "key": "B",
+          "text": "资产增加"
+        },
+        {
+          "key": "C",
+          "text": "负债增加"
+        },
+        {
+          "key": "D",
+          "text": "负债减少"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "D"
+      ],
+      "answer_texts": [
+        "资产减少",
+        "负债减少"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-016",
+      "title": "基础会计多选016",
+      "stem_text": "留存收益包含",
+      "stem_html": "<p>留存收益包含</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "资本公积"
+        },
+        {
+          "key": "B",
+          "text": "盈余公积"
+        },
+        {
+          "key": "C",
+          "text": "实收资本"
+        },
+        {
+          "key": "D",
+          "text": "未分配利润"
+        }
+      ],
+      "answer_keys": [
+        "B",
+        "D"
+      ],
+      "answer_texts": [
+        "盈余公积",
+        "未分配利润"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-017",
+      "title": "基础会计多选017",
+      "stem_text": "账户一般可以提供的金额指标有",
+      "stem_html": "<p>账户一般可以提供的金额指标有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "期初余额"
+        },
+        {
+          "key": "B",
+          "text": "本期增加发生额"
+        },
+        {
+          "key": "C",
+          "text": "期中余额"
+        },
+        {
+          "key": "D",
+          "text": "本期减少发生额"
+        },
+        {
+          "key": "E",
+          "text": "期末余额"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "期初余额",
+        "本期增加发生额",
+        "本期减少发生额",
+        "期末余额"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-018",
+      "title": "基础会计多选018",
+      "stem_text": "明细分类科目",
+      "stem_html": "<p>明细分类科目</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "也称一级会计科目"
+        },
+        {
+          "key": "B",
+          "text": "是进行总分类核算的依据"
+        },
+        {
+          "key": "C",
+          "text": "是对总分类科目核算内容详细分类的科目"
+        },
+        {
+          "key": "D",
+          "text": "是进行明细分类核算的依据"
+        },
+        {
+          "key": "E",
+          "text": "提供更加详细具体的指标"
+        }
+      ],
+      "answer_keys": [
+        "C",
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "是对总分类科目核算内容详细分类的科目",
+        "是进行明细分类核算的依据",
+        "提供更加详细具体的指标"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-019",
+      "title": "基础会计多选019",
+      "stem_text": "账户中用哪一方登记增加额，哪一方登记减少额，取决于",
+      "stem_html": "<p>账户中用哪一方登记增加额，哪一方登记减少额，取决于</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "所记录的经济内容"
+        },
+        {
+          "key": "B",
+          "text": "记账人的偏好"
+        },
+        {
+          "key": "C",
+          "text": "公司类型"
+        },
+        {
+          "key": "D",
+          "text": "反映会计指标信息的详细程度"
+        },
+        {
+          "key": "E",
+          "text": "所采用的记账方法"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "E"
+      ],
+      "answer_texts": [
+        "所记录的经济内容",
+        "所采用的记账方法"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-020",
+      "title": "基础会计多选020",
+      "stem_text": "下列账户中，用贷方登记增加数的有",
+      "stem_html": "<p>下列账户中，用贷方登记增加数的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "应付账款"
+        },
+        {
+          "key": "B",
+          "text": "实收资本"
+        },
+        {
+          "key": "C",
+          "text": "累计折旧"
+        },
+        {
+          "key": "D",
+          "text": "盈余公积"
+        },
+        {
+          "key": "E",
+          "text": "本年利润"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "应付账款",
+        "实收资本",
+        "累计折旧",
+        "盈余公积",
+        "本年利润"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-021",
+      "title": "基础会计多选021",
+      "stem_text": "采用借贷记账法时，账户的借方一般用来登记",
+      "stem_html": "<p>采用借贷记账法时，账户的借方一般用来登记</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "资产的增加"
+        },
+        {
+          "key": "B",
+          "text": "收入的减少"
+        },
+        {
+          "key": "C",
+          "text": "费用的增加"
+        },
+        {
+          "key": "D",
+          "text": "负债的减少"
+        },
+        {
+          "key": "E",
+          "text": "所有者权益的减少"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "资产的增加",
+        "收入的减少",
+        "费用的增加",
+        "负债的减少",
+        "所有者权益的减少"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-022",
+      "title": "基础会计多选022",
+      "stem_text": "下列账户中，在会计期末一般没有余额的账户有",
+      "stem_html": "<p>下列账户中，在会计期末一般没有余额的账户有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "资产类账户"
+        },
+        {
+          "key": "B",
+          "text": "负债类账户"
+        },
+        {
+          "key": "C",
+          "text": "所有者权益类账户"
+        },
+        {
+          "key": "D",
+          "text": "收入类账户"
+        },
+        {
+          "key": "E",
+          "text": "费用类账户"
+        }
+      ],
+      "answer_keys": [
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "收入类账户",
+        "费用类账户"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-023",
+      "title": "基础会计多选023",
+      "stem_text": "以下项目中，通过试算平衡无法发现的错误有",
+      "stem_html": "<p>以下项目中，通过试算平衡无法发现的错误有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "账户正确但一方记错了方向"
+        },
+        {
+          "key": "B",
+          "text": "记账方向正确但记错账户"
+        },
+        {
+          "key": "C",
+          "text": "漏记或重记某项经济业务"
+        },
+        {
+          "key": "D",
+          "text": "方向正确但一方金额少写"
+        },
+        {
+          "key": "E",
+          "text": "借贷方向彼此颠倒"
+        }
+      ],
+      "answer_keys": [
+        "B",
+        "C",
+        "E"
+      ],
+      "answer_texts": [
+        "记账方向正确但记错账户",
+        "漏记或重记某项经济业务",
+        "借贷方向彼此颠倒"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-024",
+      "title": "基础会计多选024",
+      "stem_text": "企业用银行存款偿还应付账款，引起会计要素变化的有",
+      "stem_html": "<p>企业用银行存款偿还应付账款，引起会计要素变化的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "资产增加"
+        },
+        {
+          "key": "B",
+          "text": "负债增加"
+        },
+        {
+          "key": "C",
+          "text": "收入减少"
+        },
+        {
+          "key": "D",
+          "text": "资产减少"
+        },
+        {
+          "key": "E",
+          "text": "负债减少"
+        }
+      ],
+      "answer_keys": [
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "资产减少",
+        "负债减少"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-025",
+      "title": "基础会计多选025",
+      "stem_text": "下列能引起资产和所有者权益同时增加的业务有",
+      "stem_html": "<p>下列能引起资产和所有者权益同时增加的业务有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "收到国家投资存入银行"
+        },
+        {
+          "key": "B",
+          "text": "提取盈余公积"
+        },
+        {
+          "key": "C",
+          "text": "收到外商投入设备一台"
+        },
+        {
+          "key": "D",
+          "text": "将资本公积转增为资本"
+        },
+        {
+          "key": "E",
+          "text": "收到外单位的现金投资"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "C",
+        "E"
+      ],
+      "answer_texts": [
+        "收到国家投资存入银行",
+        "收到外商投入设备一台",
+        "收到外单位的现金投资"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-026",
+      "title": "基础会计多选026",
+      "stem_text": "一般纳税人企业购入材料的采购成本的构成内容包括",
+      "stem_html": "<p>一般纳税人企业购入材料的采购成本的构成内容包括</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "材料买价"
+        },
+        {
+          "key": "B",
+          "text": "增值税进项税额"
+        },
+        {
+          "key": "C",
+          "text": "采购费用"
+        },
+        {
+          "key": "D",
+          "text": "采购人员差旅费"
+        },
+        {
+          "key": "E",
+          "text": "销售机构经费"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "C"
+      ],
+      "answer_texts": [
+        "材料买价",
+        "采购费用"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-027",
+      "title": "基础会计多选027",
+      "stem_text": "企业在采购材料过程中发生的下列费用中，不计入材料采购成本，而是列作管理费用的有",
+      "stem_html": "<p>企业在采购材料过程中发生的下列费用中，不计入材料采购成本，而是列作管理费用的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "采购人员差旅费"
+        },
+        {
+          "key": "B",
+          "text": "专设采购机构经费"
+        },
+        {
+          "key": "C",
+          "text": "市内采购材料的零星运杂费"
+        },
+        {
+          "key": "D",
+          "text": "运输途中的合理损耗"
+        },
+        {
+          "key": "E",
+          "text": "外地运杂费"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer_texts": [
+        "采购人员差旅费",
+        "专设采购机构经费",
+        "市内采购材料的零星运杂费"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-028",
+      "title": "基础会计多选028",
+      "stem_text": "在材料采购业务核算时，与“在途物资”账户相对应的账户一般有",
+      "stem_html": "<p>在材料采购业务核算时，与“在途物资”账户相对应的账户一般有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "“应付账款”账户"
+        },
+        {
+          "key": "B",
+          "text": "“应付票据”账户"
+        },
+        {
+          "key": "C",
+          "text": "“银行存款”账户"
+        },
+        {
+          "key": "D",
+          "text": "“预付账款”账户"
+        },
+        {
+          "key": "E",
+          "text": "“应交税费”账户"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer_texts": [
+        "“应付账款”账户",
+        "“应付票据”账户",
+        "“银行存款”账户",
+        "“预付账款”账户"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-029",
+      "title": "基础会计多选029",
+      "stem_text": "下列各项收入中，可能属于制造业企业其他业务收入的有",
+      "stem_html": "<p>下列各项收入中，可能属于制造业企业其他业务收入的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "销售材料收入"
+        },
+        {
+          "key": "B",
+          "text": "提供运输劳务获得的收入"
+        },
+        {
+          "key": "C",
+          "text": "出租固定资产的资金收入"
+        },
+        {
+          "key": "D",
+          "text": "出售固定资产的净收入"
+        },
+        {
+          "key": "E",
+          "text": "出售无形资产所有权获得的收入"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer_texts": [
+        "销售材料收入",
+        "提供运输劳务获得的收入",
+        "出租固定资产的资金收入"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-030",
+      "title": "基础会计多选030",
+      "stem_text": "下列各项中，属于管理费用的是",
+      "stem_html": "<p>下列各项中，属于管理费用的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "行政管理部门水电费"
+        },
+        {
+          "key": "B",
+          "text": "业务招待费"
+        },
+        {
+          "key": "C",
+          "text": "销售人员工资"
+        },
+        {
+          "key": "D",
+          "text": "企业筹建期间开办费"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "D"
+      ],
+      "answer_texts": [
+        "行政管理部门水电费",
+        "业务招待费",
+        "企业筹建期间开办费"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-031",
+      "title": "基础会计多选031",
+      "stem_text": "明细分类账的格式有三栏式、数量金额式、多栏式，相应地各适用于",
+      "stem_html": "<p>明细分类账的格式有三栏式、数量金额式、多栏式，相应地各适用于</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "债权债务明细账"
+        },
+        {
+          "key": "B",
+          "text": "材料物资类明细账"
+        },
+        {
+          "key": "C",
+          "text": "收入、费用成本式明细账"
+        },
+        {
+          "key": "D",
+          "text": "卡片式明细账"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer_texts": [
+        "债权债务明细账",
+        "材料物资类明细账",
+        "收入、费用成本式明细账"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-032",
+      "title": "基础会计多选032",
+      "stem_text": "下列说法中正确的有",
+      "stem_html": "<p>下列说法中正确的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "库存现金日记账必须逐日逐笔登记"
+        },
+        {
+          "key": "B",
+          "text": "银行存款日记账必须逐日逐笔登记"
+        },
+        {
+          "key": "C",
+          "text": "总账必须定期汇总登记"
+        },
+        {
+          "key": "D",
+          "text": "明细账必须逐日逐笔登记"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer_texts": [
+        "库存现金日记账必须逐日逐笔登记",
+        "银行存款日记账必须逐日逐笔登记",
+        "总账必须定期汇总登记"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-033",
+      "title": "基础会计多选033",
+      "stem_text": "登记会计账簿时应做到",
+      "stem_html": "<p>登记会计账簿时应做到</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "按规定使用蓝黑墨水钢笔书写"
+        },
+        {
+          "key": "B",
+          "text": "不得使用铅笔或圆珠笔书写"
+        },
+        {
+          "key": "C",
+          "text": "在某些特定条件下可以使用红色墨水笔"
+        },
+        {
+          "key": "D",
+          "text": "在某些特定条件下可以使用铅笔"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer_texts": [
+        "按规定使用蓝黑墨水钢笔书写",
+        "不得使用铅笔或圆珠笔书写",
+        "在某些特定条件下可以使用红色墨水笔"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-034",
+      "title": "基础会计多选034",
+      "stem_text": "财产清查按照清查范围可分为",
+      "stem_html": "<p>财产清查按照清查范围可分为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "全面清查"
+        },
+        {
+          "key": "B",
+          "text": "局部清查"
+        },
+        {
+          "key": "C",
+          "text": "定期清查"
+        },
+        {
+          "key": "D",
+          "text": "不定期清查"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B"
+      ],
+      "answer_texts": [
+        "全面清查",
+        "局部清查"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-035",
+      "title": "基础会计多选035",
+      "stem_text": "财产物资的盘存制度有",
+      "stem_html": "<p>财产物资的盘存制度有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "收付实现制"
+        },
+        {
+          "key": "B",
+          "text": "权责发生制"
+        },
+        {
+          "key": "C",
+          "text": "永续盘存制"
+        },
+        {
+          "key": "D",
+          "text": "实地盘存制"
+        }
+      ],
+      "answer_keys": [
+        "C",
+        "D"
+      ],
+      "answer_texts": [
+        "永续盘存制",
+        "实地盘存制"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-036",
+      "title": "基础会计多选036",
+      "stem_text": "编制“银行余额调节表”时，计算调节后的余额应以企业银行存款日记账余额",
+      "stem_html": "<p>编制“银行余额调节表”时，计算调节后的余额应以企业银行存款日记账余额</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "加企业未入账的收入款项"
+        },
+        {
+          "key": "B",
+          "text": "加银行未入账的收入款项"
+        },
+        {
+          "key": "C",
+          "text": "加双方都未入账的收入款项"
+        },
+        {
+          "key": "D",
+          "text": "加企业未入账的支出款项"
+        },
+        {
+          "key": "E",
+          "text": "减企业未入账的支出款项"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "E"
+      ],
+      "answer_texts": [
+        "加企业未入账的收入款项",
+        "减企业未入账的支出款项"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-037",
+      "title": "基础会计多选037",
+      "stem_text": "企业对外提供的财务报表包括",
+      "stem_html": "<p>企业对外提供的财务报表包括</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "资产负债表"
+        },
+        {
+          "key": "B",
+          "text": "利润表"
+        },
+        {
+          "key": "C",
+          "text": "现金流量表"
+        },
+        {
+          "key": "D",
+          "text": "所有者权益变动表"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer_texts": [
+        "资产负债表",
+        "利润表",
+        "现金流量表",
+        "所有者权益变动表"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-038",
+      "title": "基础会计多选038",
+      "stem_text": "一般而言，在下述情况下，需要进行全面清查",
+      "stem_html": "<p>一般而言，在下述情况下，需要进行全面清查</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "年终决算之前"
+        },
+        {
+          "key": "B",
+          "text": "单位撤销、合并、联营、实行股份制改造或改变隶属关系时"
+        },
+        {
+          "key": "C",
+          "text": "清产核资时"
+        },
+        {
+          "key": "D",
+          "text": "实物保管人员因调动工作办理移交时"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer_texts": [
+        "年终决算之前",
+        "单位撤销、合并、联营、实行股份制改造或改变隶属关系时",
+        "清产核资时"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-039",
+      "title": "基础会计多选039",
+      "stem_text": "下列各项中，属于原始凭证审核内容的有",
+      "stem_html": "<p>下列各项中，属于原始凭证审核内容的有</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "合理性审核"
+        },
+        {
+          "key": "B",
+          "text": "合法性审核"
+        },
+        {
+          "key": "C",
+          "text": "完整性审核"
+        },
+        {
+          "key": "D",
+          "text": "正确性审核"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "answer_texts": [
+        "合理性审核",
+        "合法性审核",
+        "完整性审核",
+        "正确性审核"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-040",
+      "title": "基础会计多选040",
+      "stem_text": "下列选项中，说法错误的是",
+      "stem_html": "<p>下列选项中，说法错误的是</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "对于现金的清查，应将其结果及时填列在实存账存对比表中。"
+        },
+        {
+          "key": "B",
+          "text": "卡片式账簿的优点是能够避免账页散失，防止不合法地抽换账页。"
+        },
+        {
+          "key": "C",
+          "text": "采用红字更正法更正错账时，只需用红字填制一张与原分录相同的记账凭证即可。"
+        },
+        {
+          "key": "D",
+          "text": "企业购入材料而货款未付，其资产与负债会同时减少。"
+        },
+        {
+          "key": "E",
+          "text": "会计凭证的保管期限届满后，企业可以自行销毁所有凭证。"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "answer_texts": [
+        "对于现金的清查，应将其结果及时填列在实存账存对比表中。",
+        "卡片式账簿的优点是能够避免账页散失，防止不合法地抽换账页。",
+        "采用红字更正法更正错账时，只需用红字填制一张与原分录相同的记账凭证即可。",
+        "企业购入材料而货款未付，其资产与负债会同时减少。",
+        "会计凭证的保管期限届满后，企业可以自行销毁所有凭证。"
+      ],
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-multi-041",
+      "title": "基础会计多选041",
+      "stem_text": "按照凭证所记录的经济业务是否与现金、银行存款有关，可将记账凭证分为",
+      "stem_html": "<p>按照凭证所记录的经济业务是否与现金、银行存款有关，可将记账凭证分为</p>",
+      "options": [
+        {
+          "key": "A",
+          "text": "收款凭证"
+        },
+        {
+          "key": "B",
+          "text": "付款凭证"
+        },
+        {
+          "key": "C",
+          "text": "转账凭证"
+        },
+        {
+          "key": "D",
+          "text": "原始凭证"
+        }
+      ],
+      "answer_keys": [
+        "A",
+        "B",
+        "C"
+      ],
+      "answer_texts": [
+        "收款凭证",
+        "付款凭证",
+        "转账凭证"
+      ],
+      "source": "basic-accounting-review-1"
+    }
+  ],
+  "finance_judgment_questions": [
+    {
+      "id": "finance-basic-judge-001",
+      "title": "基础会计判断001",
+      "stem_text": "会计反映具有连续性，而会计监督只具有强制性。",
+      "stem_html": "<p>会计反映具有连续性，而会计监督只具有强制性。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-002",
+      "title": "基础会计判断002",
+      "stem_text": "“资产=负债+所有者权益”体现了企业资金运动过程中某一时期的资产分布和权益构成。",
+      "stem_html": "<p>“资产=负债+所有者权益”体现了企业资金运动过程中某一时期的资产分布和权益构成。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-003",
+      "title": "基础会计判断003",
+      "stem_text": "复式记账属于会计对经济活动进行核算时所采用的主要方法。",
+      "stem_html": "<p>复式记账属于会计对经济活动进行核算时所采用的主要方法。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-004",
+      "title": "基础会计判断004",
+      "stem_text": "资产类账户期末应无余额。",
+      "stem_html": "<p>资产类账户期末应无余额。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-005",
+      "title": "基础会计判断005",
+      "stem_text": "应付账款期末余额通常在贷方。",
+      "stem_html": "<p>应付账款期末余额通常在贷方。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-006",
+      "title": "基础会计判断006",
+      "stem_text": "对在银行存款清查时出现的未达账项，可编制“银行存款余额调节表”来调整，该表是调节账面余额的原始凭证。",
+      "stem_html": "<p>对在银行存款清查时出现的未达账项，可编制“银行存款余额调节表”来调整，该表是调节账面余额的原始凭证。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-007",
+      "title": "基础会计判断007",
+      "stem_text": "科目汇总表是根据专用记账凭证或通用记账凭证汇总编制而成的。",
+      "stem_html": "<p>科目汇总表是根据专用记账凭证或通用记账凭证汇总编制而成的。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-008",
+      "title": "基础会计判断008",
+      "stem_text": "按照权责发生制会计处理基础的要求，企业收到货币资金必定意味着本月收入的增加。",
+      "stem_html": "<p>按照权责发生制会计处理基础的要求，企业收到货币资金必定意味着本月收入的增加。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-009",
+      "title": "基础会计判断009",
+      "stem_text": "企业将融资租入的固定资产视为自有固定资产进行核算，体现了实质重于形式原则。",
+      "stem_html": "<p>企业将融资租入的固定资产视为自有固定资产进行核算，体现了实质重于形式原则。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-010",
+      "title": "基础会计判断010",
+      "stem_text": "记账后，如果发现记账错误是由于记账凭证所列示的会计科目和金额错误引起的，可采用划线更正法。",
+      "stem_html": "<p>记账后，如果发现记账错误是由于记账凭证所列示的会计科目和金额错误引起的，可采用划线更正法。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-011",
+      "title": "基础会计判断011",
+      "stem_text": "总分类账可采用三栏式账页，而明细分类账则应根据其经济业务的特点采用不同格式的账页。",
+      "stem_html": "<p>总分类账可采用三栏式账页，而明细分类账则应根据其经济业务的特点采用不同格式的账页。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-012",
+      "title": "基础会计判断012",
+      "stem_text": "企业的财务会计报告分为年度、半年度、季度和月度财务会计报告。",
+      "stem_html": "<p>企业的财务会计报告分为年度、半年度、季度和月度财务会计报告。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-013",
+      "title": "基础会计判断013",
+      "stem_text": "企业购买材料时产生的合理损耗应计入材料采购成本。",
+      "stem_html": "<p>企业购买材料时产生的合理损耗应计入材料采购成本。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-014",
+      "title": "基础会计判断014",
+      "stem_text": "总分类账的外表形式是数量金额式。",
+      "stem_html": "<p>总分类账的外表形式是数量金额式。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-015",
+      "title": "基础会计判断015",
+      "stem_text": "复合会计分录是一借一贷的会计分录。",
+      "stem_html": "<p>复合会计分录是一借一贷的会计分录。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-016",
+      "title": "基础会计判断016",
+      "stem_text": "“银行存款余额调节表”是原始凭证。",
+      "stem_html": "<p>“银行存款余额调节表”是原始凭证。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-017",
+      "title": "基础会计判断017",
+      "stem_text": "收入源于日常活动，利得源于非日常活动。",
+      "stem_html": "<p>收入源于日常活动，利得源于非日常活动。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-018",
+      "title": "基础会计判断018",
+      "stem_text": "依照我国企业会计准则的要求，资产负债表采用的格式是账户式。",
+      "stem_html": "<p>依照我国企业会计准则的要求，资产负债表采用的格式是账户式。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-019",
+      "title": "基础会计判断019",
+      "stem_text": "“交易性金融资产”属于资产负债表中“流动资产”项目。",
+      "stem_html": "<p>“交易性金融资产”属于资产负债表中“流动资产”项目。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-020",
+      "title": "基础会计判断020",
+      "stem_text": "“累计折旧”账户是资产类账户，其期末余额在借方，反映固定资产的净值。",
+      "stem_html": "<p>“累计折旧”账户是资产类账户，其期末余额在借方，反映固定资产的净值。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "N",
+      "answer_text": "错误",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-021",
+      "title": "基础会计判断021",
+      "stem_text": "资产负债表中的“货币资金”项目，应根据库存现金、银行存款、其他货币资金账户的期末余额填列。",
+      "stem_html": "<p>资产负债表中的“货币资金”项目，应根据库存现金、银行存款、其他货币资金账户的期末余额填列。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    },
+    {
+      "id": "finance-basic-judge-022",
+      "title": "基础会计判断022",
+      "stem_text": "对于现金的清查，应将其结果及时填制现金盘点报告表。",
+      "stem_html": "<p>对于现金的清查，应将其结果及时填制现金盘点报告表。</p>",
+      "options": [
+        {
+          "key": "Y",
+          "text": "正确"
+        },
+        {
+          "key": "N",
+          "text": "错误"
+        }
+      ],
+      "answer_key": "Y",
+      "answer_text": "正确",
+      "source": "basic-accounting-review-1"
+    }
+  ]
 }

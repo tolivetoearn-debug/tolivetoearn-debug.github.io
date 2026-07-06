@@ -60,19 +60,24 @@
             <div class="academy-course-head">
               <div>
                 <span class="academy-course-tag">中级财务</span>
-                <h2>主观题训练区</h2>
-                <p>简答题、计算题和模拟考试都在这里，模拟卷严格按提纲结构来抽题。</p>
+                <h2>中财刷题专区</h2>
+                <p>基础会计客观题、简答题、计算题和模拟考试都在这里，客观题可以按题直接刷。</p>
               </div>
               <div class="academy-course-meta">
-                <span>3 个入口</span>
+                <span>6 个入口</span>
                 <strong id="courseFinanceProgress">0 / 0</strong>
               </div>
             </div>
             <div class="academy-pills">
+              <span class="academy-pill">基础会计客观题</span>
               <span class="academy-pill">模拟考试</span>
               <span class="academy-pill">简答题</span>
               <span class="academy-pill">计算题</span>
               <span class="academy-pill">AI伴答</span>
+            </div>
+            <div class="bank-picker-row">
+              <span class="bank-picker-label">题库选择</span>
+              <div id="financeBankPicker" class="bank-picker"></div>
             </div>
             <div class="academy-mode-grid two-cols">
               <button class="academy-mode-card academy-mode-card-featured academy-mode-card-exam" type="button" data-mode="financeExam">
@@ -88,6 +93,48 @@
                 </div>
                 <div class="academy-progress-track"><span data-mode-progress-bar="financeExam"></span></div>
                 <span class="academy-mode-action" data-mode-action="financeExam">开始模拟</span>
+              </button>
+              <button class="academy-mode-card" type="button" data-mode="financeSingle">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">基础会计</span>
+                  <span class="academy-mode-state" data-mode-status="financeSingle">待开始</span>
+                </div>
+                <h3>单选题</h3>
+                <p>按题直接刷基础会计单选，自动判对错。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="financeSingle">0 / 0</span>
+                  <span data-mode-progress-rate="financeSingle">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="financeSingle"></span></div>
+                <span class="academy-mode-action" data-mode-action="financeSingle">开始练习</span>
+              </button>
+              <button class="academy-mode-card" type="button" data-mode="financeMulti">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">基础会计</span>
+                  <span class="academy-mode-state" data-mode-status="financeMulti">待开始</span>
+                </div>
+                <h3>多选题</h3>
+                <p>多选题按题刷，提交后直接显示正确组合。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="financeMulti">0 / 0</span>
+                  <span data-mode-progress-rate="financeMulti">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="financeMulti"></span></div>
+                <span class="academy-mode-action" data-mode-action="financeMulti">开始练习</span>
+              </button>
+              <button class="academy-mode-card" type="button" data-mode="financeJudge">
+                <div class="academy-mode-top">
+                  <span class="academy-mode-badge">基础会计</span>
+                  <span class="academy-mode-state" data-mode-status="financeJudge">待开始</span>
+                </div>
+                <h3>判断题</h3>
+                <p>按题快速刷判断题，适合反复过概念。</p>
+                <div class="academy-mode-progress-row">
+                  <span data-mode-progress-text="financeJudge">0 / 0</span>
+                  <span data-mode-progress-rate="financeJudge">0%</span>
+                </div>
+                <div class="academy-progress-track"><span data-mode-progress-bar="financeJudge"></span></div>
+                <span class="academy-mode-action" data-mode-action="financeJudge">开始练习</span>
               </button>
               <button class="academy-mode-card" type="button" data-mode="short">
                 <div class="academy-mode-top">

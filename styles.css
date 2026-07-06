@@ -1435,6 +1435,7 @@ body::after {
 
 .academy-course-head,
 .academy-pills,
+.bank-picker-row,
 .academy-mode-grid {
   position: relative;
   z-index: 1;
@@ -1512,6 +1513,74 @@ body::after {
 .academy-pill {
   background: #f1f4f6;
   color: var(--muted);
+}
+
+.bank-picker-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: -4px 0 18px;
+}
+
+.bank-picker-label {
+  flex: 0 0 auto;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.bank-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.bank-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 168px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid #dce3eb;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--brand);
+  box-shadow: 0 8px 20px rgba(0, 32, 69, 0.04);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.bank-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(0, 32, 69, 0.08);
+}
+
+.academy-course-panel.finance .bank-chip:hover {
+  border-color: #b197fc;
+}
+
+.bank-chip.active {
+  border-color: #8b5cf6;
+  background: linear-gradient(180deg, rgba(245, 240, 255, 0.96) 0%, rgba(236, 228, 255, 0.92) 100%);
+  box-shadow: 0 16px 28px rgba(95, 61, 196, 0.14);
+}
+
+.bank-chip-title {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.bank-chip-meta {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.bank-chip.active .bank-chip-meta {
+  color: #5f3dc4;
 }
 
 .academy-mode-grid {
@@ -1772,6 +1841,15 @@ body::after {
   .academy-course-meta {
     align-items: flex-start;
   }
+
+  .bank-picker-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bank-picker-label {
+    margin-top: 0;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1820,6 +1898,11 @@ body::after {
   .academy-course-head h2,
   .academy-mode-card h3 {
     font-size: 26px;
+  }
+
+  .bank-chip {
+    width: 100%;
+    min-width: 0;
   }
 }
 
