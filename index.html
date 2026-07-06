@@ -395,10 +395,34 @@
             </div>
             <div class="review-hero-actions">
               <button id="resourceUploadTrigger" class="primary-button" type="button">上传资料</button>
+              <button id="aiImportTrigger" class="ghost-button" type="button">AI生成题库/知识库</button>
               <span id="resourceUploadStatus" class="helper-text">支持 PDF / DOCX / XLSX / TXT / MD / PNG / JPG / WEBP，上传前会先过 AI 审核</span>
               <input id="resourceUploadInput" class="hidden" type="file" multiple accept=".pdf,.docx,.xlsx,.txt,.md,.png,.jpg,.jpeg,.webp">
+              <input id="aiImportInput" class="hidden" type="file" accept=".txt,.md,.docx,.xlsx,.pdf">
             </div>
           </article>
+
+          <section id="aiImportPanel" class="academy-course-panel neutral resources-panel ai-import-panel hidden">
+            <div class="panel-head">
+              <div>
+                <span class="academy-summary-label">AI导入中心</span>
+                <h3>上传文件，自动判断生成什么</h3>
+                <p>AI 会先判断资料是题库、知识点还是混合资料。题库会生成刷题题目；知识点会生成背诵卡片，并加入主页学习搭子的本地知识库。</p>
+              </div>
+              <div class="ai-import-controls">
+                <select id="aiImportCourse" class="ai-import-select" aria-label="导入课程">
+                  <option value="auto">自动判断课程</option>
+                  <option value="Python">Python</option>
+                  <option value="中级财务">中级财务</option>
+                </select>
+                <button id="aiImportPickButton" class="primary-button" type="button">选择文件生成</button>
+              </div>
+            </div>
+            <div class="ai-import-status-row">
+              <span id="aiImportStatus" class="helper-text">支持 TXT / MD / DOCX / XLSX；PDF 会尽量提取可读文字，扫描版建议先转成文本或 DOCX。</span>
+            </div>
+            <div id="aiImportResultPanel" class="ai-import-result-panel hidden"></div>
+          </section>
 
           <section class="review-summary-grid">
             <article class="academy-summary-card">
@@ -443,6 +467,17 @@
               </div>
             </div>
             <div id="uploadedResourceGrid" class="resource-grid"></div>
+          </section>
+
+          <section class="academy-course-panel finance resources-panel">
+            <div class="panel-head">
+              <div>
+                <span class="academy-summary-label">AI背诵知识库</span>
+                <h3>导入知识点生成的背诵卡</h3>
+                <p>这里保存当前存档自己生成的知识点卡片，主页学习搭子也会优先检索这些内容。</p>
+              </div>
+            </div>
+            <div id="aiKnowledgeCardGrid" class="resource-grid"></div>
           </section>
         </section>
       </section>

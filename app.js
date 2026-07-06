@@ -155,6 +155,63 @@ JSON 结构必须是：
 }
 `;
 
+const AI_IMPORT_GENERATE_SYSTEM_PROMPT = `
+你是一个中文学习网站的题库整理员。用户会上传一份资料，可能是题库、答案、知识点、复习提纲或混合内容。
+
+你的任务：
+1. 先判断资料类型：question_bank、knowledge_notes、mixed、unknown。
+2. 如果像题库或有题目答案，生成可刷题目。
+3. 如果像知识点、提纲、笔记，生成背诵卡片。
+4. 如果是混合资料，两种都生成。
+5. 自动判断题型：codefill、fill、single、judge、program、short、calc。
+6. 不要编造明显超出资料的专业事实；资料不足时少生成。
+
+题型要求：
+- codefill：Python/程序代码片段里的填空题，stem 中用 {{blank1}}、{{blank2}} 标出代码空位，并给 blanks。
+- fill：普通文字填空题，stem 中用 {{blank1}}、{{blank2}} 标出填空位置，并给 blanks。
+- single：必须 4 个选项，并明确 answer_index，0 表示第一个选项。
+- judge：必须给 statement 和 answer_boolean。
+- program：给 prompt 和 reference_answer。
+- short：给 prompt 和 reference_answer。
+- calc：给 prompt 和 reference_answer，可包含步骤。
+
+背诵卡要求：
+- title 简短。
+- key_points 3 到 6 条，适合直接背。
+- detail 用自己的话解释。
+- memory_tip 给一句记忆提示。
+
+只返回 JSON，不要输出任何多余文字。JSON 结构：
+{
+  "classification": "question_bank" | "knowledge_notes" | "mixed" | "unknown",
+  "course": "Python" | "中级财务" | "未分类",
+  "summary": "一句话说明你判断的原因",
+  "questions": [
+    {
+      "type": "codefill" | "fill" | "single" | "judge" | "program" | "short" | "calc",
+      "title": "题目标题",
+      "stem": "填空题题干，填空处使用 {{blank1}}；单选/判断可用普通题干",
+      "blanks": [{"label": "填空1", "answers": ["标准答案", "可接受写法"]}],
+      "options": ["A选项", "B选项", "C选项", "D选项"],
+      "answer_index": 0,
+      "statement": "判断题陈述",
+      "answer_boolean": true,
+      "prompt": "主观题/程序题/计算题题干",
+      "reference_answer": "参考答案或步骤"
+    }
+  ],
+  "knowledge_cards": [
+    {
+      "title": "知识点标题",
+      "course": "Python" | "中级财务" | "未分类",
+      "key_points": ["要点1", "要点2", "要点3"],
+      "detail": "解释",
+      "memory_tip": "记忆提示"
+    }
+  ]
+}
+`;
+
 const RESOURCE_ALLOWED_UPLOAD_EXTENSIONS = new Set(["pdf", "docx", "xlsx", "txt", "md", "png", "jpg", "jpeg", "webp"]);
 const RESOURCE_DANGEROUS_UPLOAD_EXTENSIONS = new Set([
   "7z", "apk", "app", "bat", "bin", "cmd", "com", "cpl", "crt", "csv", "dll", "doc", "docm", "exe", "gif",
@@ -165,6 +222,10 @@ const RESOURCE_DANGEROUS_UPLOAD_EXTENSIONS = new Set([
 const RESOURCE_TEXT_PREVIEW_EXTENSIONS = new Set(["txt", "md"]);
 const RESOURCE_SIGNATURE_BYTES = 24;
 const RESOURCE_PREVIEW_CHAR_LIMIT = 1400;
+const AI_IMPORT_ALLOWED_EXTENSIONS = new Set(["txt", "md", "docx", "xlsx", "pdf"]);
+const AI_IMPORT_TEXT_CHAR_LIMIT = 22000;
+const AI_IMPORT_MAX_GENERATED_QUESTIONS = 30;
+const AI_IMPORT_MAX_KNOWLEDGE_CARDS = 36;
 
 const PUBLIC_RESOURCES = [
   {
@@ -429,6 +490,13 @@ const practiceQuestionIndexChip = document.getElementById("practiceQuestionIndex
 const resourceUploadTrigger = document.getElementById("resourceUploadTrigger");
 const resourceUploadInput = document.getElementById("resourceUploadInput");
 const resourceUploadStatus = document.getElementById("resourceUploadStatus");
+const aiImportTrigger = document.getElementById("aiImportTrigger");
+const aiImportInput = document.getElementById("aiImportInput");
+const aiImportPanel = document.getElementById("aiImportPanel");
+const aiImportCourse = document.getElementById("aiImportCourse");
+const aiImportPickButton = document.getElementById("aiImportPickButton");
+const aiImportStatus = document.getElementById("aiImportStatus");
+const aiImportResultPanel = document.getElementById("aiImportResultPanel");
 const publicResourceCount = document.getElementById("publicResourceCount");
 const uploadedResourceCount = document.getElementById("uploadedResourceCount");
 const financeResourceCount = document.getElementById("financeResourceCount");
@@ -437,6 +505,7 @@ const publicResourceMeta = document.getElementById("publicResourceMeta");
 const uploadedResourceMeta = document.getElementById("uploadedResourceMeta");
 const publicResourceGrid = document.getElementById("publicResourceGrid");
 const uploadedResourceGrid = document.getElementById("uploadedResourceGrid");
+const aiKnowledgeCardGrid = document.getElementById("aiKnowledgeCardGrid");
 
 let userCenterStore = ensureUserCenterDefaults(loadUserCenterStore(), loadLegacyProgress());
 let progressStore = getActiveProfile().progress;
@@ -537,6 +606,14 @@ async function init() {
   wrongReviewPlanButton?.addEventListener("click", handleWrongReviewPlanRequest);
   resourceUploadTrigger?.addEventListener("click", () => resourceUploadInput?.click());
   resourceUploadInput?.addEventListener("change", handleResourceUploadInput);
+  aiImportTrigger?.addEventListener("click", () => {
+    aiImportPanel?.classList.toggle("hidden");
+    if (!aiImportPanel?.classList.contains("hidden")) {
+      aiImportPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+  aiImportPickButton?.addEventListener("click", () => aiImportInput?.click());
+  aiImportInput?.addEventListener("change", handleAiImportInput);
 
   shuffleQuestionOrderToggle.addEventListener("change", toggleQuestionShuffle);
   memorizeModeToggle.addEventListener("change", toggleMemorizeMode);
@@ -802,20 +879,27 @@ function switchQuestionSet(filterMode) {
 }
 
 function getQuestionsByMode(mode) {
+  const custom = getCustomQuestionsByMode(mode);
   if (mode === "financeExam") {
     return getActiveFinanceExamSession()?.questions || [];
   }
   if (mode === "codefill") {
-    return (state.data.fill_questions || []).filter((question) => isProgramFillQuestion(question));
+    return [
+      ...(state.data.fill_questions || []).filter((question) => isProgramFillQuestion(question)),
+      ...custom,
+    ];
   }
   if (mode === "fill") {
-    return (state.data.fill_questions || []).filter((question) => !isProgramFillQuestion(question));
+    return [
+      ...(state.data.fill_questions || []).filter((question) => !isProgramFillQuestion(question)),
+      ...custom,
+    ];
   }
-  if (mode === "short") return state.data.short_answer_questions || [];
-  if (mode === "calc") return state.data.calculation_questions || [];
-  if (mode === "single") return state.data.single_choice_questions || [];
-  if (mode === "judge") return state.data.judgment_questions || [];
-  return state.data.program_questions || [];
+  if (mode === "short") return [...(state.data.short_answer_questions || []), ...custom];
+  if (mode === "calc") return [...(state.data.calculation_questions || []), ...custom];
+  if (mode === "single") return [...(state.data.single_choice_questions || []), ...custom];
+  if (mode === "judge") return [...(state.data.judgment_questions || []), ...custom];
+  return [...(state.data.program_questions || []), ...custom];
 }
 
 function getQuestionKind(mode, question) {
@@ -1272,6 +1356,45 @@ function renderUploadedResources() {
   });
 }
 
+function renderAiKnowledgeCards() {
+  if (!aiKnowledgeCardGrid) return;
+  const cards = progressStore.customKnowledgeCards || [];
+  if (!cards.length) {
+    aiKnowledgeCardGrid.innerHTML = `
+      <article class="resource-empty-card">
+        <h4>还没有 AI 背诵卡</h4>
+        <p>点上面的“AI生成题库/知识库”，导入知识点资料后会自动生成背诵卡片。</p>
+      </article>
+    `;
+    return;
+  }
+
+  aiKnowledgeCardGrid.innerHTML = cards.slice().reverse().map((card) => `
+    <article class="resource-card ai-knowledge-card">
+      <div class="resource-card-top">
+        <div class="resource-card-badges">
+          <span class="resource-course-tag ${getResourceCourseClass(card.course)}">${escapeHtml(card.course || "未分类")}</span>
+          <span class="resource-file-tag">背诵卡</span>
+        </div>
+        <span class="resource-file-size">${escapeHtml(formatProfileTime(card.createdAt))}</span>
+      </div>
+      <h4>${escapeHtml(card.title)}</h4>
+      <ul class="ai-knowledge-points">
+        ${card.keyPoints.map((point) => `<li>${escapeHtml(point)}</li>`).join("")}
+      </ul>
+      <p>${escapeHtml(card.detail || "已加入本地知识库。")}</p>
+      ${card.memoryTip ? `<div class="resource-card-meta">记忆提示：${escapeHtml(card.memoryTip)}</div>` : ""}
+      <div class="resource-card-actions">
+        <button class="ghost-button resource-delete-button" type="button" data-knowledge-delete="${escapeHtml(card.id)}">删除卡片</button>
+      </div>
+    </article>
+  `).join("");
+
+  aiKnowledgeCardGrid.querySelectorAll("[data-knowledge-delete]").forEach((button) => {
+    button.addEventListener("click", () => deleteAiKnowledgeCard(button.dataset.knowledgeDelete));
+  });
+}
+
 function updateResourceSummaryCards() {
   const uploaded = state.resourceUploads || [];
   const financeCount = PUBLIC_RESOURCES.filter((item) => item.course === "中级财务").length
@@ -1290,6 +1413,7 @@ function updateResourceSummaryCards() {
 function renderResourcesCenter() {
   renderPublicResources();
   renderUploadedResources();
+  renderAiKnowledgeCards();
   updateResourceSummaryCards();
 }
 
@@ -1465,6 +1589,668 @@ async function deleteUploadedResource(id) {
     console.error(error);
     updateResourceUploadStatus(error.message || "删除失败，等会再试一次");
   }
+}
+
+function updateAiImportStatus(text) {
+  if (aiImportStatus) {
+    aiImportStatus.textContent = text;
+  } else {
+    updateResourceUploadStatus(text);
+  }
+}
+
+async function handleAiImportInput() {
+  const file = aiImportInput?.files?.[0];
+  if (aiImportInput) {
+    aiImportInput.value = "";
+  }
+  if (!file) return;
+
+  const extension = getResourceFileExtension(file.name);
+  if (!AI_IMPORT_ALLOWED_EXTENSIONS.has(extension)) {
+    updateAiImportStatus("暂时只支持 TXT / MD / DOCX / XLSX / PDF 导入生成。");
+    return;
+  }
+  if (file.size > 8 * 1024 * 1024) {
+    updateAiImportStatus("文件超过 8MB，先拆小一点再导入。");
+    return;
+  }
+
+  try {
+    aiImportPanel?.classList.remove("hidden");
+    aiImportPickButton && (aiImportPickButton.disabled = true);
+    updateAiImportStatus(`正在读取文件：${file.name}`);
+    const extracted = await extractAiImportText(file, extension);
+    const content = truncateText(extracted.text, AI_IMPORT_TEXT_CHAR_LIMIT);
+    if (content.length < 30) {
+      updateAiImportStatus("没有提取到足够文字。PDF 如果是扫描版，先转成 TXT / DOCX 再导入。");
+      return;
+    }
+
+    updateAiImportStatus(`已提取约 ${content.length} 字，AI 正在判断资料类型并生成...`);
+    const requestedCourse = aiImportCourse?.value || "auto";
+    const result = await requestAiImportGeneration({
+      file,
+      extension,
+      requestedCourse,
+      extractor: extracted.extractor,
+      content,
+    });
+    const saved = saveAiImportResult(result, {
+      fileName: file.name,
+      extension,
+      extractor: extracted.extractor,
+      requestedCourse,
+    });
+    renderAiImportResult(result, saved);
+    renderResourcesCenter();
+    renderHomeDashboard();
+    updateHomeChatStatus();
+    updateAiImportStatus(`生成完成：新增 ${saved.questionCount} 道题、${saved.cardCount} 张背诵卡。`);
+  } catch (error) {
+    console.error(error);
+    updateAiImportStatus(error.message || "AI 导入失败，稍后再试。");
+  } finally {
+    aiImportPickButton && (aiImportPickButton.disabled = false);
+  }
+}
+
+async function extractAiImportText(file, extension) {
+  if (["txt", "md"].includes(extension)) {
+    return { text: await file.text(), extractor: extension.toUpperCase() };
+  }
+  if (extension === "docx") {
+    return { text: await extractDocxText(file), extractor: "DOCX正文" };
+  }
+  if (extension === "xlsx") {
+    return { text: await extractXlsxText(file), extractor: "XLSX表格" };
+  }
+  if (extension === "pdf") {
+    return { text: await extractPdfTextFallback(file), extractor: "PDF基础文本" };
+  }
+  return { text: "", extractor: "未知" };
+}
+
+async function readZipEntries(file) {
+  const buffer = await file.arrayBuffer();
+  const view = new DataView(buffer);
+  const bytes = new Uint8Array(buffer);
+  let eocd = -1;
+  for (let index = bytes.length - 22; index >= Math.max(0, bytes.length - 66000); index -= 1) {
+    if (view.getUint32(index, true) === 0x06054b50) {
+      eocd = index;
+      break;
+    }
+  }
+  if (eocd < 0) throw new Error("没有识别到 Office 文件结构。");
+
+  const entryCount = view.getUint16(eocd + 10, true);
+  let offset = view.getUint32(eocd + 16, true);
+  const entries = new Map();
+  const decoder = new TextDecoder("utf-8");
+
+  for (let entryIndex = 0; entryIndex < entryCount; entryIndex += 1) {
+    if (view.getUint32(offset, true) !== 0x02014b50) break;
+    const method = view.getUint16(offset + 10, true);
+    const compressedSize = view.getUint32(offset + 20, true);
+    const nameLength = view.getUint16(offset + 28, true);
+    const extraLength = view.getUint16(offset + 30, true);
+    const commentLength = view.getUint16(offset + 32, true);
+    const localOffset = view.getUint32(offset + 42, true);
+    const name = decoder.decode(bytes.slice(offset + 46, offset + 46 + nameLength));
+
+    if (view.getUint32(localOffset, true) === 0x04034b50) {
+      const localNameLength = view.getUint16(localOffset + 26, true);
+      const localExtraLength = view.getUint16(localOffset + 28, true);
+      const dataStart = localOffset + 30 + localNameLength + localExtraLength;
+      const compressed = bytes.slice(dataStart, dataStart + compressedSize);
+      let data;
+      if (method === 0) {
+        data = compressed;
+      } else if (method === 8) {
+        data = new Uint8Array(await inflateRawZipData(compressed));
+      }
+      if (data) entries.set(name, data);
+    }
+    offset += 46 + nameLength + extraLength + commentLength;
+  }
+
+  return entries;
+}
+
+async function inflateRawZipData(bytes) {
+  if (!("DecompressionStream" in window)) {
+    throw new Error("当前浏览器不支持 DOCX / XLSX 解压，建议换 Chrome / Edge，或先转 TXT。");
+  }
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  return new Response(stream).arrayBuffer();
+}
+
+function decodeXmlText(xml) {
+  return String(xml || "")
+    .replace(/<w:tab\/>/gu, "\t")
+    .replace(/<w:br\/>/gu, "\n")
+    .replace(/<\/w:p>/gu, "\n")
+    .replace(/<\/row>/gu, "\n")
+    .replace(/<\/c>/gu, "\t")
+    .replace(/<[^>]+>/gu, "")
+    .replace(/&lt;/gu, "<")
+    .replace(/&gt;/gu, ">")
+    .replace(/&amp;/gu, "&")
+    .replace(/&quot;/gu, "\"")
+    .replace(/&apos;/gu, "'")
+    .replace(/[ \t]+\n/gu, "\n")
+    .replace(/\n{3,}/gu, "\n\n")
+    .trim();
+}
+
+async function extractDocxText(file) {
+  const entries = await readZipEntries(file);
+  const documentXml = entries.get("word/document.xml");
+  if (!documentXml) throw new Error("DOCX 里没有找到正文。");
+  return decodeXmlText(new TextDecoder("utf-8").decode(documentXml));
+}
+
+async function extractXlsxText(file) {
+  const entries = await readZipEntries(file);
+  const decoder = new TextDecoder("utf-8");
+  const sharedXml = entries.get("xl/sharedStrings.xml");
+  const sharedStrings = [];
+  if (sharedXml) {
+    const text = decoder.decode(sharedXml);
+    [...text.matchAll(/<si[\s\S]*?<\/si>/gu)].forEach((match) => {
+      sharedStrings.push(decodeXmlText(match[0]));
+    });
+  }
+
+  const lines = [];
+  [...entries.keys()]
+    .filter((name) => /^xl\/worksheets\/sheet\d+\.xml$/u.test(name))
+    .sort()
+    .forEach((name) => {
+      const xml = decoder.decode(entries.get(name));
+      lines.push(`【${name.replace("xl/worksheets/", "").replace(".xml", "")}】`);
+      [...xml.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/gu)].forEach((rowMatch) => {
+        const cells = [];
+        [...rowMatch[1].matchAll(/<c\b([^>]*)>([\s\S]*?)<\/c>/gu)].forEach((cellMatch) => {
+          const attrs = cellMatch[1] || "";
+          const body = cellMatch[2] || "";
+          let value = "";
+          if (/t="s"/u.test(attrs)) {
+            const index = Number((body.match(/<v>([\s\S]*?)<\/v>/u) || [])[1]);
+            value = sharedStrings[index] || "";
+          } else {
+            value = decodeXmlText(body);
+          }
+          if (value) cells.push(value);
+        });
+        if (cells.length) lines.push(cells.join(" | "));
+      });
+    });
+  return lines.join("\n");
+}
+
+async function extractPdfTextFallback(file) {
+  const raw = await file.slice(0, Math.min(file.size, 2 * 1024 * 1024)).text();
+  const strings = [];
+  [...raw.matchAll(/\(([^()\r\n]{2,160})\)\s*Tj/gu)].forEach((match) => strings.push(match[1]));
+  [...raw.matchAll(/\(([^()\r\n]{2,160})\)/gu)].forEach((match) => strings.push(match[1]));
+  const text = strings.length ? strings.join("\n") : raw;
+  return sanitizeUploadPreviewText(text)
+    .replace(/\\([()\\])/gu, "$1")
+    .replace(/\s{2,}/gu, " ")
+    .slice(0, AI_IMPORT_TEXT_CHAR_LIMIT);
+}
+
+async function requestAiImportGeneration(payload) {
+  const body = {
+    model: AI_CONFIG.model,
+    temperature: 0.2,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: AI_IMPORT_GENERATE_SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: JSON.stringify({
+          文件名: payload.file.name,
+          文件类型: payload.extension,
+          文件大小: formatFileSize(payload.file.size),
+          抽取方式: payload.extractor,
+          用户选择课程: payload.requestedCourse,
+          当前网站题型: ["codefill", "fill", "single", "judge", "program", "short", "calc"],
+          生成上限: {
+            题目: AI_IMPORT_MAX_GENERATED_QUESTIONS,
+            背诵卡: AI_IMPORT_MAX_KNOWLEDGE_CARDS,
+          },
+          正文: payload.content,
+        }, null, 2),
+      },
+    ],
+  };
+
+  let response = await postAiRequest(body);
+  if (!response.ok) {
+    const firstErrorText = await response.text();
+    const fallbackBody = { ...body };
+    delete fallbackBody.response_format;
+    response = await postAiRequest(fallbackBody);
+    if (!response.ok) {
+      const secondErrorText = await response.text();
+      throw new Error(extractAiError(secondErrorText) || extractAiError(firstErrorText) || "AI 生成失败");
+    }
+  }
+
+  const data = await response.json();
+  return normalizeAiImportResult(parseAiJson(getAiMessageContent(data)));
+}
+
+function normalizeAiImportResult(raw) {
+  const allowedClasses = ["question_bank", "knowledge_notes", "mixed", "unknown"];
+  const classification = allowedClasses.includes(raw?.classification) ? raw.classification : "unknown";
+  const course = normalizeImportCourse(raw?.course);
+  return {
+    classification,
+    course,
+    summary: String(raw?.summary || "AI 已完成资料判断。").trim(),
+    questions: Array.isArray(raw?.questions) ? raw.questions.slice(0, AI_IMPORT_MAX_GENERATED_QUESTIONS) : [],
+    knowledgeCards: Array.isArray(raw?.knowledge_cards || raw?.knowledgeCards)
+      ? (raw.knowledge_cards || raw.knowledgeCards).slice(0, AI_IMPORT_MAX_KNOWLEDGE_CARDS)
+      : [],
+  };
+}
+
+function normalizeImportCourse(value) {
+  const text = String(value || "").trim();
+  if (text.includes("Python") || text.includes("程序")) return "Python";
+  if (text.includes("中财") || text.includes("财务") || text.includes("会计")) return "中级财务";
+  return "未分类";
+}
+
+function saveAiImportResult(result, meta = {}) {
+  const importId = `ai-import-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const normalizedQuestions = normalizeGeneratedQuestions(result.questions, {
+    importId,
+    fileName: meta.fileName,
+    course: result.course,
+  });
+  const normalizedCards = normalizeGeneratedKnowledgeCards(result.knowledgeCards, {
+    importId,
+    fileName: meta.fileName,
+    course: result.course,
+  });
+
+  progressStore.customQuestions ||= createEmptyCustomQuestionBuckets();
+  normalizedQuestions.forEach((question) => {
+    const mode = question.source.importMode;
+    progressStore.customQuestions[mode] ||= [];
+    progressStore.customQuestions[mode].push(question);
+  });
+  Object.keys(progressStore.customQuestions).forEach((mode) => {
+    progressStore.customQuestions[mode] = normalizeQuestionBucket(mode, progressStore.customQuestions[mode]).slice(-120);
+  });
+
+  progressStore.customKnowledgeCards ||= [];
+  progressStore.customKnowledgeCards.push(...normalizedCards);
+  progressStore.customKnowledgeCards = normalizeCustomKnowledgeCards(progressStore.customKnowledgeCards).slice(-160);
+
+  const modeCounts = normalizedQuestions.reduce((acc, question) => {
+    const mode = question.source.importMode;
+    acc[mode] = (acc[mode] || 0) + 1;
+    return acc;
+  }, {});
+  progressStore.aiImportHistory ||= [];
+  progressStore.aiImportHistory.push({
+    id: importId,
+    fileName: String(meta.fileName || "导入文件"),
+    classification: result.classification,
+    course: result.course,
+    summary: result.summary,
+    modeCounts,
+    questionCount: normalizedQuestions.length,
+    cardCount: normalizedCards.length,
+    createdAt: new Date().toISOString(),
+  });
+  progressStore.aiImportHistory = normalizeAiImportHistory(progressStore.aiImportHistory).slice(-20);
+
+  saveProgress();
+  return {
+    importId,
+    questions: normalizedQuestions,
+    cards: normalizedCards,
+    modeCounts,
+    questionCount: normalizedQuestions.length,
+    cardCount: normalizedCards.length,
+  };
+}
+
+function renderAiImportResult(result, saved) {
+  if (!aiImportResultPanel) return;
+  const modeLinks = Object.entries(saved.modeCounts || {}).map(([mode, count]) => `
+    <button class="ghost-button" type="button" data-ai-import-start="${escapeHtml(mode)}">
+      去刷${escapeHtml(MODE_LABELS[mode] || mode)} ${count}题
+    </button>
+  `).join("");
+  aiImportResultPanel.innerHTML = `
+    <article class="ai-import-result-card">
+      <div class="resource-card-badges">
+        <span class="resource-file-tag">${escapeHtml(result.classification)}</span>
+        <span class="resource-course-tag ${getResourceCourseClass(result.course)}">${escapeHtml(result.course)}</span>
+      </div>
+      <h4>AI 已完成导入</h4>
+      <p>${escapeHtml(result.summary)}</p>
+      <div class="ai-import-result-stats">
+        <span>新增题目 ${saved.questionCount}</span>
+        <span>背诵卡 ${saved.cardCount}</span>
+      </div>
+      <div class="resource-card-actions">
+        ${modeLinks || '<span class="helper-text">这份资料主要生成了背诵卡，已放到下方知识库。</span>'}
+      </div>
+    </article>
+  `;
+  aiImportResultPanel.classList.remove("hidden");
+  aiImportResultPanel.querySelectorAll("[data-ai-import-start]").forEach((button) => {
+    button.addEventListener("click", () => startMode(button.dataset.aiImportStart));
+  });
+}
+
+function createEmptyCustomQuestionBuckets() {
+  return { codefill: [], fill: [], single: [], judge: [], program: [], short: [], calc: [] };
+}
+
+function getCustomQuestionsByMode(mode, progressData = progressStore) {
+  const buckets = normalizeCustomQuestions(progressData?.customQuestions);
+  return buckets[mode] || [];
+}
+
+function normalizeCustomQuestions(value) {
+  const buckets = createEmptyCustomQuestionBuckets();
+  if (!value || typeof value !== "object") return buckets;
+  Object.keys(buckets).forEach((mode) => {
+    buckets[mode] = normalizeQuestionBucket(mode, value[mode]);
+  });
+  return buckets;
+}
+
+function normalizeQuestionBucket(mode, list) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((question) => normalizeStoredCustomQuestion(mode, question))
+    .filter(Boolean);
+}
+
+function normalizeStoredCustomQuestion(mode, question) {
+  if (!question?.id) return null;
+  if (mode === "fill" || mode === "codefill") {
+    if (!question.stem_html || !Array.isArray(question.answers)) return null;
+  } else if (mode === "single" || mode === "judge") {
+    if (!question.stem_html || !Array.isArray(question.options) || !question.answer_key) return null;
+  } else if (!question.prompt_html || !question.answer_html) {
+    return null;
+  }
+  return {
+    ...question,
+    title: String(question.title || "AI生成题").trim(),
+    source: {
+      ...(question.source || {}),
+      importMode: question.source?.importMode || mode,
+    },
+  };
+}
+
+function normalizeGeneratedQuestions(items, meta) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item, index) => buildGeneratedQuestion(item, index, meta))
+    .filter(Boolean);
+}
+
+function buildGeneratedQuestion(item, index, meta) {
+  let type = normalizeGeneratedQuestionType(item?.type);
+  if (type === "fill" && shouldTreatGeneratedFillAsCode(item, meta)) {
+    type = "codefill";
+  }
+  const id = `${meta.importId}-${type}-${String(index + 1).padStart(3, "0")}`;
+  const title = String(item?.title || `AI生成${QUESTION_KIND_LABELS[type] || "题目"}${index + 1}`).trim();
+  const source = {
+    importId: meta.importId,
+    importMode: type,
+    importTitle: meta.fileName || "AI导入",
+    course: meta.course || "未分类",
+  };
+
+  if (type === "fill" || type === "codefill") {
+    return buildGeneratedFillQuestion(item, { id, title, source });
+  }
+  if (type === "single") {
+    return buildGeneratedSingleQuestion(item, { id, title, source });
+  }
+  if (type === "judge") {
+    return buildGeneratedJudgeQuestion(item, { id, title, source });
+  }
+  if (["program", "short", "calc"].includes(type)) {
+    const prompt = String(item?.prompt || item?.stem || "").trim();
+    const answer = String(item?.reference_answer || item?.referenceAnswer || item?.answer || "").trim();
+    if (!prompt || !answer) return null;
+    return {
+      id,
+      title,
+      prompt_html: textToParagraphHtml(prompt),
+      answer_html: `<p><strong>参考答案</strong></p>${textToParagraphHtml(answer)}`,
+      source,
+    };
+  }
+  return null;
+}
+
+function shouldTreatGeneratedFillAsCode(item, meta = {}) {
+  const blob = [
+    item?.stem,
+    item?.prompt,
+    item?.title,
+    item?.course,
+    meta.course,
+  ].map((part) => String(part || "")).join("\n").toLowerCase();
+  if (!blob) return false;
+  return /python|def\s+\w+\s*\(|for\s+\w+\s+in\s+|while\s+|if\s+.*:|print\s*\(|input\s*\(|range\s*\(|list|dict|append\s*\(|代码|程序/u.test(blob);
+}
+
+function normalizeGeneratedQuestionType(value) {
+  const type = String(value || "").trim().toLowerCase();
+  if (["single", "judge", "program", "short", "calc", "fill", "codefill"].includes(type)) return type;
+  if (type.includes("计算")) return "calc";
+  if (type.includes("判断")) return "judge";
+  if (type.includes("选择")) return "single";
+  if (type.includes("程序填空") || type.includes("代码填空") || type.includes("code fill") || type.includes("codefill")) return "codefill";
+  if (type.includes("程序")) return "program";
+  if (type.includes("简答")) return "short";
+  return "fill";
+}
+
+function buildGeneratedFillQuestion(item, base) {
+  let stem = String(item?.stem || item?.prompt || "").trim();
+  const blanks = Array.isArray(item?.blanks) ? item.blanks : [];
+  const normalizedBlanks = blanks
+    .map((blank, index) => ({
+      label: String(blank?.label || `填空${index + 1}`).trim(),
+      answers: normalizeGeneratedAnswerList(blank?.answers || blank?.answer),
+    }))
+    .filter((blank) => blank.answers.length);
+  if (!normalizedBlanks.length) {
+    const answer = normalizeGeneratedAnswerList(item?.answer || item?.reference_answer || item?.referenceAnswer);
+    if (!answer.length) return null;
+    normalizedBlanks.push({ label: "填空1", answers: answer });
+  }
+  if (!/\{\{blank\d+\}\}/u.test(stem)) {
+    const blankMarks = normalizedBlanks.map((_, index) => `{{blank${index + 1}}}`).join(" ");
+    stem = `${stem || "请填写正确答案"}：${blankMarks}`;
+  }
+  const maxBlankNumber = Math.max(1, ...[...stem.matchAll(/\{\{blank(\d+)\}\}/gu)].map((match) => Number(match[1]) || 1));
+  if (maxBlankNumber > normalizedBlanks.length) {
+    return null;
+  }
+  const stemHtml = escapeHtml(stem)
+    .replace(/\{\{blank(\d+)\}\}/gu, (_, numberText) => {
+      const index = Math.max(Number(numberText) - 1, 0);
+      const label = normalizedBlanks[index]?.label || `填空${index + 1}`;
+      return `<span style="color:#b45309;font-weight:700;">【${escapeHtml(label)}】</span><span class="blank-slot" data-blank-index="${index}"></span>`;
+    })
+    .replace(/\n/gu, "<br>");
+  return {
+    id: base.id,
+    title: base.title,
+    stem_html: `<p>${stemHtml}</p>`,
+    answers: normalizedBlanks.map((blank) => blank.answers),
+    display_answers: normalizedBlanks.map((blank) => blank.answers[0]),
+    blank_labels: normalizedBlanks.map((blank) => blank.label),
+    source: { ...base.source, importMode: base.source?.importMode === "codefill" ? "codefill" : "fill" },
+  };
+}
+
+function buildGeneratedSingleQuestion(item, base) {
+  const options = Array.isArray(item?.options) ? item.options.map((option) => stripChoicePrefix(option)).filter(Boolean).slice(0, 4) : [];
+  const stem = String(item?.stem || item?.prompt || "").trim();
+  if (options.length !== 4 || !stem) return null;
+  const answerIndex = normalizeGeneratedAnswerIndex(item?.answer_index ?? item?.answerIndex ?? item?.answer ?? item?.answer_key ?? item?.answerKey, options);
+  if (answerIndex < 0) return null;
+  const keys = ["A", "B", "C", "D"];
+  return {
+    id: base.id,
+    title: base.title,
+    stem_text: stem,
+    stem_html: textToParagraphHtml(stem),
+    options: options.map((text, index) => ({ key: keys[index], text })),
+    answer_key: keys[answerIndex],
+    answer_text: options[answerIndex],
+    source: { ...base.source, importMode: "single" },
+  };
+}
+
+function stripChoicePrefix(value) {
+  return String(value || "")
+    .trim()
+    .replace(/^[A-Fa-fＡ-Ｆａ-ｆ][.．、:：)）]\s*/u, "")
+    .replace(/^选项\s*[A-Fa-fＡ-Ｆａ-ｆ][.．、:：)）]?\s*/u, "")
+    .trim();
+}
+
+function normalizeGeneratedAnswerIndex(value, options = []) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    if (value >= 0 && value < options.length) return Math.floor(value);
+    if (value >= 1 && value <= options.length) return Math.floor(value - 1);
+  }
+  const text = String(value ?? "").trim();
+  if (!text) return 0;
+  const letterMap = { A: 0, B: 1, C: 2, D: 3, Ａ: 0, Ｂ: 1, Ｃ: 2, Ｄ: 3 };
+  const leadingLetter = text.match(/^[A-DＡ-Ｄ]/iu)?.[0]?.toUpperCase();
+  if (leadingLetter && Object.prototype.hasOwnProperty.call(letterMap, leadingLetter)) {
+    return letterMap[leadingLetter];
+  }
+  const numeric = Number(text);
+  if (Number.isFinite(numeric)) {
+    if (numeric >= 0 && numeric < options.length) return Math.floor(numeric);
+    if (numeric >= 1 && numeric <= options.length) return Math.floor(numeric - 1);
+  }
+  const normalizedAnswer = normalizeAnswer(stripChoicePrefix(text));
+  const matchedIndex = options.findIndex((option) => normalizeAnswer(option) === normalizedAnswer);
+  return matchedIndex >= 0 ? matchedIndex : -1;
+}
+
+function buildGeneratedJudgeQuestion(item, base) {
+  const statement = String(item?.statement || item?.stem || item?.prompt || "").trim();
+  if (!statement) return null;
+  const booleanValue = item?.answer_boolean ?? item?.answerBoolean;
+  const answerText = item?.answer ?? item?.answer_key ?? item?.answerKey ?? booleanValue;
+  const answerBoolean = typeof booleanValue === "boolean"
+    ? booleanValue
+    : /^(true|正确|对|yes|y|t)$/iu.test(String(answerText || "").trim());
+  return {
+    id: base.id,
+    title: base.title,
+    stem_text: statement,
+    stem_html: textToParagraphHtml(statement),
+    options: [
+      { key: "Y", text: "正确" },
+      { key: "N", text: "错误" },
+    ],
+    answer_key: answerBoolean ? "Y" : "N",
+    answer_text: answerBoolean ? "正确" : "错误",
+    source: { ...base.source, importMode: "judge" },
+  };
+}
+
+function normalizeGeneratedAnswerList(value) {
+  const raw = Array.isArray(value) ? value : [value];
+  return raw.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 6);
+}
+
+function textToParagraphHtml(value) {
+  const lines = String(value || "").trim().split(/\n{2,}/u).map((line) => line.trim()).filter(Boolean);
+  if (!lines.length) return "<p></p>";
+  return lines.map((line) => `<p>${escapeHtml(line).replace(/\n/gu, "<br>")}</p>`).join("");
+}
+
+function normalizeGeneratedKnowledgeCards(items, meta) {
+  if (!Array.isArray(items)) return [];
+  return items
+    .map((item, index) => {
+      const title = String(item?.title || `AI背诵卡${index + 1}`).trim();
+      const keyPoints = normalizeStringList(item?.key_points || item?.keyPoints).slice(0, 8);
+      const detail = String(item?.detail || "").trim();
+      if (!title || (!keyPoints.length && !detail)) return null;
+      return {
+        id: `${meta.importId}-card-${String(index + 1).padStart(3, "0")}`,
+        importId: meta.importId,
+        sourceTitle: String(meta.fileName || "AI导入资料"),
+        course: normalizeImportCourse(item?.course || meta.course),
+        title,
+        keyPoints: keyPoints.length ? keyPoints : [detail],
+        detail,
+        memoryTip: String(item?.memory_tip || item?.memoryTip || "").trim(),
+        createdAt: new Date().toISOString(),
+      };
+    })
+    .filter(Boolean);
+}
+
+function normalizeCustomKnowledgeCards(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => ({
+      id: String(item?.id || ""),
+      importId: String(item?.importId || ""),
+      sourceTitle: String(item?.sourceTitle || "AI导入资料"),
+      course: normalizeImportCourse(item?.course),
+      title: String(item?.title || "").trim(),
+      keyPoints: normalizeStringList(item?.keyPoints || item?.key_points).slice(0, 8),
+      detail: String(item?.detail || "").trim(),
+      memoryTip: String(item?.memoryTip || item?.memory_tip || "").trim(),
+      createdAt: String(item?.createdAt || new Date().toISOString()),
+    }))
+    .filter((item) => item.id && item.title && (item.keyPoints.length || item.detail));
+}
+
+function normalizeAiImportHistory(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => ({
+    id: String(item?.id || ""),
+    fileName: String(item?.fileName || "导入文件"),
+    classification: String(item?.classification || "unknown"),
+    course: normalizeImportCourse(item?.course),
+    summary: String(item?.summary || ""),
+    modeCounts: item?.modeCounts && typeof item.modeCounts === "object" ? item.modeCounts : {},
+    questionCount: Number(item?.questionCount || 0),
+    cardCount: Number(item?.cardCount || 0),
+    createdAt: String(item?.createdAt || ""),
+  })).filter((item) => item.id);
+}
+
+function deleteAiKnowledgeCard(id) {
+  if (!id) return;
+  progressStore.customKnowledgeCards = normalizeCustomKnowledgeCards(progressStore.customKnowledgeCards)
+    .filter((card) => card.id !== id);
+  saveProgress();
+  renderResourcesCenter();
+  updateHomeChatStatus();
 }
 
 function renderCurrentQuestion() {
@@ -2108,7 +2894,7 @@ function buildEnabledChatFeatureLabels(progressData = progressStore) {
 }
 
 function isKnowledgeBaseAvailable() {
-  return Array.isArray(state.knowledgeBase?.items) && state.knowledgeBase.items.length > 0;
+  return getKnowledgeBaseItems().length > 0;
 }
 
 function isKnowledgeChatEnabled(progressData = progressStore) {
@@ -2626,7 +3412,7 @@ function findKnowledgeBaseMatches(query, limit = 5) {
   const hints = normalizeSearchText(query);
   const scored = [];
 
-  state.knowledgeBase.items.forEach((item) => {
+  getKnowledgeBaseItems().forEach((item) => {
     const blob = item._searchBlob || "";
     if (!blob) return;
     let score = 0;
@@ -2655,6 +3441,35 @@ function findKnowledgeBaseMatches(query, limit = 5) {
 
   scored.sort((a, b) => b._score - a._score || a.text.length - b.text.length);
   return scored.slice(0, limit);
+}
+
+function getKnowledgeBaseItems() {
+  return [
+    ...(Array.isArray(state.knowledgeBase?.items) ? state.knowledgeBase.items : []),
+    ...buildCustomKnowledgeBaseItems(progressStore),
+  ];
+}
+
+function buildCustomKnowledgeBaseItems(progressData = progressStore) {
+  return normalizeCustomKnowledgeCards(progressData?.customKnowledgeCards).map((card) => {
+    const text = [
+      `标题：${card.title}`,
+      card.keyPoints.length ? `背诵要点：${card.keyPoints.join("；")}` : "",
+      card.detail ? `解释：${card.detail}` : "",
+      card.memoryTip ? `记忆提示：${card.memoryTip}` : "",
+    ].filter(Boolean).join("\n");
+    return {
+      id: card.id,
+      course: card.course,
+      source_type: "ai_import",
+      source_title: card.sourceTitle || "AI导入知识库",
+      section_title: card.title,
+      page: null,
+      text,
+      search_text: text,
+      _searchBlob: normalizeSearchText([card.course, card.sourceTitle, card.title, text].filter(Boolean).join(" ")),
+    };
+  });
 }
 
 function buildKnowledgeContext(matches) {
@@ -4215,7 +5030,16 @@ function parseAiJson(rawContent) {
     .replace(/^```json\s*/iu, "")
     .replace(/^```\s*/u, "")
     .replace(/\s*```$/u, "");
-  return JSON.parse(clean);
+  try {
+    return JSON.parse(clean);
+  } catch (error) {
+    const firstBrace = clean.indexOf("{");
+    const lastBrace = clean.lastIndexOf("}");
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      return JSON.parse(clean.slice(firstBrace, lastBrace + 1));
+    }
+    throw error;
+  }
 }
 
 function normalizeAiReview(raw, mode) {
@@ -4232,8 +5056,12 @@ function normalizeAiReview(raw, mode) {
 }
 
 function normalizeStringList(value) {
-  if (!Array.isArray(value)) return [];
-  return value.map((item) => String(item || "").trim()).filter(Boolean);
+  const source = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(/[\n；;]+/u)
+      : [];
+  return source.map((item) => String(item || "").trim()).filter(Boolean);
 }
 
 function applyAiReviewResult(mode, id, verdict) {
@@ -5032,6 +5860,9 @@ function ensureProgressDefaults(raw) {
     chatKnowledgeEnabled: typeof raw?.chatKnowledgeEnabled === "boolean" ? raw.chatKnowledgeEnabled : true,
     chatWebSearchEnabled: typeof raw?.chatWebSearchEnabled === "boolean" ? raw.chatWebSearchEnabled : true,
     chatUrlReadEnabled: typeof raw?.chatUrlReadEnabled === "boolean" ? raw.chatUrlReadEnabled : true,
+    customQuestions: normalizeCustomQuestions(raw?.customQuestions),
+    customKnowledgeCards: normalizeCustomKnowledgeCards(raw?.customKnowledgeCards),
+    aiImportHistory: normalizeAiImportHistory(raw?.aiImportHistory),
     questionChatHistories: normalizeQuestionChatHistories(raw?.questionChatHistories),
     lastAiPraise: raw?.lastAiPraise && typeof raw.lastAiPraise === "object" ? raw.lastAiPraise : {},
     homeChatHistory: Array.isArray(raw?.homeChatHistory)
@@ -5215,6 +6046,8 @@ function isMemorizeMode() {
 }
 
 function isProgramFillQuestion(question) {
+  const importMode = question?.source?.importMode || question?.importMode;
+  if (importMode) return importMode === "codefill";
   return !String(question?.id || "").startsWith("docx-fill-");
 }
 
