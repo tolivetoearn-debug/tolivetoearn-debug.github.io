@@ -488,6 +488,7 @@ async function init() {
   primaryAction.addEventListener("click", handlePrimaryAction);
   prevAction.addEventListener("click", () => navigateRelative(-1));
   nextAction?.addEventListener("click", () => navigateRelative(1));
+  questionNavigator?.addEventListener("click", handleNavigatorClick);
   markQuestionButton.addEventListener("click", toggleQuestionMarked);
   rewriteNumbersButton?.addEventListener("click", rewriteCurrentQuestionNumbers);
   aiExplainButton?.addEventListener("click", handleAiExplain);
@@ -4547,11 +4548,12 @@ function renderNavigator() {
     `;
   }).join("");
 
-  questionNavigator.querySelectorAll("[data-nav-index]").forEach((button) => {
-    button.addEventListener("click", () => {
-      jumpToQuestion(Number(button.dataset.navIndex));
-    });
-  });
+}
+
+function handleNavigatorClick(event) {
+  const button = event.target.closest("[data-nav-index]");
+  if (!button || !questionNavigator?.contains(button)) return;
+  jumpToQuestion(Number(button.dataset.navIndex));
 }
 
 function buildNavigatorSummary(list) {
